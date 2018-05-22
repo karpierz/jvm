@@ -1,0 +1,18 @@
+include README.rst
+include CHANGES.rst
+include LICENSE
+include tox.ini
+
+graft jt
+prune jt/jvm/c/build
+exclude jt/jvm/java/class2py.py
+exclude jt/jvm/java/com/jt/util/classlist_update.py
+recursive-exclude jt/jvm/java *.java
+
+graft docs
+prune docs/_build
+
+graft tests
+
+global-exclude .build .build.*
+global-exclude *.py[co] __pycache__
