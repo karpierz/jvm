@@ -28,39 +28,44 @@ def test_suite(names=None, omit=()):
     return tests
 
 
-class UnknownError(RuntimeError):
+class JavaException(Exception):
     """ """
 
-class ThreadNotAttachedError(RuntimeError):
+class UnknownError(Exception):
     """ """
 
-class VersionNotSupportedError(RuntimeError):
-    """ """
-class NotEnoughMemoryError(RuntimeError):
+class ThreadNotAttachedError(Exception):
     """ """
 
-class JVMAlreadyExistError(RuntimeError):
+class VersionNotSupportedError(Exception):
+    """ """
+class NotEnoughMemoryError(Exception):
     """ """
 
-class InvalidArgumentError(RuntimeError):
+class JVMAlreadyExistError(Exception):
+    """ """
+
+class InvalidArgumentError(Exception):
     """ """
 
 
 def main():
 
     import jt.jvm.platform
-    jvm_path = jt.jvm.platform.JVMFinder().get_jvm_path()
+    jvm_path = jt.jvm.platform.JVMFinder(java_version=1.8).get_jvm_path()
 
     print("Running testsuite using JVM:", jvm_path, "\n", file=sys.stderr)
 
     package = sys.modules[__package__]
     package.jvm = jvm = jt.jvm.JVM(jvm_path)
+    package.JavaException            = JavaException
     package.UnknownError             = UnknownError
     package.ThreadNotAttachedError   = ThreadNotAttachedError
     package.VersionNotSupportedError = VersionNotSupportedError
     package.NotEnoughMemoryError     = NotEnoughMemoryError
     package.JVMAlreadyExistError     = JVMAlreadyExistError
     package.InvalidArgumentError     = InvalidArgumentError
+    jvm.JavaException                = JavaException
     jvm.ExceptionsMap = {
         jt.jvm.EStatusCode.ERR:       UnknownError,
         jt.jvm.EStatusCode.EDETACHED: ThreadNotAttachedError,

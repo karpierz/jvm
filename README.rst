@@ -6,18 +6,18 @@ Pure Python Java package
 Overview
 ========
 
-  | jtypes.jvm is a bridge between Python and Java JVM, allowing these to intercommunicate.
+  | **jtypes.jvm** is a bridge between Python and Java JVM, allowing these to intercommunicate.
   | It is an effort to allow python programs full access to Java class libraries.
-  | 
-  | jtypes.jvm is a lightweight Python package, based on the ctypes FFI library.
-  | It is a fork of Steve Menard's good known JPype package by reimplementing whole it's
-    functionality in a clean Python instead of C/C++.
+
+  `PyPI record <https://pypi.python.org/pypi/jtypes.jvm>`__.
+
+  | **jtypes.jvm** is a lightweight Python package, based on the *ctypes* or *cffi* library.
 
 
 What is jtypes.jvm:
 -------------------
 
-  jtypes.jvm is an effort to allow python programs full access to Java class libraries.
+  **jtypes.jvm** is an effort to allow python programs full access to Java class libraries.
   This is achieved not through re-implementing Python, as Jython/JPython has done,
   but rather through interfacing at the native level in both virtual machines.
 
@@ -59,7 +59,7 @@ Prerequisites:
 + Python 2.7 or higher or 3.4 or higher
 
   * http://www.python.org/
-  * 2.7 and 3.4 are primary test environments.
+  * 2.7 and 3.6 are primary test environments.
 
 + pip and setuptools
 
@@ -85,4 +85,4 @@ License
 Authors
 =======
 
-* Adam Karpierz <python@python.pl>
+* Adam Karpierz <adam@karpierz.net>
