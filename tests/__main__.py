@@ -1,8 +1,7 @@
-# Copyright (c) 2004-2018 Adam Karpierz
+# Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
-
-from __future__ import absolute_import, print_function
 
 import unittest
 import sys
@@ -14,7 +13,7 @@ from . import test_dir
 test_java = os.path.join(test_dir, "java")
 
 
-def test_suite(names=None, omit=()):
+def test_suite(names=None, omit=("run",)):
 
     from .python import __name__ as pkg_name
     from .python import __path__ as pkg_path
@@ -49,15 +48,16 @@ class InvalidArgumentError(Exception):
     """ """
 
 
-def main():
+def main(argv=sys.argv):
 
-    import jt.jvm.platform
-    jvm_path = jt.jvm.platform.JVMFinder(java_version=1.8).get_jvm_path()
+    import jvm as _jvm
+    import jvm.platform
+    jvm_path = jvm.platform.JVMFinder(java_version=1.8).get_jvm_path()
 
     print("Running testsuite using JVM:", jvm_path, "\n", file=sys.stderr)
 
     package = sys.modules[__package__]
-    package.jvm = jvm = jt.jvm.JVM(jvm_path)
+    package.jvm = jvm = _jvm.JVM(jvm_path)
     package.JavaException            = JavaException
     package.UnknownError             = UnknownError
     package.ThreadNotAttachedError   = ThreadNotAttachedError
@@ -67,18 +67,18 @@ def main():
     package.InvalidArgumentError     = InvalidArgumentError
     jvm.JavaException                = JavaException
     jvm.ExceptionsMap = {
-        jt.jvm.EStatusCode.ERR:       UnknownError,
-        jt.jvm.EStatusCode.EDETACHED: ThreadNotAttachedError,
-        jt.jvm.EStatusCode.EVERSION:  VersionNotSupportedError,
-        jt.jvm.EStatusCode.ENOMEM:    NotEnoughMemoryError,
-        jt.jvm.EStatusCode.EEXIST:    JVMAlreadyExistError,
-        jt.jvm.EStatusCode.EINVAL:    InvalidArgumentError,
+        _jvm.EStatusCode.ERR:       UnknownError,
+        _jvm.EStatusCode.EDETACHED: ThreadNotAttachedError,
+        _jvm.EStatusCode.EVERSION:  VersionNotSupportedError,
+        _jvm.EStatusCode.ENOMEM:    NotEnoughMemoryError,
+        _jvm.EStatusCode.EEXIST:    JVMAlreadyExistError,
+        _jvm.EStatusCode.EINVAL:    InvalidArgumentError,
     }
     jvm.start("-Djava.class.path={}".format(
               os.pathsep.join([os.path.join(test_java, "classes")])),
               "-ea", "-Xms16M", "-Xmx512M")
     try:
-        tests = test_suite(sys.argv[1:] or None)
+        tests = test_suite(argv[1:] or None)
         result = unittest.TextTestRunner(verbosity=2).run(tests)
     finally:
         jvm.shutdown()

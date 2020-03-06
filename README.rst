@@ -1,32 +1,32 @@
-jtypes.jvm
-==========
+jvm
+===
 
-Pure Python Java package
+Pure Python Java package.
 
 Overview
 ========
 
-  | **jtypes.jvm** is a bridge between Python and Java JVM, allowing these to intercommunicate.
-  | It is an effort to allow python programs full access to Java class libraries.
+  | |package_bold| is a bridge between Python and Java JVM, allowing these to intercommunicate.
+  | It is an effort to allow Python programs full access to Java class libraries.
 
-  `PyPI record <https://pypi.python.org/pypi/jtypes.jvm>`__.
+  `PyPI record`_.
 
-  | **jtypes.jvm** is a lightweight Python package, based on the *ctypes* or *cffi* library.
+  | |package_bold| is a lightweight Python package, based on the *ctypes* or *cffi* library.
 
 
-What is jtypes.jvm:
+What is |package|:
 -------------------
 
-  **jtypes.jvm** is an effort to allow python programs full access to Java class libraries.
+  |package_bold| is an effort to allow Python programs full access to Java class libraries.
   This is achieved not through re-implementing Python, as Jython/JPython has done,
   but rather through interfacing at the native level in both virtual machines.
 
-  Eventually, it should be possible to replace Java with python in many, though not all, situations.
-  JSP, Servlets, RMI servers and IDE plugins are good candidates.
+  Eventually, it should be possible to replace Java with python in many, though not all,
+  situations. JSP, Servlets, RMI servers and IDE plugins are good candidates.
 
-  Once this integration is achieved, a second phase will be started to separate the Java logic from
-  the Python logic, eventually allowing the bridging technology to be used in other environments,
-  I.E. Ruby, Perl, COM, etc ...
+  Once this integration is achieved, a second phase will be started to separate the
+  Java logic from the Python logic, eventually allowing the bridging technology to be used
+  in other environments, I.E. Ruby, Perl, COM, etc ...
 
 
 Known Bugs/Limitations :
@@ -56,29 +56,32 @@ Installation
 
 Prerequisites:
 
-+ Python 2.7 or higher or 3.4 or higher
++ Python 3.6 or higher
 
-  * http://www.python.org/
-  * 2.7 and 3.6 are primary test environments.
+  * https://www.python.org/
+  * 3.7 is a primary test environment.
 
 + pip and setuptools
 
-  * http://pypi.python.org/pypi/pip
-  * http://pypi.python.org/pypi/setuptools
+  * https://pypi.org/project/pip/
+  * https://pypi.org/project/setuptools/
 
-To install run::
+To install run:
 
-    python -m pip install --upgrade jtypes.jvm
+.. parsed-literal::
+
+    python -m pip install --upgrade |package|
 
 To ensure everything is running correctly you can run the tests using::
 
-    python -m jt.jvm.tests
+    python -m jvm.tests
 
 License
 =======
 
-  | Copyright (c) 2004-2018 Adam Karpierz
+  | Copyright (c) 2004-2020 Adam Karpierz
   |
+  | Licensed under CC BY-NC-ND 4.0
   | Licensed under proprietary License
   | Please refer to the accompanying LICENSE file.
 
@@ -86,3 +89,7 @@ Authors
 =======
 
 * Adam Karpierz <adam@karpierz.net>
+
+.. |package| replace:: jvm
+.. |package_bold| replace:: **jvm**
+.. _PyPI record: https://pypi.org/project/jvm/

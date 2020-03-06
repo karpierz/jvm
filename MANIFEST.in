@@ -1,18 +1,31 @@
+# Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
+# Licensed under proprietary License
+# Please refer to the accompanying LICENSE file.
+
 include README.rst
 include CHANGES.rst
 include LICENSE
-include tox.ini
-
-graft src
-prune src/jt/jvm/c/build
-exclude src/jt/jvm/java/class2py.py
-exclude src/jt/jvm/java/com/jt/util/classlist_update.py
-recursive-exclude src/jt/jvm/java *.java
 
 graft docs
-prune docs/_build
+
+graft src
+exclude src/jvm/jcontext.py
+exclude src/jvm/jvm.py
+exclude src/jvm/_util.py
+exclude src/jvm/lic.key
+prune src/jvm/platform/\#
+prune src/jvm/lib
+exclude src/jvm/java/class2py.py
+recursive-exclude src/jvm/java *.java *.java_
+prune src/jvm/java/com
+prune src/jvm/java/org/python
+exclude src/jvm/java/org/jt/util/classlist_update.py
 
 graft tests
+exclude tests/_info_.txt tests/_report_*.txt
+prune tests/c
+prune tests/java
 
 global-exclude .build .build.*
-global-exclude *.py[co] __pycache__
+global-exclude *.py[cod] __pycache__

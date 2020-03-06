@@ -1,14 +1,16 @@
-# Copyright (c) 2004-2018 Adam Karpierz
+# Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from __future__ import absolute_import
-
 from os import path
+from io import open
+from glob import glob
 from setuptools import setup
 
 top_dir = path.dirname(path.abspath(__file__))
-with open(path.join(top_dir, "src", "jt", "jvm", "__about__.py")) as f:
+with open(glob(path.join(top_dir, "src/*/__about__.py"))[0],
+          encoding="utf-8") as f:
     class about: exec(f.read(), None)
 
 setup(

@@ -1,5 +1,5 @@
-jtypes.jvm documentation
-========================
+jvm documentation
+=================
 
 .. toctree::
    :maxdepth: 2
