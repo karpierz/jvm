@@ -8,7 +8,7 @@ __all__ = ('__title__', '__summary__', '__uri__', '__version_info__',
            '__copyright__', '__license__')
 
 __title__        = "jvm"
-__summary__      = "Python-Java bridge (ctypes/cffi-based)"
+__summary__      = "Python bridge for the Java Virtual Machine."
 __uri__          = "https://pypi.org/project/jvm/"
 __version_info__ = type("version_info", (), dict(serial=2,
                         major=0, minor=4, micro=0, releaselevel="beta"))
