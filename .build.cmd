@@ -43,14 +43,12 @@ popd
 pushd "%~dp0"\src\jvm\java
 %py% org\python\Version.py
 %javac% ^
-    com\jt\*.java ^
     org\jt\reflect\*.java ^
     org\jt\ref\*.java ^
     org\python\*.java ^
     org\python\core\*.java ^
     org\python\util\*.java ^
     org\python\jsr223\*.java
-%py% -m class2py com\jt\ProxyException.class
 %py% -m class2py org\jt\reflect\ProxyHandler.class
 %py% -m class2py org\jt\ref\Reference.class
 %py% -m class2py org\jt\ref\ReferenceQueue.class
@@ -82,7 +80,6 @@ pushd "%~dp0"\src\jvm\java
 %py% -m class2py org\python\jsr223\PyScriptEngine.class
 %py% -m class2py org\python\jsr223\PyScriptEngine$PyCompiledScript.class
 del /F/Q/S ^
-    com\*.class ^
     org\*.class ^
     > nul
 popd

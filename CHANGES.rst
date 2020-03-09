@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4.0b2 (2020-03-06)
+0.4.0b3 (2020-03-08)
 --------------------
 - Drop support for Python2.
 - Update of Mozilla Rhino.
