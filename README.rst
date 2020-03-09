@@ -11,8 +11,7 @@ Overview
 
   `PyPI record`_.
 
-  | |package_bold| package is closely based on the **jni** package (Python's lightweight
-  package, based on the *ctypes* or *cffi* library).
+  | |package_bold| package is closely based on the **jni** package (Python's lightweight package, based on the *ctypes* or *cffi* library).
 
 
 What is |package|:
