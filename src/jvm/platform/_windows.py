@@ -7,8 +7,8 @@ import sys
 from os import path
 import struct
 
-from public import public
-from ..lib  import platform
+from ..lib import public
+from ..lib import platform
 
 from . import _jvmfinder
 from ._jvmfinder import JVMNotSupportedException

@@ -7,7 +7,7 @@ import os
 from os import path
 import re
 
-from public import public
+from ..lib import public
 
 from . import _linux
 

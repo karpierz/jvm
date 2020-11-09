@@ -1,11 +1,12 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
 from typing import Optional, Union, Tuple
 
-from public import public
 import jni
+from .lib import public
 from .lib import memoryview as memview
 
 from .jconstants  import EJavaType
@@ -17,7 +18,6 @@ from ._util       import str2jchars
 
 @public
 class JObject(JObjectBase):
-
     """Object"""
 
     __slots__ = ()
@@ -117,7 +117,8 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jstr) if jstr else None
 
     @classmethod
-    def newDirectByteBuffer(cls, val: Union[bytes, bytearray, memoryview, memview]) -> Optional['JObject']:
+    def newDirectByteBuffer(cls, val: Union[bytes, bytearray,
+                                            memoryview, memview]) -> Optional['JObject']:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             if isinstance(val, memview):
@@ -127,12 +128,12 @@ class JObject(JObjectBase):
             jobj = jenv.NewDirectByteBuffer(val, len(val))
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
-    def asClass(self, own: bool=True) -> JClass:
+    def asClass(self, own: bool = True) -> JClass:
 
         with self.jvm as (jvm, jenv):
             return self.jvm.JClass(jenv, self._jobj, own=own)
 
-    def asArray(self, javaType: Optional[EJavaType]=None, own: bool=True) -> 'JArray':
+    def asArray(self, javaType: Optional[EJavaType] = None, own: bool = True) -> 'JArray':
 
         with self.jvm as (jvm, jenv):
             return self.jvm.JArray(jenv, self._jobj, own=own)

@@ -6,7 +6,6 @@
 import unittest
 import sys
 NoneType = type(None)
-unicode  = type(u"")
 
 import jni
 from jvm.jconstants import EJavaType
@@ -15,16 +14,16 @@ from jvm.jstring    import JString
 
 class JVMTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         from . import jvm
-        self.jvm = jvm
+        cls.jvm = jvm
 
     def test_JVM(self):
 
         from jvm import JVM
 
-        with self.assertRaisesRegex(RuntimeError,
-                                    "First paramter must be a string or unicode"):
+        with self.assertRaisesRegex(RuntimeError, "First paramter must be a string"):
             jvm = JVM(123)
 
         with self.assertRaisesRegex(RuntimeError,
@@ -63,7 +62,6 @@ class JVMTestCase(unittest.TestCase):
         package_name = "java.lang"
 
         jpackage = cloader.getPackage(package_name)
-        jpackage = cloader.getPackage(unicode(package_name))
         self._check_jpackage(jpackage,
                              name=package_name,
                              is_sealed=False)
@@ -89,8 +87,7 @@ class JVMTestCase(unittest.TestCase):
 
         jclass_name = "nonexistent.package.and.Class"
 
-        from .. import JavaException
-        with self.assertRaisesRegex(JavaException,
+        with self.assertRaisesRegex(self.jvm.JavaException,
                                     "Java exception java.lang.ClassNotFoundException occurred: "
                                     + jclass_name):
             jclass = cloader.findClass(jclass_name)
@@ -115,8 +112,7 @@ class JVMTestCase(unittest.TestCase):
 
         jclass_name = "nonexistent.package.and.Class"
 
-        from .. import JavaException
-        with self.assertRaisesRegex(JavaException,
+        with self.assertRaisesRegex(self.jvm.JavaException,
                                     "Java exception java.lang.ClassNotFoundException occurred: "
                                     + jclass_name):
             jclass = cloader.findSystemClass(jclass_name)
@@ -159,7 +155,6 @@ class JVMTestCase(unittest.TestCase):
         package_name = "java.lang"
 
         jpackage = self.jvm.JPackage.getPackage(package_name)
-        jpackage = self.jvm.JPackage.getPackage(unicode(package_name))
         self._check_jpackage(jpackage,
                              name=package_name,
                              is_sealed=False)
@@ -186,12 +181,6 @@ class JVMTestCase(unittest.TestCase):
         jclass_name = "java.lang.String"
 
         jclass = self.jvm.JClass.forName(jclass_name)
-        self._check_jclass(jclass,
-                           name=jclass_name,
-                           canonical_name=jclass_name,
-                           simple_name=jclass_name.rpartition(".")[-1],
-                           is_array=False)
-        jclass = self.jvm.JClass.forName(unicode(jclass_name))
         self._check_jclass(jclass,
                            name=jclass_name,
                            canonical_name=jclass_name,
@@ -431,14 +420,12 @@ class JVMTestCase(unittest.TestCase):
                                simple_name="String" + ndims_dparents,
                                is_array=True)
 
-            for jname in ("java.lang.StringBuilder",
-                          u"java.lang.StringBuilder"):
-                jclass = self.jvm.JClass.getObjectArrayClass(jname, ndims)
-                self._check_jclass(jclass,
-                                   name=ndims_sparents + "Ljava.lang.StringBuilder;",
-                                   canonical_name="java.lang.StringBuilder" + ndims_dparents,
-                                   simple_name="StringBuilder" + ndims_dparents,
-                                   is_array=True)
+            jclass = self.jvm.JClass.getObjectArrayClass("java.lang.StringBuilder", ndims)
+            self._check_jclass(jclass,
+                               name=ndims_sparents + "Ljava.lang.StringBuilder;",
+                               canonical_name="java.lang.StringBuilder" + ndims_dparents,
+                               simple_name="StringBuilder" + ndims_dparents,
+                               is_array=True)
 
         jclass  = self.jvm.JClass.forName(jclass_name)
         jclass2 = self.jvm.JClass.forName(jclass_name)
@@ -558,8 +545,6 @@ class JVMTestCase(unittest.TestCase):
 
         field = jclass.getDeclaredField(decl_field_name)
         self.assertIsInstance(field, self.jvm.JField)
-        field = jclass.getDeclaredField(unicode(decl_field_name))
-        self.assertIsInstance(field, self.jvm.JField)
 
         fields = jclass.getDeclaredFields()
         self.assertIsInstance(fields, tuple)
@@ -567,8 +552,6 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(item, self.jvm.JField)
 
         field = jclass.getField(field_name)
-        self.assertIsInstance(field, self.jvm.JField)
-        field = jclass.getField(unicode(field_name))
         self.assertIsInstance(field, self.jvm.JField)
 
         fields = jclass.getFields()
@@ -640,7 +623,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(raw_modifiers, int)
 
         name = field.getName()
-        self.assertIsInstance(name, unicode)
+        self.assertIsInstance(name, str)
         self.assertEqual(name, decl_field_name)
 
         # from JField
@@ -649,7 +632,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(field_type, self.jvm.JClass)
 
         signature = field.getSignature()
-        self.assertIsInstance(signature, unicode)
+        self.assertIsInstance(signature, str)
 
         is_a = field.isEnumConstant()
         self.assertIs(type(is_a), bool)
@@ -669,7 +652,7 @@ class JVMTestCase(unittest.TestCase):
         field = jclass.getDeclaredField(decl_field_name)
         self.assertIsInstance(field, self.jvm.JField)
         value = field.getStaticChar(jclass)
-        self.assertIsInstance(value, unicode)
+        self.assertIsInstance(value, str)
         self.assertEqual(len(value), 1)
 
         jclass_name = "java.lang.Byte"
@@ -720,7 +703,7 @@ class JVMTestCase(unittest.TestCase):
         field = jclass.getDeclaredField(decl_field_name)
         self.assertIsInstance(field, self.jvm.JField)
         value = field.getStaticString(jclass)
-        self.assertIsInstance(value, unicode)
+        self.assertIsInstance(value, str)
 
         decl_field_name = "TRUE"
         jclass_name = "java.lang.Boolean"
@@ -736,7 +719,7 @@ class JVMTestCase(unittest.TestCase):
 
         #this: JObject
         #value = field.getChar(this)
-        #self.assertIsInstance(value, unicode)
+        #self.assertIsInstance(value, str)
         #self.assertEqual(len(value), 1)
 
         #this: JObject
@@ -765,7 +748,7 @@ class JVMTestCase(unittest.TestCase):
 
         #this: JObject
         #value = field.getString(this)
-        #self.assertIsInstance(value, (unicode, NoneType))
+        #self.assertIsInstance(value, (str, NoneType))
 
         #this: JObject
         #value = field.getObject(this)
@@ -854,12 +837,12 @@ class JVMTestCase(unittest.TestCase):
             #pos: int, val_expected: str
             jargs.setChar(1, val_expected)
             val = jargs.arguments[1].c
-            self.assertIsInstance(val, unicode)
+            self.assertIsInstance(val, str)
             self.assertEqual(val, val_expected)
             jargs.arguments[11].c = val_expected
             jargs.argtypes[11]    = EJavaType.CHAR
             val = jargs.arguments[11].c
-            self.assertIsInstance(jargs.arguments[11].c, unicode)
+            self.assertIsInstance(jargs.arguments[11].c, str)
             self.assertEqual(val, val_expected)
 
         with self.assertRaises(TypeError):
@@ -1026,8 +1009,8 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(raw_modifiers, int)
 
         name = jctor.getName()
-        self.assertIsInstance(name, unicode)
-        self.assertEqual(name, u"java.lang.String")
+        self.assertIsInstance(name, str)
+        self.assertEqual(name, "java.lang.String")
 
         # from JConstructor
 
@@ -1046,7 +1029,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertFalse(is_vrargs)
 
         signature = jctor.getSignature()
-        self.assertIsInstance(signature, unicode)
+        self.assertIsInstance(signature, str)
         self.assertEqual(signature, ctor_signature)
 
         ctor_signature = u"([CII)V"
@@ -1070,8 +1053,8 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(raw_modifiers, int)
 
         name = jctor.getName()
-        self.assertIsInstance(name, unicode)
-        self.assertEqual(name, u"java.lang.String")
+        self.assertIsInstance(name, str)
+        self.assertEqual(name, "java.lang.String")
 
         # from JConstructor
 
@@ -1089,7 +1072,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertFalse(is_vrargs)
 
         signature = jctor.getSignature()
-        self.assertIsInstance(signature, unicode)
+        self.assertIsInstance(signature, str)
         self.assertEqual(signature, ctor_signature)
 
         jargs = self.jvm.JArguments(3)
@@ -1151,7 +1134,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(raw_modifiers, int)
 
         name = jmethod.getName()
-        self.assertIsInstance(name, unicode)
+        self.assertIsInstance(name, str)
         self.assertEqual(name, jmethod_name)
 
         # from JMethod
@@ -1174,7 +1157,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertFalse(is_vrargs)
 
         signature = jmethod.getSignature()
-        self.assertIsInstance(signature, unicode)
+        self.assertIsInstance(signature, str)
         self.assertEqual(signature, jmethod_signature)
 
         jmethod_name = u"codePointCount"
@@ -1199,7 +1182,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(raw_modifiers, int)
 
         name = jmethod.getName()
-        self.assertIsInstance(name, unicode)
+        self.assertIsInstance(name, str)
         self.assertEqual(name, jmethod_name)
 
         # from JMethod
@@ -1221,7 +1204,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertFalse(is_vrargs)
 
         signature = jmethod.getSignature()
-        self.assertIsInstance(signature, unicode)
+        self.assertIsInstance(signature, str)
         self.assertEqual(signature, jmethod_signature)
 
         # Methods call
@@ -1252,7 +1235,7 @@ class JVMTestCase(unittest.TestCase):
         #self.assertEqual(return_type.getName(), "???")
         jargs = self.jvm.JArguments(0)
         #return_value = jmethod.callStaticChar(jclass, jargs)
-        #self.assertIsInstance(return_value, unicode)
+        #self.assertIsInstance(return_value, str)
 
         #jmethod_name = u"???"
         #jmethod_signature = u"???"
@@ -1315,7 +1298,7 @@ class JVMTestCase(unittest.TestCase):
         #self.assertEqual(return_type.getName(), "???")
         jargs = self.jvm.JArguments(0)
         #return_value = jmethod.callStaticString(jclass, jargs)
-        #self.assertIsInstance(return_value, (unicode, NoneType))
+        #self.assertIsInstance(return_value, (str, NoneType))
 
         #jmethod_name = u"???"
         #jmethod_signature = u"???"
@@ -1374,7 +1357,7 @@ class JVMTestCase(unittest.TestCase):
         #self.assertEqual(return_type.getName(), "???")
         jargs = self.jvm.JArguments(0)
         #return_value = jmethod.callInstanceChar(this, jargs)
-        #self.assertIsInstance(return_value, unicode)
+        #self.assertIsInstance(return_value, str)
 
         #jmethod_name = u"???"
         #jmethod_signature = u"???"
@@ -1438,7 +1421,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertEqual(return_type.getName(), "java.lang.String")
         jargs = self.jvm.JArguments(0)
         return_value = jmethod.callInstanceString(this, jargs)
-        self.assertIsInstance(return_value, (unicode, NoneType))
+        self.assertIsInstance(return_value, (str, NoneType))
         self.assertIsNotNone(return_value)
         self.assertEqual(return_value, u"EARR")
 
@@ -1481,7 +1464,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(hash_value, int)
 
         name = prop.getName()
-        self.assertIsInstance(name, unicode)
+        self.assertIsInstance(name, str)
         self.assertEqual(name, prop_name)
 
         prop_type = prop.getPropertyType()
@@ -1509,7 +1492,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(hash_value, int)
 
         name = prop.getName()
-        self.assertIsInstance(name, unicode)
+        self.assertIsInstance(name, str)
         self.assertEqual(name, prop_name)
 
         prop_type = prop.getPropertyType()
@@ -1572,7 +1555,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(hash_value, int)
 
         str_value = jobj.toString()
-        self.assertIsInstance(str_value, (unicode, NoneType))
+        self.assertIsInstance(str_value, (str, NoneType))
         self.assertIsNotNone(str_value)
 
         is_equals = jobj.equals(jobj)
@@ -1701,7 +1684,7 @@ class JVMTestCase(unittest.TestCase):
 
         jobj = self.jvm.JObject.newCharacter(u"A")
         value = jobj.charValue()
-        self.assertIsInstance(value, unicode)
+        self.assertIsInstance(value, str)
         self.assertEqual(len(value), 1)
         self.assertEqual(value, u"A")
 
@@ -1737,7 +1720,7 @@ class JVMTestCase(unittest.TestCase):
 
         jobj = self.jvm.JObject.newString(u"STRING")
         value = jobj.stringValue()
-        self.assertIsInstance(value, unicode)
+        self.assertIsInstance(value, str)
         self.assertEqual(value, u"STRING")
         # return jstr if jstr is not None else u"null" #!!! v1.x
 
@@ -1828,7 +1811,7 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(hash_value, int)
 
             str_value = jannotation.toString()
-            self.assertIsInstance(str_value, (unicode, NoneType))
+            self.assertIsInstance(str_value, (str, NoneType))
             self.assertIsNotNone(str_value)
 
             is_equals = jannotation.equals(jannotation)
@@ -1876,7 +1859,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(id, int)
 
         name = thread.getName()
-        self.assertIsInstance(name, unicode)
+        self.assertIsInstance(name, str)
 
         cloader = thread.getContextClassLoader()
         self.assertIsInstance(cloader, (self.jvm.JClassLoader, NoneType))
@@ -1959,7 +1942,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertEqual(return_type.getName(), "java.lang.String")
         jargs = self.jvm.JArguments(0)
         return_value = jmethod.callStaticString(jclass, jargs)
-        self.assertIsInstance(return_value, unicode)
+        self.assertIsInstance(return_value, str)
         self.assertEqual(return_value, u"hello \U0001F30E!")
 
         #Test = jclass # autoclass('org.jnius.BasicsTest')
@@ -2045,28 +2028,28 @@ class JVMTestCase(unittest.TestCase):
         #self.assertIsInstance(jcls, self.jvm.JClass)
 
         str_value = jclass.toString()
-        self.assertIsInstance(str_value, (unicode, NoneType))
+        self.assertIsInstance(str_value, (str, NoneType))
         self.assertIsNotNone(str_value)
 
         # from JClass
 
         jclass_name = jclass.getName()
-        self.assertIsInstance(jclass_name, unicode)
+        self.assertIsInstance(jclass_name, str)
         if name is not None:
             self.assertEqual(jclass_name, name)
 
         class_canonical_name = jclass.getCanonicalName()
-        self.assertIsInstance(class_canonical_name, unicode)
+        self.assertIsInstance(class_canonical_name, str)
         if canonical_name is not None:
             self.assertEqual(class_canonical_name, canonical_name)
 
         class_simple_name = jclass.getSimpleName()
-        self.assertIsInstance(class_simple_name, unicode)
+        self.assertIsInstance(class_simple_name, str)
         if simple_name is not None:
             self.assertEqual(class_simple_name, simple_name)
 
         class_signature = jclass.getSignature()
-        self.assertIsInstance(class_signature, unicode)
+        self.assertIsInstance(class_signature, str)
         if signature is not None:
             self.assertEqual(class_signature, signature)
 
@@ -2118,28 +2101,27 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsNotNone(jpackage)
 
         package_name = jpackage.getName()
-        self.assertIsInstance(package_name, unicode)
+        self.assertIsInstance(package_name, str)
         if name is not None:
             self.assertEqual(package_name, name)
-            self.assertEqual(package_name, unicode(name))
 
         spec_title = jpackage.getSpecificationTitle()
-        self.assertIsInstance(spec_title, (unicode, NoneType))
+        self.assertIsInstance(spec_title, (str, NoneType))
 
         spec_version = jpackage.getSpecificationVersion()
-        self.assertIsInstance(spec_version, (unicode, NoneType))
+        self.assertIsInstance(spec_version, (str, NoneType))
 
         spec_vendor = jpackage.getSpecificationVendor()
-        self.assertIsInstance(spec_vendor, (unicode, NoneType))
+        self.assertIsInstance(spec_vendor, (str, NoneType))
 
         spec_title = jpackage.getImplementationTitle()
-        self.assertIsInstance(spec_title, (unicode, NoneType))
+        self.assertIsInstance(spec_title, (str, NoneType))
 
         impl_version = jpackage.getImplementationVersion()
-        self.assertIsInstance(impl_version, (unicode, NoneType))
+        self.assertIsInstance(impl_version, (str, NoneType))
 
         spec_vendor = jpackage.getImplementationVendor()
-        self.assertIsInstance(spec_vendor, (unicode, NoneType))
+        self.assertIsInstance(spec_vendor, (str, NoneType))
 
         package_is_sealed = jpackage.isSealed()
         self.assertIs(type(package_is_sealed), bool)

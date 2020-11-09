@@ -6,8 +6,8 @@
 import os
 from os import path
 
-from public import public
-from ..lib  import cli
+from ..lib import public
+from ..lib import cli
 
 from . import _linux
 
@@ -73,8 +73,8 @@ class JVMFinder(_linux.JVMFinder):
             # to search for other possible java candidates and check their versions.
             if path.isfile("/usr/libexec/java_home"): # -x
                 # Apple JDKs
-                java_home, _ = cli.cmd("/usr/libexec/java_home",
-                                       "" if not self._java_version else "-v {}".format(self._java_version))
+                java_home = cli.cmd("/usr/libexec/java_home",
+                                    "" if not self._java_version else "-v {}".format(self._java_version)).stdout
                 if not java_home.strip():
                     java_home = None
             else:
@@ -92,11 +92,11 @@ class JVMFinder(_linux.JVMFinder):
 
 
 ### return top Java version
-# cout, _ = cli.cmd("/usr/libexec/java_home")
+# cout = cli.cmd("/usr/libexec/java_home").stdout
 # self._locations[0] + "/1.7.0.jdk/Contents/Home"
 
 ### I want Java version 1.7
-# cout, _ = cli.cmd("/usr/libexec/java_home", "-v 1.7")
+# cout = cli.cmd("/usr/libexec/java_home", "-v 1.7").stdout
 # "/System/Library/Java/JavaVirtualMachines/1.7.0.jdk/Contents/Home"
 
     # Oracle:       "/Library/Java/Home"

@@ -1,4 +1,5 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
@@ -7,8 +8,8 @@ import sys
 import math
 from collections import namedtuple
 
-from public import public
 import jni
+from .lib import public
 from .lib import cached
 from .lib import memoryview as memview
 
@@ -19,17 +20,16 @@ from .jstring     import JString
 from .jobject     import JObject
 from ._util       import str2jchars
 
-bitsof  = lambda x: (int(math.log(x, 2)) + 1)
-bytesof = lambda x: (int(math.log(x, 2)) + 8) // 8
+def bitsof(x):  return (int(math.log(x, 2)) + 1)
+def bytesof(x): return (int(math.log(x, 2)) + 8) // 8
 
-is_memview = lambda x: isinstance(x, (memview, memoryview))
+def is_memview(x): return isinstance(x, (memview, memoryview))
 
 JArrayBuffer = namedtuple("JArrayBuffer", ("buf", "itemsize", "format", "is_copy"))
 
 
 @public
 class JArray(JObjectBase):
-
     """Java Array"""
 
     __slots__ = ()
@@ -43,75 +43,75 @@ class JArray(JObjectBase):
 
     @classmethod
     def newBooleanArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewBooleanArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newCharArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewCharArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newByteArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewByteArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newShortArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewShortArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newIntArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewIntArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newLongArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewLongArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newFloatArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewFloatArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newDoubleArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewDoubleArray(size)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newStringArray(cls, size: int) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewObjectArray(size, jvm.String.Class)
             return cls.jvm.JArray(jenv, jarr)
 
     @classmethod
     def newObjectArray(cls, size: int, componentClass: JClass) -> 'JArray':
-
+        """???."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jenv.NewObjectArray(size, jni.cast(componentClass.handle, jni.jclass))
             return cls.jvm.JArray(jenv, jarr)
 
-    def __init__(self, jenv: jni.JNIEnv, jarr: jni.jarray, own: bool=True):
+    def __init__(self, jenv: jni.JNIEnv, jarr: jni.jarray, own: bool = True):
         super().__init__(jenv, jni.cast(jarr, jni.jarray), own=own)
 
     def __hash__(self):
@@ -137,143 +137,143 @@ class JArray(JObjectBase):
     def __len__(self):
         return self.getLength()
 
-    def asObject(self, own: bool=True) -> JObject:
-
+    def asObject(self, own: bool = True) -> JObject:
+        """???."""
         with self.jvm as (jvm, jenv):
             return self.jvm.JObject(jenv, self._jobj, own=own)
 
     @cached
     def getLength(self) -> int:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             return int(jenv.GetArrayLength(self._jobj))
 
     def getBoolean(self, idx: int) -> bool:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jboolean)
             jenv.GetBooleanArrayRegion(self._jobj, idx, 1, elem)
             return bool(elem[0])
 
     def getChar(self, idx: int) -> str:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new_array(jni.jchar, 1)
             jenv.GetCharArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getByte(self, idx: int) -> int:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jbyte)
             jenv.GetByteArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getShort(self, idx: int) -> int:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jshort)
             jenv.GetShortArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getInt(self, idx: int) -> int:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jint)
             jenv.GetIntArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getLong(self, idx: int) -> int:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jlong)
             jenv.GetLongArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getFloat(self, idx: int) -> float:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jfloat)
             jenv.GetFloatArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getDouble(self, idx: int) -> float:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elem = jni.new(jni.jdouble)
             jenv.GetDoubleArrayRegion(self._jobj, idx, 1, elem)
             return elem[0]
 
     def getString(self, idx: int) -> Optional[str]:
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jstr = jenv.GetObjectArrayElement(self._jobj, idx)
             return JString(jenv, jstr, own=False).str if jstr else None
 
     def getObject(self, idx: int) -> Optional[JObject]:
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jobj = jenv.GetObjectArrayElement(self._jobj, idx)
             return self.jvm.JObject(jenv, jobj) if jobj else None
 
     def setBoolean(self, idx: int, val: bool):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jboolean, 1)
             elems[0] = val
             jenv.SetBooleanArrayRegion(self._jobj, idx, 1, elems)
 
     def setChar(self, idx: int, val: str):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jchar, 1)
             elems[0] = val
             jenv.SetCharArrayRegion(self._jobj, idx, 1, elems)
 
     def setByte(self, idx: int, val: int):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jbyte, 1)
             elems[0] = val
             jenv.SetByteArrayRegion(self._jobj, idx, 1, elems)
 
     def setShort(self, idx: int, val: int):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jshort, 1)
             elems[0] = val
             jenv.SetShortArrayRegion(self._jobj, idx, 1, elems)
 
     def setInt(self, idx: int, val: int):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jint, 1)
             elems[0] = val
             jenv.SetIntArrayRegion(self._jobj, idx, 1, elems)
 
     def setLong(self, idx: int, val: int):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jlong, 1)
             elems[0] = val
             jenv.SetLongArrayRegion(self._jobj, idx, 1, elems)
 
     def setFloat(self, idx: int, val: float):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jfloat, 1)
             elems[0] = val
             jenv.SetFloatArrayRegion(self._jobj, idx, 1, elems)
 
     def setDouble(self, idx: int, val: float):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             elems = jni.new_array(jni.jdouble, 1)
             elems[0] = val
             jenv.SetDoubleArrayRegion(self._jobj, idx, 1, elems)
 
     def setString(self, idx: int, val: Optional[str]):
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             if val is None:
                 jstr = None
@@ -283,12 +283,12 @@ class JArray(JObjectBase):
             jenv.SetObjectArrayElement(self._jobj, idx, jstr)
 
     def setObject(self, idx: int, val: Optional[JObject]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             jenv.SetObjectArrayElement(self._jobj, idx, val.handle if val is not None else None)
 
     def getBooleanSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -311,7 +311,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getCharSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -334,7 +334,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getByteSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -357,7 +357,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getShortSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -380,7 +380,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getIntSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -403,7 +403,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getLongSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -426,7 +426,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getFloatSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -449,7 +449,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getDoubleSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -472,7 +472,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getStringSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -485,7 +485,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def getObjectSlice(self, start: int, stop: int, step: int) -> 'JArray':
-
+        """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -498,7 +498,7 @@ class JArray(JObjectBase):
             return self.jvm.JArray(jenv, jarr_ret)
 
     def setBooleanSlice(self, start: int, stop: int, step: int, val: Sequence[bool]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -518,7 +518,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setCharSlice(self, start: int, stop: int, step: int, val: Union[Sequence[str], str]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -543,7 +543,7 @@ class JArray(JObjectBase):
 
     def setByteSlice(self, start: int, stop: int, step: int,
                      val: Union[Sequence[Union[int, bytes]], bytes, bytearray]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -575,7 +575,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setShortSlice(self, start: int, stop: int, step: int, val: Sequence[int]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -594,7 +594,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setIntSlice(self, start: int, stop: int, step: int, val: Sequence[int]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -613,7 +613,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setLongSlice(self, start: int, stop: int, step: int, val: Sequence[int]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -632,7 +632,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setFloatSlice(self, start: int, stop: int, step: int, val: Sequence[float]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -651,7 +651,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setDoubleSlice(self, start: int, stop: int, step: int, val: Sequence[float]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             size = JArray.size(start, stop, step)
             jarr = self._jobj
@@ -671,7 +671,7 @@ class JArray(JObjectBase):
                     raise exc
 
     def setStringSlice(self, start: int, stop: int, step: int, val: Sequence[Optional[str]]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             jarr = self._jobj
             with JFrame(jenv) as jfrm:
@@ -686,7 +686,7 @@ class JArray(JObjectBase):
                     jenv.SetObjectArrayElement(jarr, idx, jstr)
 
     def setObjectSlice(self, start: int, stop: int, step: int, val: Sequence[Optional[JObject]]):
-
+        """???."""
         with self.jvm as (jvm, jenv):
             jarr = self._jobj
             for ix, idx in enumerate(range(start, stop, step)):
@@ -694,129 +694,105 @@ class JArray(JObjectBase):
                 jenv.SetObjectArrayElement(jarr, idx, obj.handle if obj is not None else None)
 
     def getBooleanBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetBooleanArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jboolean), b"B", bool(is_copy))
 
     def getCharBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetCharArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jchar), b"H", bool(is_copy))
 
     def getByteBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetByteArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jbyte), b"b", bool(is_copy))
 
     def getShortBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetShortArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jshort), b"h", bool(is_copy))
 
     def getIntBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetIntArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jint), b"i", bool(is_copy))
 
     def getLongBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetLongArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jlong), b"q", bool(is_copy))
 
     def getFloatBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetFloatArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jfloat), b"f", bool(is_copy))
 
     def getDoubleBuffer(self) -> Tuple:
-
+        """???."""
         with self.jvm as (jvm, jenv):
             is_copy = jni.obj(jni.jboolean)
             return JArrayBuffer(jenv.GetDoubleArrayElements(self._jobj, is_copy),
                                 jni.sizeof(jni.jdouble), b"d", bool(is_copy))
 
-    def releaseBooleanBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseBooleanBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseBooleanArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jboolean)))
-            else:
-                jenv.ReleaseBooleanArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jboolean)),
-                                                 jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseBooleanArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jboolean)),
+                                             0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseCharBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseCharBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseCharArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jchar)))
-            else:
-                jenv.ReleaseCharArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jchar)),
-                                              jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseCharArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jchar)),
+                                          0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseByteBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseByteBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseByteArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jbyte)))
-            else:
-                jenv.ReleaseByteArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jbyte)),
-                                              jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseByteArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jbyte)),
+                                          0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseShortBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseShortBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseShortArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jshort)))
-            else:
-                jenv.ReleaseShortArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jshort)),
-                                               jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseShortArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jshort)),
+                                           0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseIntBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseIntBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseIntArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jint)))
-            else:
-                jenv.ReleaseIntArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jint)),
-                                             jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseIntArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jint)),
+                                         0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseLongBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseLongBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseLongArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jlong)))
-            else:
-                jenv.ReleaseLongArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jlong)),
-                                              jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseLongArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jlong)),
+                                          0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseFloatBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseFloatBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseFloatArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jfloat)))
-            else:
-                jenv.ReleaseFloatArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jfloat)),
-                                               jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseFloatArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jfloat)),
+                                           0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)
 
-    def releaseDoubleBuffer(self, buf: object, mode: Optional[bool]=None):
-
+    def releaseDoubleBuffer(self, buf: object, mode: Optional[bool] = None):
+        """???."""
         with self.jvm as (jvm, jenv):
-            if mode is None:
-                jenv.ReleaseDoubleArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jdouble)))
-            else:
-                jenv.ReleaseDoubleArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jdouble)),
-                                                jni.JNI_COMMIT if mode else jni.JNI_ABORT)
+            jenv.ReleaseDoubleArrayElements(self._jobj, jni.cast(buf, jni.POINTER(jni.jdouble)),
+                                            0 if mode is None else jni.JNI_COMMIT if mode else jni.JNI_ABORT)

@@ -1,11 +1,12 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
 from typing import Optional, Tuple
 
-from public import public
 import jni
+from .lib import public
 from .lib import cached
 
 from .jframe      import JFrame
@@ -17,14 +18,13 @@ from ._util       import str2jchars
 
 @public
 class JPackage(JObjectBase, JAnnotatedElement):
-
     """Java Package"""
 
     __slots__ = ()
 
     @classmethod
     def getPackage(cls, name: str) -> Optional['JPackage']:
-
+        """Find a package by name in the callers ClassLoader instance."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 2):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
@@ -37,7 +37,7 @@ class JPackage(JObjectBase, JAnnotatedElement):
 
     @classmethod
     def getPackages(cls) -> Tuple['JPackage', ...]:
-
+        """Get all the packages currently known for the caller's ClassLoader instance."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallStaticObjectMethod(jvm.Package.Class,
                                                         jvm.Package.getPackages),
@@ -66,7 +66,8 @@ class JPackage(JObjectBase, JAnnotatedElement):
         """Returns the version number of the specification that this package implements.
         This version string must be a sequence of nonnegative decimal integers separated
         by "."'s and may have leading zeros. When version strings are compared the most
-        significant numbers are compared."""
+        significant numbers are compared.
+        """
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             ver = jenv.CallObjectMethod(self._jobj, jvm.Package.getSpecificationVersion)
             return JString(jenv, ver, own=False).str if ver else None
@@ -74,7 +75,8 @@ class JPackage(JObjectBase, JAnnotatedElement):
     @cached
     def getSpecificationVendor(self) -> str:
         """Return the name of the organization, vendor, or company that owns
-        and maintains the specification of the classes that implement this package."""
+        and maintains the specification of the classes that implement this package.
+        """
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             vend = jenv.CallObjectMethod(self._jobj, jvm.Package.getSpecificationVendor)
             return JString(jenv, vend, own=False).str if vend else None
@@ -92,7 +94,8 @@ class JPackage(JObjectBase, JAnnotatedElement):
         by the vendor of this implementation and does not have any particular syntax
         specified or expected by the Java runtime. It may be compared for equality with
         other package version strings used for this implementation by this vendor for
-        this package."""
+        this package.
+        """
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             ver = jenv.CallObjectMethod(self._jobj, jvm.Package.getImplementationVersion)
             return JString(jenv, ver, own=False).str if ver else None
@@ -100,7 +103,8 @@ class JPackage(JObjectBase, JAnnotatedElement):
     @cached
     def getImplementationVendor(self) -> str:
         """Returns the name of the organization, vendor or company that provided
-        this implementation."""
+        this implementation.
+        """
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             vend = jenv.CallObjectMethod(self._jobj, jvm.Package.getImplementationVendor)
             return JString(jenv, vend, own=False).str if vend else None

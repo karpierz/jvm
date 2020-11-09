@@ -1,0 +1,103 @@
+Running testsuite using JVM: C:\Program Files\Java\jre1.8.0_191\bin\server\jvm.dll 
+
+test_JAnnotation (tests.python.test_JVM.JVMTestCase) ... ok
+test_JArguments (tests.python.test_JVM.JVMTestCase) ... ok
+test_JArray (tests.python.test_JVM.JVMTestCase) ... ok
+test_JClass (tests.python.test_JVM.JVMTestCase) ... ok
+test_JClassLoader (tests.python.test_JVM.JVMTestCase) ... FAIL
+test_JConstructor (tests.python.test_JVM.JVMTestCase) ... ok
+test_JException (tests.python.test_JVM.JVMTestCase) ... ok
+test_JField (tests.python.test_JVM.JVMTestCase) ... ok
+test_JMethod (tests.python.test_JVM.JVMTestCase) ... ok
+test_JMonitor (tests.python.test_JVM.JVMTestCase) ... ok
+test_JObject (tests.python.test_JVM.JVMTestCase) ... ok
+test_JPackage (tests.python.test_JVM.JVMTestCase) ... ok
+test_JPropertyDescriptor (tests.python.test_JVM.JVMTestCase) ... ok
+test_JProxy (tests.python.test_JVM.JVMTestCase) ... ok
+test_JReferenceQueue (tests.python.test_JVM.JVMTestCase) ... ERROR
+test_JString (tests.python.test_JVM.JVMTestCase) ... ok
+test_JThread (tests.python.test_JVM.JVMTestCase) ... ok
+test_JVM (tests.python.test_JVM.JVMTestCase) ... ok
+test_PythonInterpreter (tests.python.test_JVM.JVMTestCase) ... ERROR
+test__JVM (tests.python.test_JVM.JVMTestCase) ... ok
+test_CompleteHandler (tests.python.test_TypeHandlerABC.TypeHandlerABCTestCase) ... ok
+test_IncompleteHandler (tests.python.test_TypeHandlerABC.TypeHandlerABCTestCase) ... ok
+
+======================================================================
+ERROR: test_JReferenceQueue (tests.python.test_JVM.JVMTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 332, in handleException
+    raise exc
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jmethod.py", line 84, in callStaticVoid
+    jenv.CallStaticVoidMethod(jcls.handle, self._jmid(jenv), jargs.arguments)
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jni\src\jt\jni\cffi\jni_cffi.py", line 764, in CallStaticVoidMethod
+    if fun.ExceptionCheck(penv): self.handleJavaException()
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jni\src\jt\jni\cffi\jni_cffi.py", line 229, in handleJavaException
+    raise thr
+jt.jni.cffi.jni_cffi.Throwable: (<cdata 'struct _jobject *' 0x0000000010ACD920>, <cdata 'struct _jobject *' NULL>)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\tests\python\test_JVM.py", line 1906, in test_JReferenceQueue
+    return_value = jmethod.callStaticVoid(jclass, jargs)
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jmethod.py", line 85, in callStaticVoid
+    return None
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 195, in __exit__
+    if exc: self.handleException(exc)
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 343, in handleException
+    message if message is not None else classname))
+JavaException: Java exception java.lang.UnsatisfiedLinkError occurred: com.jt.ref.Reference.initialize(J)V
+
+======================================================================
+ERROR: test_PythonInterpreter (tests.python.test_JVM.JVMTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 332, in handleException
+    raise exc
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jconstructor.py", line 75, in newInstance
+    jobj = jenv.NewObject(jcls, self._jcid(jenv), jargs.arguments)
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jni\src\jt\jni\cffi\jni_cffi.py", line 383, in NewObject
+    if not ret and fun.ExceptionCheck(penv): self.handleJavaException()
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jni\src\jt\jni\cffi\jni_cffi.py", line 229, in handleJavaException
+    raise thr
+jt.jni.cffi.jni_cffi.Throwable: (<cdata 'struct _jobject *' 0x0000000010ACB8A0>, <cdata 'struct _jobject *' NULL>)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\tests\python\test_JVM.py", line 1969, in test_PythonInterpreter
+    python = jctor.newInstance(jargs)
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jconstructor.py", line 76, in newInstance
+    return self.jvm.JObject(jenv, jobj) if jobj else None
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 195, in __exit__
+    if exc: self.handleException(exc)
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 343, in handleException
+    message if message is not None else classname))
+JavaException: Java exception java.lang.Error occurred: java.lang.UnsatisfiedLinkError: org.python.util.PythonInterpreter$Python.initialize_python([Ljava/lang/String;)V
+
+======================================================================
+FAIL: test_JClassLoader (tests.python.test_JVM.JVMTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\src\jt\jvm\jvm.py", line 332, in handleException
+    raise exc
+jt.jni.cffi.jni_cffi.Throwable: (<cdata 'struct _jobject *' 0x0000000012AE48A0>, <cdata 'struct _jobject *' NULL>)
+
+During handling of the above exception, another exception occurred:
+
+JavaException: Java exception java.lang.ClassNotFoundException occurred: 
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.jvm\tests\python\test_JVM.py", line 128, in test_JClassLoader
+    jclass = cloader.findSystemClass(jclass_name)
+AssertionError: "Java exception java.lang.ClassNotFoundException occurred: nonexistent.package.and.Class" does not match "Java exception java.lang.ClassNotFoundException occurred: "
+
+----------------------------------------------------------------------
+Ran 22 tests in 1.470s
+
+FAILED (failures=1, errors=2)
+svn: 7817:8110

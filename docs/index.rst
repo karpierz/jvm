@@ -1,14 +1,18 @@
 jvm documentation
 =================
 
+.. _readme:
+.. include:: README.rst
+
+Contents
+========
+
 .. toctree::
    :maxdepth: 2
-   :caption: Parts of the documentation:
 
-   README
-   install
-   userguide
-   CHANGES
+   install.rst
+   userguide.rst
+   CHANGES.rst
 
 Indices and tables
 ==================

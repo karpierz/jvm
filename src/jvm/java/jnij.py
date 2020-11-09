@@ -392,6 +392,7 @@ class java_beans_PropertyDescriptor(jnij):
             jcls  = jenv.FindClass(b"java/beans/PropertyDescriptor")
             self.Class           = jni.cast(jenv.NewGlobalRef(jcls), jni.jclass)
             self.hashCode        = jenv.GetMethodID(jcls,  b"hashCode",        b"()I")
+            self.toString        = jenv.GetMethodID(jcls,  b"toString",        b"()Ljava/lang/String;")
             self.getName         = jenv.GetMethodID(jfcls, b"getName",         b"()Ljava/lang/String;")
             self.getPropertyType = jenv.GetMethodID(jcls,  b"getPropertyType", b"()Ljava/lang/Class;")
             self.getReadMethod   = jenv.GetMethodID(jcls,  b"getReadMethod",   b"()Ljava/lang/reflect/Method;")

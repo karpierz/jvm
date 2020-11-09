@@ -14,58 +14,31 @@ test_java = os.path.join(test_dir, "java")
 
 
 def test_suite(names=None, omit=("run",)):
-
-    from .python import __name__ as pkg_name
-    from .python import __path__ as pkg_path
+    from . import __name__ as pkg_name
+    from . import __path__ as pkg_path
     import unittest
     import pkgutil
     if names is None:
         names = [name for _, name, _ in pkgutil.iter_modules(pkg_path)
-                 if name != "__main__" and name not in omit]
+                 if name != "__main__" and not name.startswith("tman_")
+                 and name not in omit]
     names = [".".join((pkg_name, name)) for name in names]
     tests = unittest.defaultTestLoader.loadTestsFromNames(names)
     return tests
-
-
-class JavaException(Exception):
-    """ """
-
-class UnknownError(Exception):
-    """ """
-
-class ThreadNotAttachedError(Exception):
-    """ """
-
-class VersionNotSupportedError(Exception):
-    """ """
-class NotEnoughMemoryError(Exception):
-    """ """
-
-class JVMAlreadyExistError(Exception):
-    """ """
-
-class InvalidArgumentError(Exception):
-    """ """
 
 
 def main(argv=sys.argv):
 
     import jvm as _jvm
     import jvm.platform
+
     jvm_path = jvm.platform.JVMFinder(java_version=1.8).get_jvm_path()
 
     print("Running testsuite using JVM:", jvm_path, "\n", file=sys.stderr)
 
     package = sys.modules[__package__]
     package.jvm = jvm = _jvm.JVM(jvm_path)
-    package.JavaException            = JavaException
-    package.UnknownError             = UnknownError
-    package.ThreadNotAttachedError   = ThreadNotAttachedError
-    package.VersionNotSupportedError = VersionNotSupportedError
-    package.NotEnoughMemoryError     = NotEnoughMemoryError
-    package.JVMAlreadyExistError     = JVMAlreadyExistError
-    package.InvalidArgumentError     = InvalidArgumentError
-    jvm.JavaException                = JavaException
+    jvm.JavaException = JavaException
     jvm.ExceptionsMap = {
         _jvm.EStatusCode.ERR:       UnknownError,
         _jvm.EStatusCode.EDETACHED: ThreadNotAttachedError,
@@ -83,10 +56,32 @@ def main(argv=sys.argv):
     finally:
         jvm.shutdown()
 
-    sys.exit(0 if result.wasSuccessful() else 1)
+    return 0 if result.wasSuccessful() else 1
+
+
+class JavaException(Exception):
+    """ """
+
+class UnknownError(Exception):
+    """ """
+
+class ThreadNotAttachedError(Exception):
+    """ """
+
+class VersionNotSupportedError(Exception):
+    """ """
+
+class NotEnoughMemoryError(Exception):
+    """ """
+
+class JVMAlreadyExistError(Exception):
+    """ """
+
+class InvalidArgumentError(Exception):
+    """ """
 
 
 if __name__.rpartition(".")[-1] == "__main__":
     # logging.basicConfig(level=logging.INFO)
     # logging.basicConfig(level=logging.DEBUG)
-    main()
+    sys.exit(main())

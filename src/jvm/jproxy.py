@@ -1,11 +1,12 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
 from typing import Optional, Tuple
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 
 from .jframe  import JFrame
@@ -29,7 +30,7 @@ class JProxy(obj):
 
     def __del__(self):
         try: jvm, jenv = self.jvm
-        except: return  # pragma: no cover
+        except Exception: return  # pragma: no cover
         if jvm.jnijvm:
             jenv.DeleteGlobalRef(self._jitf_array)
 

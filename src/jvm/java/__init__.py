@@ -10,7 +10,7 @@ import jni
 
 
 def registerClass(jenv: jni.JNIEnv, class_name: str, class_code,
-                  native_methods: Optional[Sequence[Callable]]=None, class_loader=None):
+                  native_methods: Optional[Sequence[Callable]] = None, class_loader=None):
 
     if inspect.ismodule(class_code) or inspect.isclass(class_code):
         if native_methods is None:
@@ -29,7 +29,7 @@ def registerClass(jenv: jni.JNIEnv, class_name: str, class_code,
 
         try:
             jcls = jenv.FindClass(class_name.replace(".", "/").encode("utf-8"))
-        except:
+        except Exception:
             size = len(class_code)
             jcls = jenv.DefineClass(class_name.replace(".", "/").encode("utf-8"),
                                     class_loader,

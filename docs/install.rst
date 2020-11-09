@@ -9,7 +9,7 @@ Requirements
 + Python 3.6 or higher
 
   * https://www.python.org/
-  * 3.7 is a primary test environment.
+  * 3.7 with Java 8 is a primary test environment.
 
 + pip and setuptools
 
@@ -19,6 +19,6 @@ Requirements
 Install
 -------
 
-Should be easy as ::
+Should be easy as::
 
     python -m pip install --upgrade jvm

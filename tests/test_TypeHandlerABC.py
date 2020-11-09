@@ -86,9 +86,10 @@ class CompleteHandler(IncompleteHandler):
 
 class TypeHandlerABCTestCase(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         from . import jvm
-        self.jvm = jvm
+        cls.jvm = jvm
 
     def test_IncompleteHandler(self):
         with self.assertRaisesRegex(TypeError,

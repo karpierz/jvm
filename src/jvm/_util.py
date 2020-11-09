@@ -3,12 +3,13 @@
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from public import public
 import jni
 from jni._util import get_config, make_config
+from .lib import public
 
 public(get_config  = get_config)
 public(make_config = make_config)
+
 
 def str2jchars(val):
     jbuf = val.encode("utf-16")[jni.sizeof(jni.jchar):]  # skip byte-order mark

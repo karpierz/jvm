@@ -8,8 +8,8 @@ import os
 from os import path
 import re
 
-from public import public
-from ..lib  import cli
+from ..lib import public
+from ..lib import cli
 
 
 @public
@@ -137,7 +137,7 @@ class JVMFinder:
                             break
 
     def get_java_version(self, java_exe):
-        _, cout = cli.cmd(java_exe, "-version")
+        cout = cli.cmd(java_exe, "-version").stderr
         match = re.search('^\s*java version\s+"(.+)"', cout, re.MULTILINE)
         return float(".".join(match.group(1).split(".")[:2]))
 

@@ -1,22 +1,22 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 
 
 @public
 class JMonitor(obj):
-
     """Java Monitor"""
 
     __slots__ = ('_jobj', '_own', '__monitored')
 
     # self._jobj: jni.jobject
 
-    def __init__(self, jobj: jni.jobject, own: bool=True):
+    def __init__(self, jobj: jni.jobject, own: bool = True):
         self._jobj = jni.NULL
         self._own  = own
         self.__monitored = False
@@ -32,7 +32,7 @@ class JMonitor(obj):
     def __del__(self):
         if not self._own or not self.jvm: return
         try: jvm, jenv = self.jvm
-        except: return  # pragma: no cover
+        except Exception: return  # pragma: no cover
         if jvm.jnijvm:
             if self.__monitored:
                 jenv.MonitorExit(self._jobj)

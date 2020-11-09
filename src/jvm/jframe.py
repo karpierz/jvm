@@ -1,11 +1,12 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
 from typing import Optional
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 
 # A default number of local references to reserve when using the
@@ -35,7 +36,7 @@ class JFrame(obj):
         if self.__size: self.__jenv.PushLocalFrame(self.__size)
         return self
 
-    def reset(self, size: Optional[int]=None):
+    def reset(self, size: Optional[int] = None):
         if self.__size: self.__jenv.PopLocalFrame(jni.NULL)
         if size is not None: self.__size = size
         if self.__size: self.__jenv.PushLocalFrame(self.__size)

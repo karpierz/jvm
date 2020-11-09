@@ -6,7 +6,7 @@
 import abc
 import numbers
 
-from public import public
+from .lib import public
 from .lib import obj
 
 

@@ -1,9 +1,10 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 
 
@@ -13,7 +14,7 @@ class JString(obj):
     __slots__ = ('__jstr', '__size', '__jchars')
 
     def __init__(self, jenv: jni.JNIEnv=None,
-                 jstr: jni.jobject=jni.obj(jni.POINTER(jni.jchar)), own: bool=True):
+                 jstr: jni.jobject=jni.obj(jni.POINTER(jni.jchar)), own: bool = True):
         self.__jstr = jni.cast(jstr, jni.jstring)
         self.__size = 0
         self.__jchars = jni.obj(jni.POINTER(jni.jchar))

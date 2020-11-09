@@ -1,12 +1,14 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
 from typing import Optional, Tuple
+from pathlib import Path
 import os
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 from .lib import const
 from .lib import weakconst
@@ -14,12 +16,11 @@ from .lib import adict
 
 from .jconstants import EStatusCode
 
-INTERNAL_CLASSPATHS = [os.path.join(os.path.dirname(__file__), "java")]
+INTERNAL_CLASSPATHS = [Path(__file__).resolve().parent/"java"]
 
 
 @public
 class JVM(obj):
-
     """Java Virtual Machine"""
 
     JNI_VERSION = jni.JNI_VERSION_1_6
@@ -42,7 +43,7 @@ class JVM(obj):
             jvms.append(jvm)
         return tuple(jvms)
 
-    def __init__(self, dll_path: Optional[object]=None):
+    def __init__(self, dll_path: Optional[object] = None):
 
         def class_copy(cls, **dict):
             dict.update(__module__="jvm", __doc__=cls.__doc__, __slots__=())
@@ -92,14 +93,15 @@ class JVM(obj):
 
             if if_load and not isinstance(dll_path, str):
                 raise JVMException(EStatusCode.EINVAL,
-                                   "First paramter must be a string or unicode")
+                                   "First paramter must be a string")
             self._jvm = _JVM()
             self._jvm.data.describe_exceptions = False
             try:
                 self._jvm.JNI = jni.load(dll_path) if if_load else None
             except Exception as exc:
                 raise JVMException(EStatusCode.UNKNOWN,
-                                   "Unable to load DLL [{}], error = {}".format(dll_path, exc))
+                                   "Unable to load DLL [{}], error = {}".format(
+                                   dll_path, exc)) from None
             self._jvm._create()
         except Exception as exc:
             self.handleException(exc)
@@ -107,10 +109,10 @@ class JVM(obj):
     def __del__(self):
         if not self._jvm: return
         try: self._jvm.jnijvm.DestroyJavaVM()
-        except: pass
+        except Exception: pass
         self._jvm.jnijvm = None
         try: self._jvm.JNI.dllclose()
-        except: pass
+        except Exception: pass
         self._jvm.JNI = None
 
     def __enter__(self):
@@ -137,7 +139,7 @@ class JVM(obj):
         jvmoptions = tuple(["-Djava.class.path=" + os.pathsep.join(
                                [item.partition("=")[2] for item in jvmoptions
                                 if item.lstrip().startswith("-Djava.class.path=")] +
-                               INTERNAL_CLASSPATHS)] +
+                               [str(path) for path in INTERNAL_CLASSPATHS])] +
                            [item for item in jvmoptions
                             if not item.lstrip().startswith("-Djava.class.path=")])
         ignoreUnrecognized = jvmargs.get("ignoreUnrecognized", True)
@@ -168,7 +170,7 @@ class JVM(obj):
                 self._jvm._initialize(jenv)
             except Exception as exc:
                 try: self._jvm.jnijvm.DestroyJavaVM()
-                except: pass
+                except Exception: pass
                 raise exc
             return self._jvm, jenv
         except Exception as exc:
@@ -177,7 +179,7 @@ class JVM(obj):
             finally:
                 self._jvm.jnijvm = None
 
-    def attach(self, pjvm: Optional[object]=None): # -> Tuple['_JVM', jni.JNIEnv]:
+    def attach(self, pjvm: Optional[object] = None): # -> Tuple['_JVM', jni.JNIEnv]:
 
         if_bind = pjvm is not None
 
@@ -257,24 +259,24 @@ class JVM(obj):
             self.JException.printDescribe()
             jexc = self.JException(exc)
             if self.JavaException and hasattr(self.JavaException, "__exception__"):
-                raise self.JavaException.__exception__(jexc)
+                raise self.JavaException.__exception__(jexc) from None
             else:
                 classname = jexc.getClass().getName()
                 message   = jexc.getMessage()
                 PyExc = self.JavaException or RuntimeError
                 raise PyExc("Java exception {} occurred: {}".format(classname,
-                            message if message is not None else classname))
+                            message if message is not None else classname)) from None
         except jni.JNIException as exc:
             PyExc = self.ExceptionsMap.get(exc.getError(),
                                            self.ExceptionsMap.get(EStatusCode.ERR, RuntimeError))
-            raise PyExc(exc.getMessage())
+            raise PyExc(exc.getMessage()) from None
         except JVMException as exc:
             PyExc = self.ExceptionsMap.get(exc.args[0],
                                            self.ExceptionsMap.get(EStatusCode.ERR, RuntimeError))
-            raise PyExc(exc.args[1])
-        except:
+            raise PyExc(exc.args[1]) from None
+        except Exception:
             PyExc = self.ExceptionsMap.get(None)
-            raise PyExc(exc) if PyExc else exc
+            raise (PyExc(exc) if PyExc else exc) from None
 
 
 @public

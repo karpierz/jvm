@@ -1,11 +1,12 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Union
+from typing import Optional
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 
 from .jconstants import EJavaType
@@ -18,12 +19,11 @@ from ._util      import str2jchars
 
 @public
 class JArguments(obj):
-
     """ArgumentList"""
 
     __slots__ = ('__jvalues', '__jtypes', '_own')
 
-    def __init__(self, size: int, own: bool=True):
+    def __init__(self, size: int, own: bool = True):
         self._own = own
         self.__jvalues = (jni.new_array(jni.jvalue, size)
                           if size > 0 else
@@ -33,7 +33,7 @@ class JArguments(obj):
     def __del__(self):
         if not self._own or not self.jvm: return
         try: jvm, jenv = self.jvm
-        except: return  # pragma: no cover
+        except Exception: return  # pragma: no cover
         if jvm.jnijvm and self.__jvalues:
             for i, arg in enumerate(self.__jvalues):
                 if self.__jtypes[i] >= EJavaType.OBJECT:

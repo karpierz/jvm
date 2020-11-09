@@ -1,0 +1,30 @@
+Running testsuite using JVM: C:\Program Files\Java\jre1.8.0_201\bin\server\jvm.dll 
+
+test_JAnnotation (tests.python.test_JVM.JVMTestCase) ... ok
+test_JArguments (tests.python.test_JVM.JVMTestCase) ... ok
+test_JArray (tests.python.test_JVM.JVMTestCase) ... ok
+test_JClass (tests.python.test_JVM.JVMTestCase) ... ok
+test_JClassLoader (tests.python.test_JVM.JVMTestCase) ... ok
+test_JConstructor (tests.python.test_JVM.JVMTestCase) ... ok
+test_JException (tests.python.test_JVM.JVMTestCase) ... ok
+test_JField (tests.python.test_JVM.JVMTestCase) ... ok
+test_JMethod (tests.python.test_JVM.JVMTestCase) ... ok
+test_JMonitor (tests.python.test_JVM.JVMTestCase) ... ok
+test_JObject (tests.python.test_JVM.JVMTestCase) ... ok
+test_JPackage (tests.python.test_JVM.JVMTestCase) ... ok
+test_JPropertyDescriptor (tests.python.test_JVM.JVMTestCase) ... ok
+test_JProxy (tests.python.test_JVM.JVMTestCase) ... ok
+test_JReferenceQueue (tests.python.test_JVM.JVMTestCase) ... ok
+test_JString (tests.python.test_JVM.JVMTestCase) ... ok
+test_JThread (tests.python.test_JVM.JVMTestCase) ... ok
+test_JVM (tests.python.test_JVM.JVMTestCase) ... ok
+test_PythonInterpreter (tests.python.test_JVM.JVMTestCase) ... skipped 'jt.jvm: crash!!!'
+test__JVM (tests.python.test_JVM.JVMTestCase) ... ok
+test_CompleteHandler (tests.python.test_TypeHandlerABC.TypeHandlerABCTestCase) ... ok
+test_IncompleteHandler (tests.python.test_TypeHandlerABC.TypeHandlerABCTestCase) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 1.624s
+
+OK (skipped=1)
+svn: 12033M

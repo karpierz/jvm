@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.5.0b1 (2020-11-09)
+--------------------
+- Add support for Python 3.9.
+- General update, improvements and cleanup.
+- Setup update.
+
 0.4.0b3 (2020-03-08)
 --------------------
 - Drop support for Python2.

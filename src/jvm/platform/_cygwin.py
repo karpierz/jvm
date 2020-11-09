@@ -5,8 +5,8 @@
 
 from os import path
 
-from public import public
-from ..lib  import platform
+from ..lib import public
+from ..lib import platform
 
 from . import _windows
 

@@ -1,11 +1,12 @@
 # Copyright (c) 2004-2020 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
 from typing import Optional
 
-from public import public
 import jni
+from .lib import public
 from .lib import obj
 
 
@@ -14,7 +15,7 @@ class JContext(obj):
 
     __slots__ = ('jvm', 'jenv')
 
-    def __init__(self, jenv: Optional[jni.JNIEnv]=None):
+    def __init__(self, jenv: Optional[jni.JNIEnv] = None):
         if jenv is None:
             from .jconstants import EStatusCode
             from .jvm        import JVMException

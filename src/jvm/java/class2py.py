@@ -5,12 +5,13 @@
 
 
 def class2py(class_file, header=None):
-    import os.path
-    import re
-    import io
+    from pathlib import Path
     from codecs import encode
-    py_fname   = os.path.splitext(class_file)[0].replace("$", "_")+".py"
-    is_new_py  = not os.path.exists(py_fname)
+    import io
+    import re
+    py_file    = Path(class_file.replace("$", "_")).with_suffix(".py")
+    class_file = Path(class_file)
+    is_new_py  = not py_file.exists()
     jcode_rexp = re.compile(r"(?P<beg>(.*\n)*)[ \t]*__javacode__[ \t]*="
                             r"\s*(((.|\n)*?\((.|\n)*?\))|(None[ \t]*\n))"
                             r"(?P<end>(.|\n)*)")
@@ -24,9 +25,9 @@ def class2py(class_file, header=None):
 """
     footer = """
 """
-    with open(class_file, "rb")            as fi, \
-         open(py_fname, "a+t", newline="") as fo, \
-         io.StringIO()                     as tmp:
+    with class_file.open("rb") as fi, \
+         py_file.open("a+t", newline="") as fo, \
+         io.StringIO() as tmp:
         fo.seek(0)
         content = fo.read()
         match = jcode_rexp.match(content)

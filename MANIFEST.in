@@ -6,26 +6,24 @@
 include README.rst
 include CHANGES.rst
 include LICENSE
+include .readthedocs.yml
 
 graft docs
 
 graft src
-exclude src/jvm/jcontext.py
-exclude src/jvm/jvm.py
-exclude src/jvm/_util.py
-exclude src/jvm/lic.key
-prune src/jvm/platform/\#
-prune src/jvm/lib
+recursive-exclude src/jvm *.java *.java_
 exclude src/jvm/java/class2py.py
-recursive-exclude src/jvm/java *.java *.java_
-prune src/jvm/java/com
-prune src/jvm/java/org/python
+exclude src/jvm/java/org/python/embed.[co]*
 exclude src/jvm/java/org/jt/util/classlist_update.py
+exclude src/jvm/java/org/python/util/*.c
+exclude src/jvm/java/org/python/util/*.h
+exclude src/jvm/lib/hid.py
+exclude src/jvm/lib/rwproperty.py
 
 graft tests
-exclude tests/_info_.txt tests/_report_*.txt
 prune tests/c
 prune tests/java
 
-global-exclude .build .build.*
+global-exclude \#/** \#*.*/**
+global-exclude .build/** .build.*/**
 global-exclude *.py[cod] __pycache__
