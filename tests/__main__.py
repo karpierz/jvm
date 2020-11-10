@@ -10,6 +10,8 @@ import logging
 
 from . import test_dir
 
+log = logging.getLogger(__name__)
+
 test_java = os.path.join(test_dir, "java")
 
 

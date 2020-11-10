@@ -24,6 +24,6 @@ graft tests
 prune tests/c
 prune tests/java
 
-global-exclude \#/** \#*.*/**
-global-exclude .build/** .build.*/**
+global-exclude \#* \#*/**
+global-exclude .build .build/** .build.* .build.*/**
 global-exclude *.py[cod] __pycache__
