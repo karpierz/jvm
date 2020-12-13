@@ -18,9 +18,24 @@ from ctypes import (c_bool, c_char, c_byte, c_ubyte, c_short, c_ushort, c_int, c
                     c_ulong, c_longlong, c_ulonglong, c_ssize_t, c_size_t, c_float, c_double,
                     c_char_p, c_void_p, POINTER, pointer, byref, sizeof, addressof, resize,
                     cast, memset, memmove, py_object, create_string_buffer, Structure, pythonapi)
-from _testcapi import (CHAR_MIN as SCHAR_MIN, CHAR_MAX as SCHAR_MAX, SHRT_MIN, SHRT_MAX,
-                       INT_MIN, INT_MAX, UCHAR_MAX, USHRT_MAX, UINT_MAX)
 from ._memorybuffer import Py_buffer, Buffer, isbuffer
+
+CHAR_BIT   = 8
+UCHAR_MAX  = c_ubyte(-1).value
+SCHAR_MIN  = -UCHAR_MAX // 2   
+SCHAR_MAX  = UCHAR_MAX // 2    
+USHRT_MAX  = c_ushort(-1).value
+SHRT_MIN   = -USHRT_MAX // 2
+SHRT_MAX   = USHRT_MAX // 2
+UINT_MAX   = c_uint(-1).value
+INT_MIN    = -UINT_MAX // 2
+INT_MAX    = UINT_MAX // 2
+ULONG_MAX  = c_ulong(-1).value
+LONG_MIN   = -ULONG_MAX // 2
+LONG_MAX   = ULONG_MAX // 2
+ULLONG_MAX = c_ulonglong(-1).value
+LLONG_MIN  = -ULLONG_MAX // 2
+LLONG_MAX  = ULLONG_MAX // 2
 
 Py_IncRef = pythonapi.Py_IncRef
 Py_IncRef.argtypes = [py_object]

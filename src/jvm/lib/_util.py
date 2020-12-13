@@ -2,7 +2,7 @@
 # Licensed under the zlib/libpng License
 # https://opensource.org/licenses/Zlib
 
-__all__ = ('issubtype', 'issequence', 'unique', 'pushd')
+__all__ = ('issubtype', 'issequence', 'unique', 'pushd', 'to_int', 'to_float')
 
 import sys
 import os
@@ -31,6 +31,15 @@ def unique(seq) -> list:
 
 def remove_all(list, value):
     list[:] = (x for x in list if x != value)
+
+
+def to_int(val) -> int:
+    return int(val if hasattr(val, "__int__") or
+                      hasattr(val, "__trunc__") else None)
+
+
+def to_float(val) -> float:
+    return float(val if hasattr(val, "__float__") else None)
 
 
 @contextmanager

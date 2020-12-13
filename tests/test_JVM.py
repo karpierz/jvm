@@ -830,8 +830,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, int)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setBoolean(0, 1.0)
+        for val_expected in (1.0, "1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setBoolean(0, val_expected)
 
         for val_expected in ("a", "B"):
             #pos: int, val_expected: str
@@ -845,8 +846,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(jargs.arguments[11].c, str)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setChar(1, 1.0)
+        for val_expected in (1.0, 1):
+            with self.assertRaises(TypeError):
+                jargs.setChar(1, 1.0)
 
         for val_expected in (True, False, 0, 1, 23, 34):
             #pos: int, val_expected: int
@@ -860,8 +862,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, int)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setByte(2, 1.0)
+        for val_expected in (1.0, "1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setByte(2, val_expected)
 
         for val_expected in (True, False, 0, 1, 23, 34):
             #pos: int, val_expected: int
@@ -875,8 +878,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, int)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setShort(3, 1.0)
+        for val_expected in (1.0, "1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setShort(3, val_expected)
 
         for val_expected in (True, False, 0, 1, 23, 34):
             #pos: int, val_expected: int
@@ -890,8 +894,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, int)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setInt(4, 1.0)
+        for val_expected in (1.0, "1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setInt(4, val_expected)
 
         for val_expected in (True, False, 0, 1, 23, 34, 2222222222222222, 9223372036854775807):
             #pos: int, val_expected: Union[int, long]
@@ -905,8 +910,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, int)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setLong(5, 1.0)
+        for val_expected in (1.0, "1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setLong(5, val_expected)
 
         for val_expected in (True, False, 0, 1, 23, 34, 2147483648, 3.44, 5.77):
             #pos: int, val_expected: float
@@ -920,8 +926,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, float)
             self.assertAlmostEqual(val, val_expected, places=6)
 
-        with self.assertRaises(TypeError):
-            jargs.setFloat(6, "xxx")
+        for val_expected in ("1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setFloat(6, val_expected)
 
         for val_expected in (True, False, 0, 1, 23, 34, 2222222222222222, 9223372036854776, 3.44, 5.77):
             #pos: int, val_expected: float
@@ -935,8 +942,9 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(val, float)
             self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setDouble(7, "xxx")
+        for val_expected in ("1", "33.2", object()):
+            with self.assertRaises(TypeError):
+                jargs.setDouble(7, val_expected)
 
         for val_expected in (None, "", "XXX"):
             #pos: int, val: Optional[str]
@@ -950,8 +958,9 @@ class JVMTestCase(unittest.TestCase):
             #self.assertIsInstance(val, float)
             #self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setString(8, 1.0)
+        for val_expected in (1, 33.2, True, object()):
+            with self.assertRaises(TypeError):
+                jargs.setString(8, val_expected)
 
         for val_expected in (None,):
             #pos: int, val: Optional[str]
@@ -965,8 +974,9 @@ class JVMTestCase(unittest.TestCase):
             #self.assertIsInstance(val, float)
             #self.assertEqual(val, val_expected)
 
-        with self.assertRaises(TypeError):
-            jargs.setObject(9, 1.0)
+        for val_expected in (1, 33.2, True):
+            with self.assertRaises(TypeError):
+                jargs.setObject(9, val_expected)
 
         # TODO
 

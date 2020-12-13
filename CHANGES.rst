@@ -1,11 +1,12 @@
 Changelog
 =========
 
-0.5.0b2 (2020-11-10)
+0.5.0b3 (2020-12-13)
 --------------------
 - Add support for Python 3.9.
 - General update, improvements and cleanup.
 - Setup update.
+- Elimination of dependence on _testcapi.
 
 0.4.0b3 (2020-03-08)
 --------------------
