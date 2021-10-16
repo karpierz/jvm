@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.5.0b4 (2021-10-16)
+0.5.0b5 (2021-10-16)
 --------------------
 - dll_path argument of JVM() can also be type os.PathLike.
 - Copyright year update.
