@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -26,7 +26,6 @@ class JVM(obj):
     JNI_VERSION = jni.JNI_VERSION_1_6
 
     def createdJVMs(self) -> Tuple['_JVM', ...]:
-
         njvm = jni.new(jni.jsize)
         err = self._jvm.JNI.GetCreatedJavaVMs(None, 0, njvm)
         if err != jni.JNI_OK:
@@ -91,17 +90,16 @@ class JVM(obj):
         try:
             # TODO: add the non-string parameters, for possible callbacks
 
-            if if_load and not isinstance(dll_path, str):
+            if if_load and not isinstance(dll_path, (str, os.PathLike)):
                 raise JVMException(EStatusCode.EINVAL,
-                                   "First paramter must be a string")
+                                   "First parameter must be a string or os.PathLike type")
             self._jvm = _JVM()
             self._jvm.data.describe_exceptions = False
             try:
                 self._jvm.JNI = jni.load(dll_path) if if_load else None
             except Exception as exc:
                 raise JVMException(EStatusCode.UNKNOWN,
-                                   "Unable to load DLL [{}], error = {}".format(
-                                   dll_path, exc)) from None
+                                   f"Unable to load DLL [{dll_path}], error = {exc}") from None
             self._jvm._create()
         except Exception as exc:
             self.handleException(exc)
@@ -135,7 +133,6 @@ class JVM(obj):
         return iter(self.__enter__())
 
     def start(self, *jvmoptions, **jvmargs): # -> Tuple['_JVM', jni.JNIEnv]:
-
         jvmoptions = tuple(["-Djava.class.path=" + os.pathsep.join(
                                [item.partition("=")[2] for item in jvmoptions
                                 if item.lstrip().startswith("-Djava.class.path=")] +
@@ -143,7 +140,6 @@ class JVM(obj):
                            [item for item in jvmoptions
                             if not item.lstrip().startswith("-Djava.class.path=")])
         ignoreUnrecognized = jvmargs.get("ignoreUnrecognized", True)
-
         try:
             pjvm = jni.obj(jni.POINTER(jni.JavaVM))
             penv = jni.obj(jni.POINTER(jni.JNIEnv))
@@ -180,14 +176,11 @@ class JVM(obj):
                 self._jvm.jnijvm = None
 
     def attach(self, pjvm: Optional[object] = None): # -> Tuple['_JVM', jni.JNIEnv]:
-
         if_bind = pjvm is not None
-
         try:
             if if_bind and not pjvm:
                 raise JVMException(EStatusCode.EINVAL,
-                                   "First paramter must be a JNI jvm handle")
-
+                                   "First parameter must be a JNI jvm handle")
             penv = jni.obj(jni.POINTER(jni.JNIEnv))
             if if_bind:
                 self._jvm.jnijvm = jni.cast(pjvm, jni.POINTER(jni.JavaVM))[0]
@@ -263,9 +256,9 @@ class JVM(obj):
             else:
                 classname = jexc.getClass().getName()
                 message   = jexc.getMessage()
+                if message is None: message = classname
                 PyExc = self.JavaException or RuntimeError
-                raise PyExc("Java exception {} occurred: {}".format(classname,
-                            message if message is not None else classname)) from None
+                raise PyExc(f"Java exception {classname} occurred: {message}") from None
         except jni.JNIException as exc:
             PyExc = self.ExceptionsMap.get(exc.getError(),
                                            self.ExceptionsMap.get(EStatusCode.ERR, RuntimeError))

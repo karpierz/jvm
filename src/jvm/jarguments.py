@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -113,7 +113,7 @@ class JArguments(obj):
                 self.__jvalues[pos].l = jni.NULL
             else:
                 if not isinstance(val, str):
-                    raise TypeError("str expected instead of {}".format(type(val)))
+                    raise TypeError(f"str expected instead of {type(val)}")
                 jchars, size, jbuf = str2jchars(val)
                 jstr = jenv.NewString(jchars, size)
                 self.__jvalues[pos].l = jenv.NewGlobalRef(jstr)
@@ -126,7 +126,7 @@ class JArguments(obj):
                 self.__jvalues[pos].l = jni.NULL
             else:
                 if not isinstance(val, self.jvm.JClass):
-                    raise TypeError("JClass expected instead of {}".format(type(val)))
+                    raise TypeError(f"JClass expected instead of {type(val)}")
                 self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)
             self.__jtypes[pos]    = EJavaType.CLASS
 
@@ -137,7 +137,7 @@ class JArguments(obj):
                 self.__jvalues[pos].l = jni.NULL
             else:
                 if not isinstance(val, self.jvm.JObject):
-                    raise TypeError("JObject expected instead of {}".format(type(val)))
+                    raise TypeError(f"JObject expected instead of {type(val)}")
                 self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)
             self.__jtypes[pos]    = EJavaType.OBJECT
 
@@ -148,6 +148,6 @@ class JArguments(obj):
                 self.__jvalues[pos].l = jni.NULL
             else:
                 if not isinstance(val, self.jvm.JArray):
-                    raise TypeError("JArray expected instead of {}".format(type(val)))
+                    raise TypeError(f"JArray expected instead of {type(val)}")
                 self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)
             self.__jtypes[pos]    = EJavaType.ARRAY

@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -6,8 +6,6 @@
 from .compat         import obj
 from .compat         import meta_dict
 from ._public        import *
-from ._let           import *
-from ._renumerate    import *
 from ._adict         import *
 from ._cache         import *
 from ._classproperty import *

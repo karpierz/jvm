@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.5.0b4 (2021-10-13)
+--------------------
+- dll_path argument of JVM() can also be type os.PathLike.
+- Copyright year update.
+- Setup update.
+
 0.5.0b3 (2020-12-13)
 --------------------
 - Add support for Python 3.9.

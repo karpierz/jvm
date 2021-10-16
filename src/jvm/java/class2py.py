@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -17,7 +17,7 @@ def class2py(class_file, header=None):
                             r"(?P<end>(.|\n)*)")
     if header is None:
         header = """\
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -42,7 +42,7 @@ def class2py(class_file, header=None):
                 break
             line = "".join(r"\x%c%c" % (c1, c2)
                            for c1, c2 in zip(*[iter(encode(row, "hex"))] * 2))
-            print('    b"{}"'.format(line), file=tmp)
+            print(f'    b"{line}"', file=tmp)
         print(")", end="", file=tmp)
         print(footer if is_new_py else end, end="", file=tmp)
         if tmp.getvalue() != content:

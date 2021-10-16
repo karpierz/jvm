@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -74,7 +74,7 @@ class JVMFinder(_linux.JVMFinder):
             if path.isfile("/usr/libexec/java_home"): # -x
                 # Apple JDKs
                 java_home = cli.cmd("/usr/libexec/java_home",
-                                    "" if not self._java_version else "-v {}".format(self._java_version)).stdout
+                                    "" if not self._java_version else f"-v {self._java_version}").stdout
                 if not java_home.strip():
                     java_home = None
             else:

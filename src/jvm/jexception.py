@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2020 Adam Karpierz
+# Copyright (c) 2004-2022 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -187,7 +187,7 @@ class JException(JObjectBase):
             jenv.Throw(self._jobj)
         else:
             location = JString(jenv, self.__jinfo, own=False).str
-            message  = "Unknown from: {}".format(location) if location else "Unknown"
+            message  = f"Unknown from: {location}" if location else "Unknown"
             jenv.ThrowNew(jvm.java_lang.RuntimeException, message.encode("utf-8"))
 
     @classmethod
