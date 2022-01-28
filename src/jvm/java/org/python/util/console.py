@@ -73,24 +73,21 @@ def prompt(python=None):
     import sys
     import traceback
 
-    ps1 = getattr(sys, "ps1", ">>> ")
-    ps2 = getattr(sys, "ps2", "... ")
+    PS1 = getattr(sys, "ps1", ">>> ")
+    PS2 = getattr(sys, "ps2", "... ")
 
     try:
         line = None
         ran  = True
         while True:
             try:
-                line = input(ps1 if ran else ps2)
+                line = input(PS1 if ran else PS2)
             except:
                 break
             ran = True
             try:
                 try:
-                    if python:
-                        ran = python.eval(line)
-                    else:
-                        ran = eval(line)
+                    ran = python.eval(line) if python else eval(line)
                 except SyntaxError:
                     if python:
                         ran = python.execute(line)
