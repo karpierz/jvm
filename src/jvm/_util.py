@@ -4,7 +4,7 @@
 # Please refer to the accompanying LICENSE file.
 
 import jni
-from jni._util import make_config, get_config, set_config
+from jni._config import make_config, get_config, set_config
 from .lib import public
 
 public(make_config = make_config)
