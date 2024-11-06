@@ -55,15 +55,15 @@ dependencies = [
     'pkg-about>=1.2.2',
     # others
     'memorybuffer>=0.7.0b1',
-    'jni>=1.1.0b1',
+    'jni>=1.1.0b2',
 ]
 dynamic = ['readme']
 [project.optional-dependencies]
 cffi = [
-    'jni[cffi]>=1.1.0b1',
+    'jni[cffi]>=1.1.0b2',
 ]
 cython = [
-    'jni[cython]>=1.1.0b1',
+    'jni[cython]>=1.1.0b2',
 ]
 doc = [
     'Sphinx>=7.4.7',
