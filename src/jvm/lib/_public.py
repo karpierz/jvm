@@ -1,6 +1,6 @@
 # @public -- populate __all__
 #
-# Copyright (C) 2016-2021 Barry A. Warsaw
+# Copyright (C) 2016 Barry Warsaw <barry@python.org>
 #
 # This project is licensed under the terms of the Apache 2.0 License.
 
@@ -19,14 +19,18 @@ def public(thing=None, **kwargs):
         raise ValueError(f"__all__ must be a list not: {type(dunder_all)}")
     if thing is None:
         # The function call form.
+        retval = []
         for key, value in kwargs.items():
             if key not in dunder_all:
                 dunder_all.append(key)
             mdict[key] = value
+            retval.append(value)
+        return retval[0] if len(retval) == 1 else tuple(retval)
     else:
         # The decorator form.
-        assert not kwargs, ("Keyword arguments are incompatible with use "
-                            "as decorator")
+        if kwargs:
+            raise AssertionError("Keyword arguments are incompatible with use "
+                                 "as decorator")
         if thing.__name__ not in dunder_all:
             dunder_all.append(thing.__name__)
     return thing

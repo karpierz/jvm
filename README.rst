@@ -41,10 +41,10 @@ Installation
 
 Prerequisites:
 
-+ Python 3.7 or higher
++ Python 3.9 or higher
 
   * https://www.python.org/
-  * 3.7 with Java 8 is a primary test environment.
+  * Java 11 is a primary test environment.
 
 + pip and setuptools
 
@@ -66,7 +66,7 @@ Prerequisites:
 
     python -m pip install --upgrade tox
 
-Visit `development page`_.
+Visit `Development page`_.
 
 Installation from sources:
 
@@ -91,7 +91,7 @@ or on development mode:
 License
 =======
 
-  | Copyright (c) 2004-2022 Adam Karpierz
+  | |copyright|
   | Licensed under CC BY-NC-ND 4.0
   | Licensed under proprietary License
   | Please refer to the accompanying LICENSE file.
@@ -103,8 +103,9 @@ Authors
 
 .. |package| replace:: jvm
 .. |package_bold| replace:: **jvm**
+.. |copyright| replace:: Copyright (c) 2004-2024 Adam Karpierz
 .. |respository| replace:: https://github.com/karpierz/jvm.git
-.. _development page: https://github.com/karpierz/jvm
+.. _Development page: https://github.com/karpierz/jvm
 .. _PyPI record: https://pypi.org/project/jvm/
 .. _Documentation: https://jvm.readthedocs.io/
 .. _jni: https://pypi.org/project/jni/

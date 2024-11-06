@@ -10,7 +10,7 @@ class Borg:
 
     __shared_state = {}
 
-    def __new__(cls, *args, **kargs):
+    def __new__(cls, *args, **kwargs):
         self = super().__new__(cls)
         self.__dict__ = Borg.__shared_state
         return self

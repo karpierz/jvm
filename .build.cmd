@@ -1,18 +1,22 @@
 @echo off
-setlocal
-set JAVA8_HOME=C:\Program Files\Java\jdk1.8.0_202
-if not defined JAVA_HOME (set JAVA_HOME=%JAVA8_HOME%)
-set javac="%JAVA_HOME%"\bin\javac -encoding UTF-8 -g:none -deprecation -Xlint:unchecked ^
-    -source 1.8 -target 1.8 -bootclasspath "%JAVA8_HOME%\jre\lib\rt.jar"
-set py=C:\Windows\py.exe -3.7 -B
-set vcdir=%ProgramFiles(x86)%\Microsoft Visual Studio\2019
+setlocal enableDelayedExpansion
+set JAVA_HOME=C:\Program Files\Zulu\zulu-11
+set javac="%JAVA_HOME%\bin\javac" -encoding UTF-8 -g:none ^
+          -deprecation -Xlint:unchecked --release 8
+
+::set py=C:\Windows\py.exe -3.9  -B
+::set py=C:\Windows\py.exe -3.10 -B
+::set py=C:\Windows\py.exe -3.11 -B
+set py=C:\Windows\py.exe -3.12 -B
+::set py=C:\Windows\py.exe -3.13 -B
+set vcdir=%ProgramFiles%\Microsoft Visual Studio\2022
 set vc32="%vcdir%\Community\VC\Auxiliary\Build\vcvars32.bat"
 set vc64="%vcdir%\Community\VC\Auxiliary\Build\vcvars64.bat"
 if exist %vc32% goto :start
 set vc32="%vcdir%\BuildTools\VC\Auxiliary\Build\vcvars32.bat"
 set vc64="%vcdir%\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 if exist %vc32% goto :start
-echo VC compiler (2019) should be installed!
+echo VC compiler (2022) should be installed!
 goto :exit
 :start
 pushd "%~dp0"

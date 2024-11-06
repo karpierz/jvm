@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2022 Adam Karpierz
+# Copyright (c) 2004 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -7,6 +7,7 @@ import ctypes as ct
 import traceback
 
 from .lib import public
+from .lib import platform
 
 from .jhostabc import JHostABC
 
@@ -14,12 +15,18 @@ PyEval_SaveThread    = lambda *args, **kwargs: None  # !!! Py_UNBLOCK_THREADS
 PyEval_RestoreThread = lambda *args, **kwargs: None  # !!! Py_BLOCK_THREADS
 PyGILState_Ensure    = lambda *args, **kwargs: None  # !!!
 PyGILState_Release   = lambda *args, **kwargs: None  # !!!
-Py_IncRef = ct.pythonapi.Py_IncRef
-Py_IncRef.argtypes = [ct.py_object]
-Py_IncRef.restype  = None
-Py_DecRef = ct.pythonapi.Py_DecRef
-Py_DecRef.argtypes = [ct.py_object]
-Py_DecRef.restype  = None
+
+if platform.is_cpython:
+    Py_IncRef = ct.pythonapi.Py_IncRef
+    Py_IncRef.argtypes = [ct.py_object]
+    Py_IncRef.restype  = None
+    Py_DecRef = ct.pythonapi.Py_DecRef
+    Py_DecRef.argtypes = [ct.py_object]
+    Py_DecRef.restype  = None
+else:
+    __objects = []
+    def Py_IncRef(obj): __objects.insert(0, obj)
+    def Py_DecRef(obj): __objects.remove(obj)
 
 
 @public

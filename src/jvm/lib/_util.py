@@ -1,56 +1,45 @@
-# Copyright (c) 2012-2022 Adam Karpierz
-# Licensed under the zlib/libpng License
-# https://opensource.org/licenses/Zlib
+# Copyright (c) 2012 Adam Karpierz
+# SPDX-License-Identifier: Zlib
 
-__all__ = ('issubtype', 'issequence', 'unique', 'pushd', 'to_int', 'to_float')
+__all__ = ('issubtype', 'issequence', 'isiterable', 'remove_all', 'pushd',
+           'print_refinfo')
 
-import sys
-import os
-from collections.abc import Sequence
-from collections import OrderedDict
-from contextlib  import contextmanager
-from pathlib     import PurePath
+from typing import Any, Sequence, Iterable, Tuple, List, Dict
+from collections import abc
+import contextlib
 
 
-def issubtype(x, t) -> bool:
+def issubtype(x: Any, t: Any) -> bool:
     return isinstance(x, type) and issubclass(x, t)
 
 
-def issequence(x) -> bool:
-    return isinstance(x, Sequence) and not isinstance(x, (bytes, str))
+def issequence(x: Any) -> bool:
+    return (isinstance(x, (Sequence, abc.Sequence)) and
+            not isinstance(x, (bytes, str)))
 
 
-def unique(seq) -> list:
-    # Raymond Hettinger
-    # https://twitter.com/raymondh/status/944125570534621185
-    # return list(dict.fromkeys(seq)) # Py >= 3.7
-    return list(OrderedDict.fromkeys(seq))
-    # used = set()
-    # return [x for x in seq if x not in used and (used.add(x) or True)]
+def isiterable(x: Any) -> bool:
+    return (isinstance(x, (Iterable, abc.Iterable)) and
+            not isinstance(x, (bytes, str, String)))
 
 
-def remove_all(list, value):
-    list[:] = (x for x in list if x != value)
+def remove_all(list: List, value: Any) -> None:
+    list[:] = (item for item in list if item != value)
 
 
-def to_int(val) -> int:
-    return int(val if hasattr(val, "__int__") or
-                      hasattr(val, "__trunc__") else None)
-
-
-def to_float(val) -> float:
-    return float(val if hasattr(val, "__float__") else None)
-
-
-@contextmanager
+@contextlib.contextmanager
 def pushd(path):
+    import os
     curr_dir = os.getcwd()
-    os.chdir(str(path) if isinstance(path, PurePath) else path)
-    yield
-    os.chdir(curr_dir)
+    os.chdir(str(path) if isinstance(path, os.PathLike) else path)
+    try:
+        yield
+    finally:
+        os.chdir(curr_dir)
 
 
-def print_refinfo(obj):
+def print_refinfo(obj: Any):
+    import sys
 
     def typename(obj):
         try:
@@ -67,3 +56,6 @@ def print_refinfo(obj):
     print("    obj type: ", typename(obj),            file=sys.stderr)
     print("    obj id:   ", id(obj),                  file=sys.stderr)
     print("    ref count:", sys.getrefcount(obj) - 2, file=sys.stderr)
+
+
+del contextlib

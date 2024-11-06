@@ -1,6 +1,5 @@
-# Copyright (c) 2012-2022 Adam Karpierz
-# Licensed under the zlib/libpng License
-# https://opensource.org/licenses/Zlib
+# Copyright (c) 2012 Adam Karpierz
+# SPDX-License-Identifier: Zlib
 
 __all__ = ('adict', 'defaultadict')
 
@@ -50,7 +49,7 @@ class defaultadict(__adict, defaultdict):
         return cls(self.default_factory, self)
 
     def copy(self):
-        return self.__class__(self)
+        return self.__class__(self.default_factory, self)
 
 
 del defaultdict

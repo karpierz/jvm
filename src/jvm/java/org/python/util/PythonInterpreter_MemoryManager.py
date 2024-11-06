@@ -1,10 +1,7 @@
-# Copyright (c) 2004-2022 Adam Karpierz
+# Copyright (c) 2004 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
-
-__jnimethods__ = (
-)
 
 __javacode__ = bytearray(  # Auto-generated; DO NOT EDIT!
     b"\xca\xfe\xba\xbe\x00\x00\x00\x34\x00\x38\x0a\x00\x0d\x00\x1c\x07\x00\x1d\x0a\x00"

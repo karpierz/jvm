@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2022 Adam Karpierz
+# Copyright (c) 2004 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -8,7 +8,7 @@ from os import path
 import re
 
 from ..lib import public
-from ..lib import cli
+from ..lib import run
 
 from . import _jvmfinder
 
@@ -72,7 +72,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
         if java_home is None:
             # If the existing JAVA_HOME directory is inadequate, use 'locate' to search
             # for other possible java candidates and check their versions.
-            cout = cli.cmd("locate", "bin/java").stdout
+            cout = run("locate", "bin/java").stdout
             for java_exe in cout.splitlines():
                 if java_exe.endswith("/java"):
                     if (not self._java_version or

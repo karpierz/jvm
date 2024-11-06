@@ -1,3 +1,302 @@
+# Copyright (c) 2004 Adam Karpierz
+# Licensed under CC BY-NC-ND 4.0
+# Licensed under proprietary License
+# Please refer to the accompanying LICENSE file.
+
 [build-system]
-requires = ["setuptools>=57.4.0", "wheel>=0.37.1", "packaging>=21.3.0", "tox>=3.24.5"]
-build-backend = "setuptools.build_meta"
+build-backend = 'setuptools.build_meta'
+requires = ['setuptools>=75.3.0', 'wheel>=0.44.0', 'packaging>=24.1.0', 'tox>=4.23.2']
+
+[project]
+name        = 'jvm'
+version     = '0.6.0b1'
+description = 'Python bridge for the Java Virtual Machine.'
+urls.Homepage      = 'https://pypi.org/project/jvm/'
+urls.Documentation = 'https://jvm.readthedocs.io/'
+urls.Download      = 'https://pypi.org/project/jvm/'
+urls.Source        = 'https://github.com/karpierz/jvm'
+urls.Issues        = 'https://github.com/karpierz/jvm/issues'
+license = { text = 'Creative Commons BY-NC-ND 4.0 License ; https://creativecommons.org/licenses/by-nc-nd/4.0 ; Copyright (c) 2004-2024 Adam Karpierz, All Rights Reserved, Licensed under proprietary License' }
+authors = [
+    { name  = 'Adam Karpierz' },
+    { email = 'adam@karpierz.net' },
+]
+maintainers = [
+    { name  = 'Adam Karpierz' },
+    { email = 'adam@karpierz.net' },
+]
+keywords = ['jni', 'jvm', 'jtypes', 'jt', 'jpype', 'jep', 'pyjnius', 'jpy', 'javabridge',
+            'pyjava', 'jcc', 'py4j', 'jython', 'java', 'pythonjava', 'rubicon-java']
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'License :: Free for non-commercial use',
+    'License :: Other/Proprietary License',
+    'Operating System :: OS Independent',
+    'Natural Language :: Polish',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Programming Language :: Python :: Implementation :: PyPy',
+    'Programming Language :: Java',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: Software Development :: Libraries :: Java Libraries',
+]
+requires-python = '>=3.9.0,<4.0.0'
+dependencies = [
+    # mandatory
+    'setuptools>=75.3.0',
+    'pkg-about>=1.2.2',
+    # others
+    'memorybuffer>=0.7.0b1',
+    'jni>=1.1.0b1',
+]
+dynamic = ['readme']
+[project.optional-dependencies]
+cffi = [
+    'jni[cffi]>=1.1.0b1',
+]
+cython = [
+    'jni[cython]>=1.1.0b1',
+]
+doc = [
+    'Sphinx>=7.4.7',
+    'sphinx-toolbox>=3.8.1',
+    'sphinx-tabs>=3.4.5', # don't touch! sphinx-toolbox requires <3.4.7
+    'sphinx-copybutton>=0.5.2',
+    'sphinxcontrib-spelling>=8.0.0',
+    'sphinx-lint>=1.0.0',
+    'restructuredtext-lint>=1.4.0',
+    'nbsphinx>=0.9.5',
+]
+test = [
+    'deepdiff>=8.0.1',
+    'rich>=13.9.4',
+]
+
+[project.scripts]
+#'jvm' = 'jvm.__main__:main'
+
+[project.gui-scripts]
+#'jvm-gui' = 'jvm:main_gui'
+
+#[project.entry-points.'jvm.magical']
+#epoint = 'jvm:main_epoint'
+
+[tool.setuptools.dynamic]
+readme = { file = ['README.rst', 'CHANGES.rst'], content-type = 'text/x-rst; charset=UTF-8' }
+
+[tool.setuptools]
+license-files = ['LICENSE']
+include-package-data = true
+platforms = ['any']
+zip-safe = false
+
+[tool.setuptools.packages.find]
+namespaces = false
+where = ['src']
+
+[tool.setuptools.package-dir]
+'' = 'src'
+#'jvm.tests' = 'tests'
+
+[tool.setuptools.package-data]
+jvm = [
+]
+'jvm.java' = [
+    'lib/*',
+]
+'jvm.java.org.jt.util' = [
+    'classlist_*.txt',
+]
+'jvm.java.org.python' = [
+    'version.properties',
+]
+'jvm.java.org.python.util' = [
+    'PythonInterpreter-*.*',
+]
+
+[tool.setuptools.exclude-package-data]
+'*' = ['*.c','*.h','*.cpp','*.hpp','*.cxx','*.hxx','*.pyx','*.pxd']
+jvm = [
+]
+
+[tool.coverage.run]
+source = [
+    'jvm',
+    'tests',
+]
+omit = [
+]
+data_file = '.tox/coverage/.coverage'
+plugins = ['covdefaults']
+
+[tool.coverage.report]
+exclude_lines = [
+    # Regexes
+    # Have to re-enable the standard pragma
+    '^\s*if\s+self\.debug\s*:',
+    '^\s*if\s+__debug__\s*:',
+    '^\s*if\s+(0|False)\s*:',
+    '''if\s+__name__.*\s*==\s*['"]__main__['"]\s*:''',
+    '^\s*@unittest\.skip\(',
+    '^\s*@unittest\.skipIf\(sys\.platform\.startswith\("win"\)',
+]
+omit = [
+    '*/jvm/lib/*',
+    '*/jvm/platform/__init__.py',
+    '*/jvm/java/class2py.py',
+    '*/jvm/java/org/jt/util/classlist_update.py',
+    'tests/run.py',
+]
+skip_covered = false
+
+[tool.coverage.html]
+directory = '.tox/coverage/.coverage.html'
+
+[tool.flake8]
+filename = ['*.py','*.pyx']
+#include = ['tests']
+#exclude = ['.tox','*.egg','.git','__pycache__','build','_build','docs/_build','dist']
+max-line-length = 99
+ignore = ['E126','E203','E221','E251','E302','E701','E702','E731',
+          'E122','E127','E128','E222','E272','E241','E266','E226','E704',
+          'D100','D101','D102','D103','D104','D400','D401','D202',
+          'N806','N802','N803','N801',
+          'I100']
+# (e.g. 'E4','W') default: 'E121','E123','126','226','E24','704'
+#select =
+#select = ['E','W','F','N','I']
+output-file = '.tox/lint/flake8out.txt'
+count = true
+#show-pep8,
+#show-source
+#verbose
+#quiet
+
+#
+# Configuration(s) for tox
+#
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+env_list = py{39,310,311,312,313}, pypy{39,310}, docs
+labels =
+    py = py{39,310,311,312,313}, pypy{39,310}
+    prepare = prepare
+    coverage = coverage
+    lint = lint
+    docs = docs
+    build  = py{39,310,311,312,313}, pypy{39,310}, docs, build
+    deploy = py{39,310,311,312,313}, pypy{39,310}, docs, build, publish
+min_version = 4.23.2
+skip_missing_interpreters = true
+requires =
+    {[base]deps}
+    virtualenv>=20.27.1
+    tox-backtick>=0.5.2
+    tox-tags>=0.2.0
+
+[base]
+base_python = python3.12
+deps =
+    pip>=24.3.1
+    setuptools>=75.3.0
+    wheel>=0.44.0
+package_subdir = jvm
+
+[testenv]
+pass_env = WINDIR
+set_env =
+    PYTHONDONTWRITEBYTECODE = 1
+commands =
+    {env_python} --version
+    {env_python} -m tests {posargs}
+extras = test, cffi, cython
+deps =
+    {[base]deps}
+
+[testenv:prepare]
+base_python = {[base]base_python}
+skip_install = true
+allowlist_externals =
+    cmd
+    .build
+commands =
+    cmd /C if exist .build.cmd .build.cmd
+
+[testenv:coverage]
+base_python = {[base]base_python}
+commands =
+    {env_python} -m coverage erase
+    -{env_python} -m coverage run -m tests {posargs}
+    {env_python} -m coverage report
+    {env_python} -m coverage html
+deps =
+    {[testenv]deps}
+    coverage>=7.6.4
+    covdefaults>=2.3.0
+    diff-cover>=9.2.0
+
+[testenv:docs]
+base_python = {[base]base_python}
+commands =
+    {env_python} -m sphinxlint --ignore .tox --ignore build --ignore dist
+   #{env_python} -m sphinx.apidoc -f {envsitepackagesdir}/{[base]package_subdir}
+    {env_python} -m sphinx.cmd.build -W -a -b html -E   ./docs ./build/docs/html
+    {env_python} -m sphinx.cmd.build -W -a -b linkcheck ./docs ./build/docs/html
+    {env_python} -m sphinx.cmd.build -W -a -b doctest   ./docs ./build/docs/html
+extras = doc
+deps =
+
+[testenv:build]
+depends = py{39,310,311,312,313}, pypy{39,310}, docs
+base_python = {[base]base_python}
+set_env =
+    {[testenv]set_env}
+    PKG_PVER=`{env_python} -W ignore -c "import platform ; print(''.join(platform.python_version_tuple()[:2]), end='')" 2> nul`
+    PKG_NAME=`{env_python} -W ignore -c "import setuptools ; setuptools._distutils.core._setup_stop_after='config' ; print(setuptools.setup().metadata.get_name(),     end='')" 2> nul`
+    PKG_DIST=`{env_python} -W ignore -c "import setuptools ; setuptools._distutils.core._setup_stop_after='config' ; print(setuptools.setup().metadata.get_fullname(), end='')" 2> nul`
+commands =
+    {env_python} -W ignore -c "from setuptools import setup ; setup()" --quiet sdist --formats=zip
+    {env_python} -W ignore -c "from setuptools import setup ; setup()" --quiet bdist_wheel
+    #{env_python} -m pyc_wheel --quiet "dist/{env:PKG_DIST}*.whl"
+    # check out for PyPi
+    {env_python} -m twine check dist/*
+deps =
+    {[testenv]deps}
+    #pyc-wheel>=1.2.7
+    twine>=5.1.1
+
+[testenv:publish]
+depends = build
+base_python = {[base]base_python}
+skip_install = true
+commands =
+    # publish on PyPi
+    {env_python} -m twine upload dist/*
+extras =
+deps =
+    twine>=5.1.1
+
+[testenv:lint]
+base_python = {[base]base_python}
+commands =
+    {env_python} -m flake8 {envsitepackagesdir}/{[base]package_subdir}/
+extras =
+deps =
+    {[testenv]deps}
+    flake8>=7.1.1
+    flake8-pyproject>=1.2.3
+    flake8-docstrings>=1.7.0
+    pep8-naming>=0.14.1
+    flake8-builtins>=2.5.0
+    flake8-deprecated>=2.2.1
+"""

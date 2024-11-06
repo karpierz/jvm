@@ -1,8 +1,7 @@
-# Copyright (c) 2012-2022 Adam Karpierz
-# Licensed under the zlib/libpng License
-# https://opensource.org/licenses/Zlib
+# Copyright (c) 2012 Adam Karpierz
+# SPDX-License-Identifier: Zlib
 
-__all__ = ('cached', 'property_cached')
+__all__ = ('cached', 'cached_property')
 
 
 def cached(method):
@@ -11,7 +10,7 @@ def cached(method):
     from functools import wraps
 
     @wraps(method)
-    def wrapper(self, *args, **kargs):
+    def wrapper(self, *args, **kwargs):
         key = hash(method)
         try:
             return self.__cache__[key]
@@ -19,14 +18,14 @@ def cached(method):
             pass
         except AttributeError:
             self.__cache__ = {}
-        self.__cache__[key] = result = method(self, *args, **kargs)
+        self.__cache__[key] = result = method(self, *args, **kwargs)
         return result
 
     return wrapper
 
 
-def property_cached(fget=None, fset=None, fdel=None, doc=None):
-    """property_cached(fget=None, fset=None, fdel=None, doc=None)
+def cached_property(fget=None, fset=None, fdel=None, doc=None):
+    """cached_property(fget=None, fset=None, fdel=None, doc=None)
 
     Property attribute.
 
@@ -37,6 +36,6 @@ def property_cached(fget=None, fset=None, fdel=None, doc=None):
       fdel
         function to be used for del'ing an attribute
       doc
-        docstring"""
-
+        docstring
+    """
     return property(None if fget is None else cached(fget), fset, fdel, doc)

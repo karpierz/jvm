@@ -598,6 +598,7 @@ java/lang/ClassCastException
 java/lang/ClassCircularityError
 jdk/nashorn/api/tree/ClassDeclarationTree
 java/lang/instrument/ClassDefinition
+java/lang/constant/ClassDesc
 com/sun/javadoc/ClassDoc
 jdk/nashorn/api/tree/ClassExpressionTree
 java/lang/instrument/ClassFileTransformer
@@ -670,6 +671,7 @@ org/w3c/dom/Comment
 com/sun/source/doctree/CommentTree
 javax/sql/CommonDataSource
 javax/naming/CommunicationException
+java/text/CompactNumberFormat
 java/lang/Comparable
 java/util/Comparator
 javax/script/Compilable
@@ -747,8 +749,11 @@ javax/sql/ConnectionPoolDataSource
 com/sun/jdi/connect/Connector
 java/io/Console
 java/util/logging/ConsoleHandler
+java/lang/constant/Constable
 java/lang/invoke/ConstantBootstraps
 java/lang/invoke/ConstantCallSite
+java/lang/constant/ConstantDesc
+java/lang/constant/ConstantDescs
 java/lang/reflect/Constructor
 com/sun/javadoc/ConstructorDoc
 javax/management/ConstructorParameters
@@ -969,6 +974,7 @@ javax/naming/directory/DirContext
 java/awt/image/DirectColorModel
 jdk/jshell/execution/DirectExecutionControl
 com/sun/source/tree/DirectiveTree
+java/lang/constant/DirectMethodHandleDesc
 java/nio/file/DirectoryIteratorException
 javax/naming/spi/DirectoryManager
 java/nio/file/DirectoryNotEmptyException
@@ -1101,6 +1107,8 @@ java/util/DuplicateFormatFlagsException
 com/sun/jdi/request/DuplicateRequestException
 java/time/Duration
 javax/xml/datatype/Duration
+java/lang/constant/DynamicCallSiteDesc
+java/lang/constant/DynamicConstantDesc
 jdk/dynalink/DynamicLinker
 jdk/dynalink/DynamicLinkerFactory
 javax/management/DynamicMBean
@@ -1978,6 +1986,8 @@ javax/swing/text/LayoutQueue
 javax/swing/LayoutStyle
 java/security/cert/LDAPCertStoreParameters
 javax/naming/ldap/LdapContext
+javax/naming/ldap/spi/LdapDnsProvider
+javax/naming/ldap/spi/LdapDnsProviderResult
 com/sun/security/auth/module/LdapLoginModule
 javax/naming/ldap/LdapName
 com/sun/security/auth/LdapPrincipal
@@ -2238,6 +2248,7 @@ com/sun/jdi/request/MethodEntryRequest
 com/sun/jdi/event/MethodExitEvent
 com/sun/jdi/request/MethodExitRequest
 java/lang/invoke/MethodHandle
+java/lang/constant/MethodHandleDesc
 java/lang/invoke/MethodHandleInfo
 java/lang/invoke/MethodHandleProxies
 java/lang/invoke/MethodHandles
@@ -2247,6 +2258,7 @@ jdk/jshell/MethodSnippet
 com/sun/source/tree/MethodTree
 java/lang/invoke/MethodType
 jdk/dynalink/linker/MethodTypeConversionStrategy
+java/lang/constant/MethodTypeDesc
 java/security/spec/MGF1ParameterSpec
 javax/sound/midi/MidiChannel
 javax/sound/midi/MidiDevice
@@ -3411,6 +3423,7 @@ com/sun/java/accessibility/util/SwingEventMonitor
 javax/swing/event/SwingPropertyChangeSupport
 javax/swing/SwingUtilities
 javax/swing/SwingWorker
+com/sun/source/tree/SwitchExpressionTree
 java/lang/invoke/SwitchPoint
 com/sun/source/tree/SwitchTree
 jdk/nashorn/api/tree/SwitchTree
@@ -3477,6 +3490,7 @@ java/lang/System
 java/awt/SystemColor
 java/awt/desktop/SystemEventListener
 java/awt/datatransfer/SystemFlavorMap
+com/sun/source/doctree/SystemPropertyTree
 java/awt/desktop/SystemSleepEvent
 java/awt/desktop/SystemSleepListener
 java/awt/SystemTray
@@ -3671,6 +3685,7 @@ jdk/dynalink/linker/TypeBasedGuardingDynamicLinker
 com/sun/source/tree/TypeCastTree
 com/sun/jdi/TypeComponent
 jdk/jshell/TypeDeclSnippet
+java/lang/invoke/TypeDescriptor
 javax/lang/model/element/TypeElement
 org/w3c/dom/TypeInfo
 javax/xml/validation/TypeInfoProvider

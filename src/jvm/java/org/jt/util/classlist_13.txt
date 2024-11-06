@@ -150,22 +150,17 @@ java/lang/reflect/AnnotatedArrayType
 javax/lang/model/AnnotatedConstruct
 java/lang/reflect/AnnotatedElement
 java/lang/reflect/AnnotatedParameterizedType
-com/sun/javadoc/AnnotatedType
 java/lang/reflect/AnnotatedType
 com/sun/source/tree/AnnotatedTypeTree
 java/lang/reflect/AnnotatedTypeVariable
 java/lang/reflect/AnnotatedWildcardType
 java/lang/annotation/Annotation
 java/text/Annotation
-com/sun/javadoc/AnnotationDesc
 jdk/jfr/AnnotationElement
 java/lang/annotation/AnnotationFormatError
 javax/lang/model/element/AnnotationMirror
 com/sun/source/tree/AnnotationTree
-com/sun/javadoc/AnnotationTypeDoc
-com/sun/javadoc/AnnotationTypeElementDoc
 java/lang/annotation/AnnotationTypeMismatchException
-com/sun/javadoc/AnnotationValue
 javax/lang/model/element/AnnotationValue
 javax/lang/model/element/AnnotationValueVisitor
 javax/security/auth/login/AppConfigurationEntry
@@ -598,7 +593,7 @@ java/lang/ClassCastException
 java/lang/ClassCircularityError
 jdk/nashorn/api/tree/ClassDeclarationTree
 java/lang/instrument/ClassDefinition
-com/sun/javadoc/ClassDoc
+java/lang/constant/ClassDesc
 jdk/nashorn/api/tree/ClassExpressionTree
 java/lang/instrument/ClassFileTransformer
 jdk/nashorn/api/scripting/ClassFilter
@@ -670,6 +665,7 @@ org/w3c/dom/Comment
 com/sun/source/doctree/CommentTree
 javax/sql/CommonDataSource
 javax/naming/CommunicationException
+java/text/CompactNumberFormat
 java/lang/Comparable
 java/util/Comparator
 javax/script/Compilable
@@ -747,10 +743,12 @@ javax/sql/ConnectionPoolDataSource
 com/sun/jdi/connect/Connector
 java/io/Console
 java/util/logging/ConsoleHandler
+java/lang/constant/Constable
 java/lang/invoke/ConstantBootstraps
 java/lang/invoke/ConstantCallSite
+java/lang/constant/ConstantDesc
+java/lang/constant/ConstantDescs
 java/lang/reflect/Constructor
-com/sun/javadoc/ConstructorDoc
 javax/management/ConstructorParameters
 java/beans/ConstructorProperties
 java/util/function/Consumer
@@ -969,6 +967,7 @@ javax/naming/directory/DirContext
 java/awt/image/DirectColorModel
 jdk/jshell/execution/DirectExecutionControl
 com/sun/source/tree/DirectiveTree
+java/lang/constant/DirectMethodHandleDesc
 java/nio/file/DirectoryIteratorException
 javax/naming/spi/DirectoryManager
 java/nio/file/DirectoryNotEmptyException
@@ -977,14 +976,11 @@ javax/naming/spi/DirObjectFactory
 javax/naming/spi/DirStateFactory
 java/awt/DisplayMode
 java/awt/dnd/DnDConstants
-com/sun/javadoc/Doc
 javax/print/Doc
 javax/print/attribute/DocAttribute
 javax/print/attribute/DocAttributeSet
 com/sun/source/doctree/DocCommentTree
-com/sun/javadoc/DocErrorReporter
 javax/print/DocFlavor
-com/sun/javadoc/Doclet
 jdk/javadoc/doclet/Doclet
 jdk/javadoc/doclet/DocletEnvironment
 javax/print/DocPrintJob
@@ -1101,6 +1097,8 @@ java/util/DuplicateFormatFlagsException
 com/sun/jdi/request/DuplicateRequestException
 java/time/Duration
 javax/xml/datatype/Duration
+java/lang/constant/DynamicCallSiteDesc
+java/lang/constant/DynamicConstantDesc
 jdk/dynalink/DynamicLinker
 jdk/dynalink/DynamicLinkerFactory
 javax/management/DynamicMBean
@@ -1217,7 +1215,6 @@ com/sun/jdi/request/ExceptionRequest
 java/util/concurrent/Exchanger
 java/lang/reflect/Executable
 javax/lang/model/element/ExecutableElement
-com/sun/javadoc/ExecutableMemberDoc
 javax/lang/model/type/ExecutableType
 jdk/jshell/spi/ExecutionControl
 jdk/jshell/spi/ExecutionControlProvider
@@ -1262,7 +1259,6 @@ java/beans/FeatureDescriptor
 javax/print/attribute/standard/Fidelity
 com/sun/jdi/Field
 java/lang/reflect/Field
-com/sun/javadoc/FieldDoc
 java/text/FieldPosition
 javax/swing/text/FieldView
 java/io/File
@@ -1964,7 +1960,6 @@ java/lang/invoke/LambdaConversionException
 com/sun/source/tree/LambdaExpressionTree
 java/lang/invoke/LambdaMetafactory
 javax/security/auth/callback/LanguageCallback
-com/sun/javadoc/LanguageVersion
 java/security/acl/LastOwnerException
 com/sun/jdi/connect/LaunchingConnector
 javax/swing/text/LayeredHighlighter
@@ -1978,6 +1973,8 @@ javax/swing/text/LayoutQueue
 javax/swing/LayoutStyle
 java/security/cert/LDAPCertStoreParameters
 javax/naming/ldap/LdapContext
+javax/naming/ldap/spi/LdapDnsProvider
+javax/naming/ldap/spi/LdapDnsProviderResult
 com/sun/security/auth/module/LdapLoginModule
 javax/naming/ldap/LdapName
 com/sun/security/auth/LdapPrincipal
@@ -2099,7 +2096,6 @@ org/w3c/dom/ls/LSSerializerFilter
 javax/crypto/Mac
 javax/crypto/MacSpi
 com/sun/tools/javac/Main
-com/sun/tools/javadoc/Main
 java/nio/charset/MalformedInputException
 javax/naming/MalformedLinkException
 javax/management/MalformedObjectNameException
@@ -2155,7 +2151,6 @@ javax/print/attribute/standard/MediaSizeName
 java/awt/MediaTracker
 javax/print/attribute/standard/MediaTray
 java/lang/reflect/Member
-com/sun/javadoc/MemberDoc
 com/sun/source/tree/MemberReferenceTree
 com/sun/source/tree/MemberSelectTree
 jdk/nashorn/api/tree/MemberSelectTree
@@ -2232,12 +2227,12 @@ javax/sound/midi/MetaMessage
 com/sun/jdi/Method
 java/lang/reflect/Method
 java/beans/MethodDescriptor
-com/sun/javadoc/MethodDoc
 com/sun/jdi/event/MethodEntryEvent
 com/sun/jdi/request/MethodEntryRequest
 com/sun/jdi/event/MethodExitEvent
 com/sun/jdi/request/MethodExitRequest
 java/lang/invoke/MethodHandle
+java/lang/constant/MethodHandleDesc
 java/lang/invoke/MethodHandleInfo
 java/lang/invoke/MethodHandleProxies
 java/lang/invoke/MethodHandles
@@ -2247,6 +2242,7 @@ jdk/jshell/MethodSnippet
 com/sun/source/tree/MethodTree
 java/lang/invoke/MethodType
 jdk/dynalink/linker/MethodTypeConversionStrategy
+java/lang/constant/MethodTypeDesc
 java/security/spec/MGF1ParameterSpec
 javax/sound/midi/MidiChannel
 javax/sound/midi/MidiDevice
@@ -2575,7 +2571,6 @@ java/lang/Override
 java/security/acl/Owner
 java/util/jar/Pack200
 java/lang/Package
-com/sun/javadoc/PackageDoc
 javax/lang/model/element/PackageElement
 com/sun/source/tree/PackageTree
 java/awt/image/PackedColorModel
@@ -2596,16 +2591,14 @@ javax/swing/plaf/PanelUI
 java/awt/print/Paper
 javax/swing/text/html/ParagraphView
 javax/swing/text/ParagraphView
-com/sun/javadoc/Parameter
 java/lang/reflect/Parameter
 java/awt/image/renderable/ParameterBlock
 java/beans/ParameterDescriptor
 javax/lang/model/element/Parameterizable
-com/sun/javadoc/ParameterizedType
 java/lang/reflect/ParameterizedType
 com/sun/source/tree/ParameterizedTypeTree
 java/sql/ParameterMetaData
-com/sun/javadoc/ParamTag
+com/sun/source/util/ParameterNameProvider
 com/sun/source/doctree/ParamTree
 com/sun/source/tree/ParenthesizedTree
 jdk/nashorn/api/tree/ParenthesizedTree
@@ -2770,7 +2763,6 @@ javax/xml/stream/events/ProcessingInstruction
 org/w3c/dom/ProcessingInstruction
 javax/annotation/processing/Processor
 java/awt/color/ProfileDataException
-com/sun/javadoc/ProgramElementDoc
 javax/swing/plaf/ProgressBarUI
 javax/swing/ProgressMonitor
 javax/swing/ProgressMonitorInputStream
@@ -2975,7 +2967,6 @@ javax/management/relation/RoleResult
 javax/management/relation/RoleStatus
 javax/management/relation/RoleUnresolved
 javax/management/relation/RoleUnresolvedList
-com/sun/javadoc/RootDoc
 javax/swing/RootPaneContainer
 javax/swing/plaf/RootPaneUI
 javax/annotation/processing/RoundEnvironment
@@ -3093,7 +3084,6 @@ java/lang/SecurityException
 java/lang/SecurityManager
 java/security/SecurityPermission
 java/nio/channels/SeekableByteChannel
-com/sun/javadoc/SeeTag
 com/sun/source/doctree/SeeTree
 javax/swing/text/Segment
 java/nio/channels/SelectableChannel
@@ -3112,7 +3102,6 @@ javax/sql/rowset/serial/SerialClob
 javax/sql/rowset/serial/SerialDatalink
 com/sun/source/doctree/SerialDataTree
 javax/sql/rowset/serial/SerialException
-com/sun/javadoc/SerialFieldTag
 com/sun/source/doctree/SerialFieldTree
 java/io/Serializable
 java/io/SerializablePermission
@@ -3247,7 +3236,6 @@ javax/xml/transform/Source
 jdk/jshell/SourceCodeAnalysis
 javax/sound/sampled/SourceDataLine
 javax/xml/transform/SourceLocator
-com/sun/javadoc/SourcePosition
 com/sun/source/util/SourcePositions
 javax/lang/model/SourceVersion
 javax/swing/SpinnerDateModel
@@ -3411,6 +3399,7 @@ com/sun/java/accessibility/util/SwingEventMonitor
 javax/swing/event/SwingPropertyChangeSupport
 javax/swing/SwingUtilities
 javax/swing/SwingWorker
+com/sun/source/tree/SwitchExpressionTree
 java/lang/invoke/SwitchPoint
 com/sun/source/tree/SwitchTree
 jdk/nashorn/api/tree/SwitchTree
@@ -3477,6 +3466,7 @@ java/lang/System
 java/awt/SystemColor
 java/awt/desktop/SystemEventListener
 java/awt/datatransfer/SystemFlavorMap
+com/sun/source/doctree/SystemPropertyTree
 java/awt/desktop/SystemSleepEvent
 java/awt/desktop/SystemSleepListener
 java/awt/SystemTray
@@ -3502,7 +3492,6 @@ javax/swing/text/TabStop
 javax/management/openmbean/TabularData
 javax/management/openmbean/TabularDataSupport
 javax/management/openmbean/TabularType
-com/sun/javadoc/Tag
 javax/swing/text/html/parser/TagElement
 jdk/javadoc/doclet/Taglet
 java/lang/annotation/Target
@@ -3565,7 +3554,6 @@ com/sun/jdi/event/ThreadStartEvent
 com/sun/jdi/request/ThreadStartRequest
 jdk/jfr/Threshold
 java/lang/Throwable
-com/sun/javadoc/ThrowsTag
 com/sun/source/doctree/ThrowsTree
 com/sun/source/tree/ThrowTree
 jdk/nashorn/api/tree/ThrowTree
@@ -3664,13 +3652,13 @@ javax/net/ssl/TrustManagerFactory
 javax/net/ssl/TrustManagerFactorySpi
 com/sun/source/tree/TryTree
 jdk/nashorn/api/tree/TryTree
-com/sun/javadoc/Type
 com/sun/jdi/Type
 java/lang/reflect/Type
 jdk/dynalink/linker/TypeBasedGuardingDynamicLinker
 com/sun/source/tree/TypeCastTree
 com/sun/jdi/TypeComponent
 jdk/jshell/TypeDeclSnippet
+java/lang/invoke/TypeDescriptor
 javax/lang/model/element/TypeElement
 org/w3c/dom/TypeInfo
 javax/xml/validation/TypeInfoProvider
@@ -3686,7 +3674,6 @@ com/sun/source/tree/TypeParameterTree
 java/sql/Types
 javax/lang/model/util/Types
 jdk/dynalink/linker/support/TypeUtilities
-com/sun/javadoc/TypeVariable
 java/lang/reflect/TypeVariable
 javax/lang/model/type/TypeVariable
 javax/lang/model/type/TypeVisitor
@@ -3854,7 +3841,6 @@ java/time/temporal/WeekFields
 com/sun/source/tree/WhileLoopTree
 jdk/nashorn/api/tree/WhileLoopTree
 com/sun/source/tree/WildcardTree
-com/sun/javadoc/WildcardType
 java/lang/reflect/WildcardType
 javax/lang/model/type/WildcardType
 java/awt/Window
@@ -3961,6 +3947,7 @@ javax/xml/xpath/XPathVariableResolver
 javax/xml/crypto/dsig/spec/XSLTTransformParameterSpec
 java/time/Year
 java/time/YearMonth
+com/sun/source/tree/YieldTree
 jdk/nashorn/api/tree/YieldTree
 java/util/zip/ZipEntry
 java/util/zip/ZipError

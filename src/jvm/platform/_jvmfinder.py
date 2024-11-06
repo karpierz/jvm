@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2022 Adam Karpierz
+# Copyright (c) 2004 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -9,7 +9,7 @@ from os import path
 import re
 
 from ..lib import public
-from ..lib import cli
+from ..lib import run
 
 
 @public
@@ -137,8 +137,8 @@ class JVMFinder:
                             break
 
     def get_java_version(self, java_exe):
-        cout = cli.cmd(java_exe, "-version").stderr
-        match = re.search('^\s*java version\s+"(.+)"', cout, re.MULTILINE)
+        cout = run(java_exe, "-version").stderr
+        match = re.search(r'^\s*java version\s+"(.+)"', cout, re.MULTILINE)
         return float(".".join(match.group(1).split(".")[:2]))
 
     def get_jre_home(self, java_home):

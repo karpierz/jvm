@@ -1,4 +1,4 @@
-# Copyright (c) 2004-2022 Adam Karpierz
+# Copyright (c) 2004 Adam Karpierz
 # Licensed under CC BY-NC-ND 4.0
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
@@ -7,7 +7,7 @@ import os
 from os import path
 
 from ..lib import public
-from ..lib import cli
+from ..lib import run
 
 from . import _linux
 
@@ -73,8 +73,8 @@ class JVMFinder(_linux.JVMFinder):
             # to search for other possible java candidates and check their versions.
             if path.isfile("/usr/libexec/java_home"): # -x
                 # Apple JDKs
-                java_home = cli.cmd("/usr/libexec/java_home",
-                                    "" if not self._java_version else f"-v {self._java_version}").stdout
+                java_home = run("/usr/libexec/java_home",
+                                "" if not self._java_version else f"-v {self._java_version}").stdout
                 if not java_home.strip():
                     java_home = None
             else:
@@ -92,11 +92,11 @@ class JVMFinder(_linux.JVMFinder):
 
 
 ### return top Java version
-# cout = cli.cmd("/usr/libexec/java_home").stdout
+# cout = run("/usr/libexec/java_home").stdout
 # self._locations[0] + "/1.7.0.jdk/Contents/Home"
 
 ### I want Java version 1.7
-# cout = cli.cmd("/usr/libexec/java_home", "-v 1.7").stdout
+# cout = run("/usr/libexec/java_home", "-v 1.7").stdout
 # "/System/Library/Java/JavaVirtualMachines/1.7.0.jdk/Contents/Home"
 
     # Oracle:       "/Library/Java/Home"

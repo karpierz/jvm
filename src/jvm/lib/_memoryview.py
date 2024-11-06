@@ -8,22 +8,25 @@ from __future__ import absolute_import
 __all__ = ('memoryview','buffer','Py_buffer','Buffer','isbuffer')
 
 import sys
+import platform
 PY3 = sys.version_info[0] >= 3
-if PY3: long    = int
-if PY3: unicode = str
+long    = int
+unicode = str
 import gc
 import struct
 import binascii
 from ctypes import (c_bool, c_char, c_byte, c_ubyte, c_short, c_ushort, c_int, c_uint, c_long,
                     c_ulong, c_longlong, c_ulonglong, c_ssize_t, c_size_t, c_float, c_double,
                     c_char_p, c_void_p, POINTER, pointer, byref, sizeof, addressof, resize,
-                    cast, memset, memmove, py_object, create_string_buffer, Structure, pythonapi)
-from ._memorybuffer import Py_buffer, Buffer, isbuffer
+                    cast, memset, memmove, py_object, create_string_buffer, Structure)
+from memorybuffer import Py_buffer, Buffer, isbuffer
+
+is_cpython = (platform.python_implementation().lower() == "cpython")
 
 CHAR_BIT   = 8
 UCHAR_MAX  = c_ubyte(-1).value
-SCHAR_MIN  = -UCHAR_MAX // 2   
-SCHAR_MAX  = UCHAR_MAX // 2    
+SCHAR_MIN  = -UCHAR_MAX // 2
+SCHAR_MAX  = UCHAR_MAX // 2
 USHRT_MAX  = c_ushort(-1).value
 SHRT_MIN   = -USHRT_MAX // 2
 SHRT_MAX   = USHRT_MAX // 2
@@ -37,57 +40,73 @@ ULLONG_MAX = c_ulonglong(-1).value
 LLONG_MIN  = -ULLONG_MAX // 2
 LLONG_MAX  = ULLONG_MAX // 2
 
-Py_IncRef = pythonapi.Py_IncRef
-Py_IncRef.argtypes = [py_object]
-Py_IncRef.restype  = None
-Py_DecRef = pythonapi.Py_DecRef
-Py_DecRef.argtypes = [py_object]
-Py_DecRef.restype  = None
-PyObject_GetBuffer = pythonapi.PyObject_GetBuffer
-PyObject_GetBuffer.argtypes = [py_object, POINTER(Py_buffer), c_int]
-PyObject_GetBuffer.restype  = c_int
-PyBuffer_Release = pythonapi.PyBuffer_Release
-PyBuffer_Release.argtypes = [POINTER(Py_buffer)]
-PyBuffer_Release.restype  = None
-PyBuffer_IsContiguous = pythonapi.PyBuffer_IsContiguous
-PyBuffer_IsContiguous.argtypes = [POINTER(Py_buffer), c_char]
-PyBuffer_IsContiguous.restype  = c_int
-PyBuffer_FillInfo = pythonapi.PyBuffer_FillInfo
-PyBuffer_FillInfo.argtypes = [POINTER(Py_buffer), py_object, c_void_p, c_ssize_t, c_int, c_int]
-PyBuffer_FillInfo.restype  = c_int
-PyNumber_Index = pythonapi.PyNumber_Index
-PyNumber_Index.argtypes = [py_object]
-PyNumber_Index.restype  = py_object
-PyNumber_AsSsize_t = pythonapi.PyNumber_AsSsize_t
-PyNumber_AsSsize_t.argtypes = [py_object, py_object]
-PyNumber_AsSsize_t.restype  = c_ssize_t
-PyLong_AsLong = pythonapi.PyLong_AsLong
-PyLong_AsLong.argtypes = [py_object]
-PyLong_AsLong.restype  = c_long
-PyLong_AsUnsignedLong = pythonapi.PyLong_AsUnsignedLong
-PyLong_AsUnsignedLong.argtypes = [py_object]
-PyLong_AsUnsignedLong.restype  = c_ulong
-PyLong_AsLongLong = pythonapi.PyLong_AsLongLong
-PyLong_AsLongLong.argtypes = [py_object]
-PyLong_AsLongLong.restype  = c_longlong
-PyLong_AsUnsignedLongLong = pythonapi.PyLong_AsUnsignedLongLong
-PyLong_AsUnsignedLongLong.argtypes = [py_object]
-PyLong_AsUnsignedLongLong.restype  = c_ulonglong
-PyLong_AsSsize_t = pythonapi.PyLong_AsSsize_t
-PyLong_AsSsize_t.argtypes = [py_object]
-PyLong_AsSsize_t.restype  = c_ssize_t
-if PY3:
+if is_cpython:
+    from ctypes import pythonapi
+    Py_IncRef = pythonapi.Py_IncRef
+    Py_IncRef.argtypes = [py_object]
+    Py_IncRef.restype  = None
+    Py_DecRef = pythonapi.Py_DecRef
+    Py_DecRef.argtypes = [py_object]
+    Py_DecRef.restype  = None
+    PyObject_GetBuffer = pythonapi.PyObject_GetBuffer
+    PyObject_GetBuffer.argtypes = [py_object, POINTER(Py_buffer), c_int]
+    PyObject_GetBuffer.restype  = c_int
+    PyBuffer_Release = pythonapi.PyBuffer_Release
+    PyBuffer_Release.argtypes = [POINTER(Py_buffer)]
+    PyBuffer_Release.restype  = None
+    PyBuffer_IsContiguous = pythonapi.PyBuffer_IsContiguous
+    PyBuffer_IsContiguous.argtypes = [POINTER(Py_buffer), c_char]
+    PyBuffer_IsContiguous.restype  = c_int
+    PyBuffer_FillInfo = pythonapi.PyBuffer_FillInfo
+    PyBuffer_FillInfo.argtypes = [POINTER(Py_buffer), py_object, c_void_p, c_ssize_t, c_int, c_int]
+    PyBuffer_FillInfo.restype  = c_int
+    PyNumber_Index = pythonapi.PyNumber_Index
+    PyNumber_Index.argtypes = [py_object]
+    PyNumber_Index.restype  = py_object
+    PyNumber_AsSsize_t = pythonapi.PyNumber_AsSsize_t
+    PyNumber_AsSsize_t.argtypes = [py_object, py_object]
+    PyNumber_AsSsize_t.restype  = c_ssize_t
+    PyLong_AsLong = pythonapi.PyLong_AsLong
+    PyLong_AsLong.argtypes = [py_object]
+    PyLong_AsLong.restype  = c_long
+    PyLong_AsUnsignedLong = pythonapi.PyLong_AsUnsignedLong
+    PyLong_AsUnsignedLong.argtypes = [py_object]
+    PyLong_AsUnsignedLong.restype  = c_ulong
+    PyLong_AsLongLong = pythonapi.PyLong_AsLongLong
+    PyLong_AsLongLong.argtypes = [py_object]
+    PyLong_AsLongLong.restype  = c_longlong
+    PyLong_AsUnsignedLongLong = pythonapi.PyLong_AsUnsignedLongLong
+    PyLong_AsUnsignedLongLong.argtypes = [py_object]
+    PyLong_AsUnsignedLongLong.restype  = c_ulonglong
+    PyLong_AsSsize_t = pythonapi.PyLong_AsSsize_t
+    PyLong_AsSsize_t.argtypes = [py_object]
+    PyLong_AsSsize_t.restype  = c_ssize_t
     PyLong_AsSize_t = pythonapi.PyLong_AsSize_t
     PyLong_AsSize_t.argtypes = [py_object]
     PyLong_AsSize_t.restype  = c_size_t
+    PyFloat_AsDouble = pythonapi.PyFloat_AsDouble
+    PyFloat_AsDouble.argtypes = [py_object]
+    PyFloat_AsDouble.restype  = c_double
+    Py_FatalError = pythonapi.Py_FatalError
+    Py_FatalError.argtypes = [c_char_p]
+    Py_FatalError.restype  = None
 else:
-    PyLong_AsSize_t = PyLong_AsSsize_t
-PyFloat_AsDouble = pythonapi.PyFloat_AsDouble
-PyFloat_AsDouble.argtypes = [py_object]
-PyFloat_AsDouble.restype  = c_double
-Py_FatalError = pythonapi.Py_FatalError
-Py_FatalError.argtypes = [c_char_p]
-Py_FatalError.restype  = None
+    def Py_IncRef(*args, **kwargs): return None
+    def Py_DecRef(*args, **kwargs): return None
+    #def PyObject_GetBuffer(*args, **kwargs): return None
+    #def PyBuffer_Release(*args, **kwargs): return None
+    #def PyBuffer_IsContiguous(*args, **kwargs): return None
+    #def PyBuffer_FillInfo(*args, **kwargs): return None
+    #def PyNumber_Index(*args, **kwargs): return None
+    #def PyNumber_AsSsize_t(*args, **kwargs): return None
+    #def PyLong_AsLong(*args, **kwargs): return None
+    #def PyLong_AsUnsignedLong(*args, **kwargs): return None
+    #def PyLong_AsLongLong(*args, **kwargs): return None
+    #def PyLong_AsUnsignedLongLong(*args, **kwargs): return None
+    #def PyLong_AsSsize_t(*args, **kwargs): return None
+    #def PyLong_AsSize_t(*args, **kwargs): return None
+    #def PyFloat_AsDouble(*args, **kwargs): return None
+    #def Py_FatalError(*args, **kwargs): return None
 
 def ct_ptr_add(ptr, offset):
     vptr = cast(ptr, c_void_p)
@@ -150,9 +169,9 @@ class managedbuffer(Py_buffer):
 
     __slots__ = ('_flags','_exports')
 
-    def __new__(cls, *args, **kargs):
+    def __new__(cls, *args, **kwargs):
 
-        self = super(managedbuffer, cls).__new__(cls, *args, **kargs)
+        self = super(managedbuffer, cls).__new__(cls, *args, **kwargs)
         self._flags   = _Py_MANAGED_BUFFER_RELEASED  # state flags
         self._exports = 0  # number of direct memoryview exports
         return self
@@ -355,7 +374,7 @@ class memoryview(Buffer, Structure):
         """for each element in the view."""
 
         self._check_released()
-        return self._view.format.decode("utf-8") if PY3 else self._view.format[:]
+        return self._view.format.decode("utf-8")
 
     @property
     def ndim(self):
@@ -979,7 +998,7 @@ class memoryview(Buffer, Structure):
             buf = cast(view.buf, POINTER(c_char))[:view.len]
         else:
             buf = self.tobytes()
-        return binascii.hexlify(buf).decode("ascii") if PY3 else buf
+        return binascii.hexlify(buf).decode("ascii")
 
     def __enter__(self):
 
@@ -1358,11 +1377,7 @@ _unpack_single_funcs_PY3 = {
     b'P': lambda ptr: cast(ptr, POINTER(c_void_p))[0],
     }
 
-_unpack_single_funcs_PY2 = _unpack_single_funcs_PY3.copy()
-_unpack_single_funcs_PY2.update({b'b': lambda ptr: cast(ptr, POINTER(c_char))[0],
-                                 b'B': lambda ptr: cast(ptr, POINTER(c_char))[0]})
-
-_unpack_single_funcs = _unpack_single_funcs_PY3 if PY3 else _unpack_single_funcs_PY2
+_unpack_single_funcs = _unpack_single_funcs_PY3
 
 def pack_single(ptr, value, fmt):
 
