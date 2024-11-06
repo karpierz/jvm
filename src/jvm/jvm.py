@@ -273,6 +273,13 @@ class JVM(obj):
 
 
 @public
+class JVMException(Exception):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+@public
 class _JVM(obj):
 
     __slots__ = ('JNI', 'jnijvm', 'data') + \
@@ -469,10 +476,3 @@ class _JVM(obj):
         self.PythonInterpreter.dispose(jenv)
         self.PyScriptEngineFactory.dispose(jenv)
         self.PyScriptEngine.dispose(jenv)
-
-
-@public
-class JVMException(Exception):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)

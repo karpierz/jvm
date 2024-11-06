@@ -1,13 +1,14 @@
 Changelog
 =========
 
-0.6.0b1 (2024-10-30)
+0.6.0b2 (2024-11-05)
 --------------------
-- Tox configuration has been moved to pyproject.toml
-- Setup update (now based on tox >= 4.0).
 - Add support for Python 3.10, 3.11, 3.12 and 3.13
 - Drop support for Python 3.7 and 3.8
 - Add support for PyPy 3.9 and 3.10
+- Tox configuration has been moved to pyproject.toml
+- Setup update (now based on tox >= 4.0).
+- Fix the bug in lib/classproperty.
 - Copyright year update.
 - Unittest have been performed for much more JVMs.
 - Setup (dependencies) update.

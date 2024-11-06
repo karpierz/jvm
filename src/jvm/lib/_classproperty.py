@@ -15,7 +15,7 @@ class classproperty:
         self.fset = fset
         self.fdel = fdel
         if doc is None and fget is not None:
-            doc = _fget.__doc__
+            doc = self._fget.__doc__
         self.__doc__ = doc
 
     def __get__(self, this, cls):
