@@ -23,6 +23,7 @@ from ._ftee          import *  # noqa
 from ._util          import *  # noqa
 from ._numbers       import *  # noqa
 from .               import platform
+from .               import epath
 from .               import importing
 
 from ._mro           import *  # noqa

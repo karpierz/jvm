@@ -1,0 +1,8 @@
+Url:       https://github.com/mozilla/rhino/releases/download/Rhino1_7_15_Release/rhino-1.7.15.jar
+Url redir: https://objects.githubusercontent.com/github-production-release-asset-2e65be/1739767/05d1ba92-fb6d-4e55-8f47-bbc438ae51f4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=releaseassetproduction%2F20241107%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241107T223438Z&X-Amz-Expires=300&X-Amz-Signature=24a0a91bd38a5f51d26d6c1cfe9929df928610f09c93d14ad6826252241dd370&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3Drhino-1.7.15.jar&response-content-type=application%2Foctet-stream
+Completed: 2024-11-07 23:34:41
+File name: rhino-1.7.15.jar
+File date: Sat, 04 May 2024 00:46:39 GMT
+File size: 1403061
+SHA256sum: EB0EE3055B12AD7113DA331293D0405891F7C4DE981C3A52557F6F987FA5F2EB
+SHA1sum:   F2B5F23E31F7EEA58F769A54B041BF61D3DE4A47

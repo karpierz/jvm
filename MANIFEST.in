@@ -14,6 +14,7 @@ graft docs
 graft src
 recursive-exclude src/jvm *.java *.java_
 exclude src/jvm/java/class2py.py
+exclude src/jvm/java/lib/*.dsc.txt
 exclude src/jvm/java/org/python/embed.[co]*
 exclude src/jvm/java/org/jt/util/classlist_update.py
 exclude src/jvm/java/org/python/util/*.c

@@ -3,8 +3,8 @@
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-import sys
-from os import path
+from typing import Optional, Tuple
+from pathlib import Path
 import struct
 
 from ..lib import public
@@ -24,7 +24,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
         super().__init__(java_version)
 
         # Library file name
-        self._libfile = "jvm.dll"
+        self._libfile: str = "jvm.dll"
 
         # Search methods
         winreg = self._get_winreg()
@@ -38,13 +38,13 @@ class JVMFinder(_jvmfinder.JVMFinder):
                 self._get_from_java_home,
             )
 
-    def check(self, jvm):
+    def check(self, jvm: Path):
 
         IMAGE_FILE_MACHINE_I386  = 332
         IMAGE_FILE_MACHINE_IA64  = 512
         IMAGE_FILE_MACHINE_AMD64 = 34404
 
-        with open(jvm, "rb") as f:
+        with jvm.open("rb") as f:
             if f.read(2) != b"MZ":
                 raise JVMNotSupportedException("JVM not valid")
             f.seek(60)
@@ -63,7 +63,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
         else:
             raise JVMNotSupportedException("Unable to deterime JVM Type")
 
-    def _get_from_registry(self):
+    def _get_from_registry(self) -> Optional[Path]:
         try:
             winreg = self._get_winreg()
         except WindowsError:
@@ -74,7 +74,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
         return (self._get_from_registry_Oracle() or
                 self._get_from_registry_Zulu())
 
-    def _get_from_registry_Oracle(self):
+    def _get_from_registry_Oracle(self) -> Optional[Path]:
         winreg = self._get_winreg()
         for node in (r"SOFTWARE", r"SOFTWARE\Wow6432Node"):
             jre_reg_keys = (node + r"\JavaSoft\JRE",
@@ -86,30 +86,31 @@ class JVMFinder(_jvmfinder.JVMFinder):
                                          [(key_path, False) for key_path in jdk_reg_keys]):
                     try:
                         with winreg.OpenKey(hkey, key_path) as java_key:
-                            version, _ = winreg.QueryValueEx(java_key, "CurrentVersion")
+                            version = winreg.QueryValueEx(java_key, "CurrentVersion")[0]
                             version_matches = (not self._java_version or
                                                float(".".join(version.split(".")[:2])) ==
                                                self._java_version)
                             version_key = version if version_matches else str(self._java_version)
                             with winreg.OpenKey(java_key, version_key) as jvm_key:
-                                java_home, _ = winreg.QueryValueEx(jvm_key, "JavaHome")
+                                java_home = Path(winreg.QueryValueEx(jvm_key, "JavaHome")[0])
                                 if is_jre:
-                                    jvm_path, _ = winreg.QueryValueEx(jvm_key, "RuntimeLib")
-                                    if path.isfile(jvm_path):
+                                    jvm_path = Path(winreg.QueryValueEx(jvm_key, "RuntimeLib")[0])
+                                    if jvm_path.is_file():
                                         return jvm_path
                                     jre_home = java_home
                                 else:
-                                    jre_home = path.join(java_home, "jre")
-                        jvm_path_cli = path.join(jre_home, "bin", "client", self._libfile)
-                        jvm_path_srv = path.join(jre_home, "bin", "server", self._libfile)
+                                    jre_home = java_home/"jre"
+                                    jre_home = jre_home if jre_home.exists() else java_home
+                        jvm_path_cli = jre_home/"bin/client"/self._libfile
+                        jvm_path_srv = jre_home/"bin/server"/self._libfile
                         return (jvm_path_cli
-                                if path.isfile(jvm_path_cli) or not path.exists(jvm_path_srv)
+                                if jvm_path_cli.is_file() or not jvm_path_srv.exists()
                                 else jvm_path_srv)
                     except WindowsError:
                         pass
         return None
 
-    def _get_from_registry_Zulu(self):
+    def _get_from_registry_Zulu(self) -> Optional[Path]:
         winreg = self._get_winreg()
         for node in (r"SOFTWARE", r"SOFTWARE\Wow6432Node"):
             reg_keys = (node + r"\Azul Systems\Zulu",
@@ -123,16 +124,21 @@ class JVMFinder(_jvmfinder.JVMFinder):
                                     is_jre = subkey_name.endswith("-jre")
                                     version = (f"{winreg.QueryValueEx(jvm_key, 'MajorVersion')[0]}."
                                                f"{winreg.QueryValueEx(jvm_key, 'MinorVersion')[0]}")
-                                    java_home, _ = winreg.QueryValueEx(jvm_key, "InstallationPath")
-                                    java_home = java_home.rstrip("\\")
                                     version_matches = (not self._java_version or
                                                        float(".".join(version.split(".")[:2])) ==
                                                        self._java_version)
+                                    java_home = Path(winreg.QueryValueEx(jvm_key,
+                                                                         "InstallationPath")[0].rstrip("\\"))
                                     if version_matches:
-                                        jvm_path_cli = path.join(java_home, "bin", "client", self._libfile)
-                                        jvm_path_srv = path.join(java_home, "bin", "server", self._libfile)
+                                        if is_jre:
+                                            jre_home = java_home
+                                        else:
+                                            jre_home = java_home/"jre"
+                                            jre_home = jre_home if jre_home.exists() else java_home
+                                        jvm_path_cli = jre_home/"bin/client"/self._libfile
+                                        jvm_path_srv = jre_home/"bin/server"/self._libfile
                                         return (jvm_path_cli
-                                                if path.isfile(jvm_path_cli) or not path.exists(jvm_path_srv)
+                                                if jvm_path_cli.is_file() or not jvm_path_srv.exists()
                                                 else jvm_path_srv)
                     except WindowsError:
                         pass

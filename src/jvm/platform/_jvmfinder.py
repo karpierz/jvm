@@ -3,9 +3,9 @@
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from typing import List
+from typing import Optional, Tuple, Sequence
+from pathlib import Path
 import os
-from os import path
 import re
 
 from ..lib import public
@@ -24,12 +24,12 @@ class JVMFinder:
         self._java_version = float(java_version) if java_version is not None else 0.0
 
         # Library file name
-        self._libfile = "libjvm.so"
+        self._libfile: str = "libjvm.so"
 
         # Predefined locations
-        self._locations = (
-            "/usr/lib/jvm",
-            "/usr/java",
+        self._locations: Tuple[Path] = (
+            Path("/usr/lib/jvm"),
+            Path("/usr/java"),
         )
 
         # Search methods
@@ -38,7 +38,7 @@ class JVMFinder:
             self._get_from_known_locations,
         )
 
-    def check(self, jvm):
+    def check(self, jvm: Path):
         """
         Check if the jvm is valid for this architecture.
 
@@ -48,7 +48,7 @@ class JVMFinder:
             JVMNotSupportedException: If the jvm is not supported.
         """
 
-    def get_jvm_path(self):
+    def get_jvm_path(self) -> Path:
         """
         Retrieves the path to the default or first found JVM library
 
@@ -74,7 +74,7 @@ class JVMFinder:
                                        "Try setting up the JAVA_HOME environment "
                                        "variable properly.".format(self._libfile))
 
-    def find_libjvm(self, java_home: str):
+    def find_libjvm(self, java_home: Path) -> Path:
         """
         Recursively looks for the given file
 
@@ -91,13 +91,14 @@ class JVMFinder:
         # Look for the file
         found_non_supported_jvm = False
         for root, _, names in os.walk(java_home):
+            root = Path(root)
             if self._libfile in names:
                 # Found it, but check for non supported jvms
-                candidate = path.split(root)[1]
+                candidate = root.parts[1]
                 if candidate in non_supported_jvm:
                     found_non_supported_jvm = True
                 else:
-                    return path.join(root, self._libfile)
+                    return root/self._libfile
         else:
             if found_non_supported_jvm:
                 raise JVMNotSupportedException("Sorry '{}' is known to be broken. "
@@ -109,7 +110,8 @@ class JVMFinder:
                                            "Please ensure your JAVA_HOME environment "
                                            "variable is pointing to correct installation.")
 
-    def find_possible_homes(self, parents: List[str]):
+    def find_possible_homes(self, parents: Sequence[Path],
+                            java_names = ("jre", "jdk", "java")):
         """
         Generator that looks for the first-level children folders that could be
         Java installations, according to their name
@@ -120,15 +122,13 @@ class JVMFinder:
         Returns:
             The possible JVM installation folders
         """
-        java_names = ("jre", "jdk", "java")
         homes = set()
         for parent in parents:
-            for childname in sorted(os.listdir(parent)):
-                home = path.realpath(path.join(parent, childname))
+            for home in sorted(parent.resolve().iterdir()):
                 # Already known home, or not a directory -> ignore
-                if home not in homes and path.isdir(home):
+                if home not in homes and home.is_dir():
                     # Check if the home seems OK
-                    real_name = path.basename(home).lower()
+                    real_name = home.name.lower()
                     for java_name in java_names:
                         if java_name in real_name:
                             # Correct JVM folder name
@@ -136,36 +136,43 @@ class JVMFinder:
                             yield home
                             break
 
-    def get_java_version(self, java_exe):
-        cout = run(java_exe, "-version").stderr
+    def get_java_home(self) -> Optional[Path]:
+        java_home = os.environ.get("JAVA_HOME")
+        return Path(java_home) if java_home else None
+
+    def get_jdk_home(self) -> Optional[Path]:
+        jdk_home = os.environ.get("JDK_HOME")
+        return Path(jdk_home) if jdk_home else None
+
+    def get_java_version(self, java_exe) -> float:
+        cout = run(java_exe, "-version", text=True, capture_output=True).stderr
         match = re.search(r'^\s*java version\s+"(.+)"', cout, re.MULTILINE)
         return float(".".join(match.group(1).split(".")[:2]))
 
-    def get_jre_home(self, java_home):
-        if path.isfile(path.join(java_home, "bin", "javac")):
+    def get_jre_home(self, java_home: Path) -> Optional[Path]:
+        if (java_home/"bin/javac").is_file():
             # this is a JDK
-            java_home = path.join(java_home, "jre")
-            return java_home if path.isdir(java_home) else None
-        elif path.isfile(path.join(java_home, "bin", "java")):
+            java_home = java_home/"jre"
+            return java_home if java_home.is_dir() else None
+        elif (java_home/"bin/java").is_file():
             # this is a JRE
             return java_home
         else:
             return None
 
-    def _get_from_java_home(self):
-        java_home = os.environ.get("JAVA_HOME")
+    def _get_from_java_home(self) -> Optional[Path]:
+        java_home = self.get_java_home()
 
-        if not java_home or not path.exists(java_home):
+        if not java_home or not java_home.exists():
             return None
 
-        java_home = path.realpath(java_home)
-        # Cygwin has a bug in realpath
-        if not path.exists(java_home):
-            java_home = os.environ.get("JAVA_HOME")
+        # Cygwin has a bug in realpath/resolve
+        if java_home.resolve().exists():
+            java_home = java_home.resolve()
 
         return self.find_libjvm(java_home)
 
-    def _get_from_known_locations(self):
+    def _get_from_known_locations(self) -> Optional[Path]:
         for home in self.find_possible_homes(self._locations):
             jvm = self.find_libjvm(home)
             if jvm is not None:

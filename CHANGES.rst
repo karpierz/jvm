@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.6.0b2 (2024-11-05)
+0.6.0b3 (2024-11-08)
 --------------------
 - Add support for Python 3.10, 3.11, 3.12 and 3.13
 - Drop support for Python 3.7 and 3.8
@@ -9,8 +9,10 @@ Changelog
 - Tox configuration has been moved to pyproject.toml
 - Setup update (now based on tox >= 4.0).
 - Fix the bug in lib/classproperty.
+- Fixes for bugs in JVMFinder's.
 - Copyright year update.
 - Unittest have been performed for much more JVMs.
+- Setup fixes.
 - Setup (dependencies) update.
 
 0.5.0b7 (2022-01-29)

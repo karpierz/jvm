@@ -3,7 +3,8 @@
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-from os import path
+from typing import Optional, Tuple
+from pathlib import Path
 
 from ..lib import public
 from ..lib import platform
@@ -21,7 +22,7 @@ class JVMFinder(_windows.JVMFinder):
         super().__init__(java_version)
 
         # Library file name
-        self._libfile = "jvm.dll"
+        self._libfile: str = "jvm.dll"
 
         # Search methods
         self._methods = (
@@ -52,19 +53,19 @@ class JVMFinder(_windows.JVMFinder):
                         version_key = java_key + "/" + (version if version_matches
                                                         else str(self._java_version))
                         with open(version_key + "/JavaHome") as f:
-                            java_home = f.read().split('\x00')[0]
+                            java_home = Path(f.read().split('\x00')[0])
                         if is_jre:
                             with open(version_key + "/RunTimeLib") as f:
-                                jvm_path = f.read().split('\x00')[0]
-                            if path.isfile(jvm_path):
+                                jvm_path = Path(f.read().split('\x00')[0])
+                            if jvm_path.is_file():
                                 return jvm_path
                             jre_home = java_home
                         else:
-                            jre_home = path.join(java_home, "jre")
-                        jvm_path_cli = path.join(jre_home, "bin", "client", self._libfile)
-                        jvm_path_srv = path.join(jre_home, "bin", "server", self._libfile)
+                            jre_home = java_home/"jre"
+                        jvm_path_cli = jre_home/"bin/client"/self._libfile
+                        jvm_path_srv = jre_home/"bin/server"/self._libfile
                         return (jvm_path_cli
-                                if path.isfile(jvm_path_cli) or not path.exists(jvm_path_srv)
+                                if jvm_path_cli.is_file() or not jvm_path_srv.exists()
                                 else jvm_path_srv)
                     except OSError:
                         pass
@@ -84,16 +85,16 @@ class JVMFinder(_windows.JVMFinder):
                         #            is_jre = subkey_name.endswith("-jre")
                         #            version = (f"{winreg.QueryValueEx(jvm_key, 'MajorVersion')[0]}."
                         #                       f"{winreg.QueryValueEx(jvm_key, 'MinorVersion')[0]}")
-                        #            java_home, _ = winreg.QueryValueEx(jvm_key, "InstallationPath")
-                        #            java_home = java_home.rstrip("\\")
+                        #            java_home = Path(winreg.QueryValueEx(jvm_key,
+                        #                                                 "InstallationPath")[0].rstrip("\\"))
                         #            version_matches = (not self._java_version or
                         #                               float(".".join(version.split(".")[:2])) ==
                         #                               self._java_version)
                         #            if version_matches:
-                        #                jvm_path_cli = path.join(java_home, "bin", "client", self._libfile)
-                        #                jvm_path_srv = path.join(java_home, "bin", "server", self._libfile)
+                        #                jvm_path_cli = java_home/"bin/client"/self._libfile
+                        #                jvm_path_srv = java_home/"bin/server"/self._libfile
                         #                return (jvm_path_cli
-                        #                        if path.isfile(jvm_path_cli) or not path.exists(jvm_path_srv)
+                        #                        if jvm_path_cli.is_file() or not jvm_path_srv.exists()
                         #                        else jvm_path_srv)
                     except WindowsError:
                         pass

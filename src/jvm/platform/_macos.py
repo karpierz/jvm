@@ -3,8 +3,8 @@
 # Licensed under proprietary License
 # Please refer to the accompanying LICENSE file.
 
-import os
-from os import path
+from typing import Optional, Tuple
+from pathlib import Path
 
 from ..lib import public
 from ..lib import run
@@ -22,11 +22,11 @@ class JVMFinder(_linux.JVMFinder):
         super().__init__(java_version)
 
         # Library file name
-        self._libfile = "libjli.dylib"
+        self._libfile: str = "libjli.dylib"
 
         # Predefined locations
-        self._locations = (
-            "/Library/Java/JavaVirtualMachines",
+        self._locations: Tuple[Path] = (
+            Path("/Library/Java/JavaVirtualMachines"),
         )
 
         # Search methods
@@ -38,11 +38,11 @@ class JVMFinder(_linux.JVMFinder):
         #     self.defaultPath,
         # )
 
-    def _pre_vm7_path(self):
+    def _pre_vm7_path(self) -> Optional[Path]:
         # Returns the previous (older then Java7) constant JVM library path
-        return "/System/Library/Frameworks/JavaVM.framework/JavaVM"
+        return Path("/System/Library/Frameworks/JavaVM.framework/JavaVM")
 
-    def _javahome_binary(self):
+    def _javahome_binary(self) -> Optional[Path]:
         # For osx > 10.5 we have the nice util /usr/libexec/java_home available.
         # Invoke it and return its output.
         # It seems this tool has been removed in osx 10.9.
@@ -54,56 +54,59 @@ class JVMFinder(_linux.JVMFinder):
             return None
         return subprocess.check_output(["/usr/libexec/java_home"]).strip()
 
-    def defaultPath(self):
+    def defaultPath(self) -> Optional[Path]:
         # This script attempts to find an existing installation of Java that
         # meets a minimum version requirement on a Mac OS X machine.
 
         # on darwin, the JVM is always in the same location it seems ...
-        return "/System/Library/Frameworks/JavaVM.framework/JavaVM"
+        return Path("/System/Library/Frameworks/JavaVM.framework/JavaVM")
 
-        java_home = os.environ.get("JAVA_HOME")
+        java_home = self.get_java_home()
 
         if java_home is not None:
             # Check JAVA_HOME directory to see if Java version is adequate
-            java_exe = path.join(java_home, "bin", "java")
+            java_exe = java_home/"bin/java"
             # [...]
 
         if java_home is None:
             # If the existing JAVA_HOME directory is inadequate, use '/usr/libexec/java_home'
             # to search for other possible java candidates and check their versions.
-            if path.isfile("/usr/libexec/java_home"): # -x
+            if Path("/usr/libexec/java_home").isfile(): # -x
                 # Apple JDKs
                 java_home = run("/usr/libexec/java_home",
-                                "" if not self._java_version else f"-v {self._java_version}").stdout
-                if not java_home.strip():
-                    java_home = None
+                                "" if not self._java_version else f"-v {self._java_version}",
+                                text=True, capture_output=True).stdout.strip()
+                java_home = Path(java_home) if java_home else None
             else:
                 # Look for the Apple JDKs first to preserve the existing behaviour,
                 # and then look for the new JDKs provided by Oracle.
-                if path.islink("/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK"):
+                framework_jdk = Path("/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK")
+                system_jdk    = Path("/System/Library/Java/JavaVirtualMachines/CurrentJDK")
+                location_jdk  = self._locations[0]/"CurrentJDK"
+                if framework_jdk.is_link():
                     # Apple JDKs
-                    java_home = "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK" + "/Home"
-                elif path.islink("/System/Library/Java/JavaVirtualMachines/CurrentJDK"):
+                    java_home = framework_jdk/"Home"
+                elif system_jdk.is_link():
                     # Apple JDKs
-                    java_home = "/System/Library/Java/JavaVirtualMachines/CurrentJDK" + "/Contents/Home"
-                elif path.islink(self._locations[0] + "/CurrentJDK"):
+                    java_home = system_jdk/"Contents/Home"
+                elif location_jdk.is_link():
                     # Oracle JDKs
-                    java_home = self._locations[0] + "/CurrentJDK" + "/Contents/Home"
+                    java_home = location_jdk/"Contents/Home"
 
 
 ### return top Java version
-# cout = run("/usr/libexec/java_home").stdout
+# cout = run("/usr/libexec/java_home", text=True, capture_output=True).stdout
 # self._locations[0] + "/1.7.0.jdk/Contents/Home"
 
 ### I want Java version 1.7
-# cout = run("/usr/libexec/java_home", "-v 1.7").stdout
+# cout = run("/usr/libexec/java_home", "-v 1.7", text=True, capture_output=True).stdout
 # "/System/Library/Java/JavaVirtualMachines/1.7.0.jdk/Contents/Home"
 
     # Oracle:       "/Library/Java/Home"
     # Apple: "/System/Library/Frameworks/JavaVM.framework/Home"
 
             # "/System/Library/Frameworks/JavaVM.framework/Versions/Current"
-            # "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK"
+            # framework_jdk
 
     # Oracle:                   self._locations[0] + "/<JDK_version>/Contents"
     # Apple: "/System/Library/Java/JavaVirtualMachines/<JDK_version>/Contents"

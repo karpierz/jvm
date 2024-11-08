@@ -4,11 +4,7 @@ set JAVA_HOME=C:\Program Files\Zulu\zulu-11
 set javac="%JAVA_HOME%\bin\javac" -encoding UTF-8 -g:none ^
           -deprecation -Xlint:unchecked --release 8
 
-::set py=C:\Windows\py.exe -3.9  -B
-::set py=C:\Windows\py.exe -3.10 -B
-::set py=C:\Windows\py.exe -3.11 -B
 set py=C:\Windows\py.exe -3.12 -B
-::set py=C:\Windows\py.exe -3.13 -B
 set vcdir=%ProgramFiles%\Microsoft Visual Studio\2022
 set vc32="%vcdir%\Community\VC\Auxiliary\Build\vcvars32.bat"
 set vc64="%vcdir%\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -111,5 +107,6 @@ dir /S/B/O:N ^
 %javac% -d java/classes -classpath java/lib/* @build.fil
 del /F/Q build.fil
 popd
+
 :exit
 endlocal

@@ -11,7 +11,6 @@ import requests
 from bs4 import BeautifulSoup
 
 urls = {
-     7: "https://docs.oracle.com/javase/7/docs/api/allclasses-frame.html",
      8: "https://docs.oracle.com/javase/8/docs/api/allclasses-frame.html",
      9: "https://docs.oracle.com/javase/9/docs/api/allclasses-frame.html",
     10: "https://docs.oracle.com/javase/10/docs/api/allclasses-frame.html",
@@ -26,6 +25,8 @@ urls = {
     19: "https://docs.oracle.com/en/java/javase/19/docs/api/allclasses-index.html",
     20: "https://docs.oracle.com/en/java/javase/20/docs/api/allclasses-index.html",
     21: "https://docs.oracle.com/en/java/javase/21/docs/api/allclasses-index.html",
+    22: "https://docs.oracle.com/en/java/javase/22/docs/api/allclasses-index.html",
+    23: "https://docs.oracle.com/en/java/javase/23/docs/api/allclasses-index.html",
 }
 
 here = Path(__file__).resolve().parent

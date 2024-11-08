@@ -5,11 +5,11 @@
 
 [build-system]
 build-backend = 'setuptools.build_meta'
-requires = ['setuptools>=75.3.0', 'wheel>=0.44.0', 'packaging>=24.1.0', 'tox>=4.23.2']
+requires = ['setuptools>=75.3.0', 'wheel>=0.44.0', 'packaging>=24.2.0', 'tox>=4.23.2']
 
 [project]
 name        = 'jvm'
-version     = '0.6.0b2'
+version     = '0.6.0b3'
 description = 'Python bridge for the Java Virtual Machine.'
 urls.Homepage      = 'https://pypi.org/project/jvm/'
 urls.Documentation = 'https://jvm.readthedocs.io/'
@@ -55,15 +55,15 @@ dependencies = [
     'pkg-about>=1.2.2',
     # others
     'memorybuffer>=0.7.0b1',
-    'jni>=1.1.0b2',
+    'jni>=1.1.0b3',
 ]
 dynamic = ['readme']
 [project.optional-dependencies]
 cffi = [
-    'jni[cffi]>=1.1.0b2',
+    'jni[cffi]>=1.1.0b3',
 ]
 cython = [
-    'jni[cython]>=1.1.0b2',
+    'jni[cython]>=1.1.0b3',
 ]
 doc = [
     'Sphinx>=7.4.7',
@@ -125,6 +125,9 @@ jvm = [
 [tool.setuptools.exclude-package-data]
 '*' = ['*.c','*.h','*.cpp','*.hpp','*.cxx','*.hxx','*.pyx','*.pxd']
 jvm = [
+]
+'jvm.java' = [
+    'lib/*.dsc.txt',
 ]
 
 [tool.coverage.run]
@@ -213,7 +216,7 @@ deps =
 package_subdir = jvm
 
 [testenv]
-pass_env = WINDIR
+pass_env = WINDIR, JAVA_HOME
 set_env =
     PYTHONDONTWRITEBYTECODE = 1
 commands =
