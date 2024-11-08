@@ -18,7 +18,6 @@ exclude src/jvm/java/lib/*.dsc.txt
 exclude src/jvm/java/org/python/embed.[co]*
 exclude src/jvm/java/org/jt/util/classlist_update.py
 exclude src/jvm/java/org/python/util/*.c
-exclude src/jvm/java/org/python/util/*.h
 exclude src/jvm/lib/hid.py
 exclude src/jvm/lib/rwproperty.py
 

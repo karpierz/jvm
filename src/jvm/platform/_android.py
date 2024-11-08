@@ -38,7 +38,7 @@ class JVMFinder(_linux.JVMFinder):
         # Search methods
         self._methods = (
             self._get_from_java_home,  # self._getFromJavaHome,
-            self._get_from_bin,        # self._getFromLibPath, 
+            self._get_from_bin,        # self._getFromLibPath,
             self._get_from_known_locations,
         )
 
