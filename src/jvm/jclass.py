@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple, FrozenSet
+from __future__ import annotations
+
+from typing import Tuple, FrozenSet
 
 import jni
 from .lib import public
@@ -28,203 +29,202 @@ class JClass(JObjectBase, JAnnotatedElement):
     name_utrans = bytes.maketrans(b"./", b"/.")
 
     @classmethod
-    def forName(cls, name: str) -> 'JClass':
-        """Returns the Class object associated with the class or interface
-        with the given string name.
-        """
+    def forName(cls, name: str) -> JClass:
+        """Returns the Class object associated with the class or interface \
+        with the given string name."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             name = name.encode("utf-8").translate(JClass.name_utrans)
             jcls = jenv.FindClass(name)
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getVoidClass(cls) -> 'JClass':
+    def getVoidClass(cls) -> JClass:
         """Returns the Class object of the primitive void type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Void.TYPE)
 
     @classmethod
-    def getBooleanClass(cls) -> 'JClass':
+    def getBooleanClass(cls) -> JClass:
         """Returns the Class object of the primitive boolean type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Boolean.TYPE)
 
     @classmethod
-    def getCharClass(cls) -> 'JClass':
+    def getCharClass(cls) -> JClass:
         """Returns the Class object of the primitive char type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Character.TYPE)
 
     @classmethod
-    def getByteClass(cls) -> 'JClass':
+    def getByteClass(cls) -> JClass:
         """Returns the Class object of the primitive byte type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Byte.TYPE)
 
     @classmethod
-    def getShortClass(cls) -> 'JClass':
+    def getShortClass(cls) -> JClass:
         """Returns the Class object of the primitive short type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Short.TYPE)
 
     @classmethod
-    def getIntClass(cls) -> 'JClass':
+    def getIntClass(cls) -> JClass:
         """Returns the Class object of the primitive int type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Integer.TYPE)
 
     @classmethod
-    def getLongClass(cls) -> 'JClass':
+    def getLongClass(cls) -> JClass:
         """Returns the Class object of the primitive long type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Long.TYPE)
 
     @classmethod
-    def getFloatClass(cls) -> 'JClass':
+    def getFloatClass(cls) -> JClass:
         """Returns the Class object of the primitive float type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Float.TYPE)
 
     @classmethod
-    def getDoubleClass(cls) -> 'JClass':
+    def getDoubleClass(cls) -> JClass:
         """Returns the Class object of the primitive double type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Double.TYPE)
 
     @classmethod
-    def getStringClass(cls) -> 'JClass':
+    def getStringClass(cls) -> JClass:
         """Returns the Class object of java.lang.String type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.String.Class)
 
     @classmethod
-    def getClassClass(cls) -> 'JClass':
+    def getClassClass(cls) -> JClass:
         """Returns the Class object of java.lang.Class type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Class.Class)
 
     @classmethod
-    def getBooleanObjectClass(cls) -> 'JClass':
+    def getBooleanObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Boolean type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Boolean.Class)
 
     @classmethod
-    def getCharObjectClass(cls) -> 'JClass':
+    def getCharObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Character type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Character.Class)
 
     @classmethod
-    def getByteObjectClass(cls) -> 'JClass':
+    def getByteObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Byte type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Byte.Class)
 
     @classmethod
-    def getShortObjectClass(cls) -> 'JClass':
+    def getShortObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Short type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Short.Class)
 
     @classmethod
-    def getIntObjectClass(cls) -> 'JClass':
+    def getIntObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Integer type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Integer.Class)
 
     @classmethod
-    def getLongObjectClass(cls) -> 'JClass':
+    def getLongObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Long type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Long.Class)
 
     @classmethod
-    def getFloatObjectClass(cls) -> 'JClass':
+    def getFloatObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Float type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Float.Class)
 
     @classmethod
-    def getDoubleObjectClass(cls) -> 'JClass':
+    def getDoubleObjectClass(cls) -> JClass:
         """Returns the Class object of java.lang.Double type."""
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JClass(jenv, jvm.Double.Class)
 
     @classmethod
-    def getBooleanArrayClass(cls, ndims: int) -> 'JClass':
+    def getBooleanArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive boolean type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"Z")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getCharArrayClass(cls, ndims: int) -> 'JClass':
+    def getCharArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive char type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"C")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getByteArrayClass(cls, ndims: int) -> 'JClass':
+    def getByteArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive byte type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"B")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getShortArrayClass(cls, ndims: int) -> 'JClass':
+    def getShortArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive short type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"S")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getIntArrayClass(cls, ndims: int) -> 'JClass':
+    def getIntArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive int type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"I")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getLongArrayClass(cls, ndims: int) -> 'JClass':
+    def getLongArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive long type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"J")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getFloatArrayClass(cls, ndims: int) -> 'JClass':
+    def getFloatArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive float type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"F")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getDoubleArrayClass(cls, ndims: int) -> 'JClass':
+    def getDoubleArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of the primitive double type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"D")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getStringArrayClass(cls, ndims: int) -> 'JClass':
+    def getStringArrayClass(cls, ndims: int) -> JClass:
         """Returns the Class object of array of java.lang.String type."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.FindClass(b"[" * ndims + b"Ljava/lang/String;")
             return cls.jvm.JClass(jenv, jcls)
 
     @classmethod
-    def getObjectArrayClass(cls, cname: str, ndims: int) -> 'JClass':
-        """Returns the Class object associated with the array of class
-        or interface with the given string name.
-        """
+    def getObjectArrayClass(cls, cname: str, ndims: int) -> JClass:
+        """Returns the Class object associated with the array of class \
+        or interface with the given string name."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             cname = cname.encode("utf-8").translate(JClass.name_utrans)
             jcls = jenv.FindClass(b"[" * ndims + b"L" + cname + b";")
             return cls.jvm.JClass(jenv, jcls)
 
     def __init__(self, jenv: jni.JNIEnv, jcls: jni.jclass, own: bool = True):
+        """Initializer"""
         super().__init__(jenv, jni.cast(jcls, jni.jclass), own=own)
 
     def __hash__(self):
@@ -232,6 +232,7 @@ class JClass(JObjectBase, JAnnotatedElement):
         return super().__hash__()
 
     def __eq__(self, other):
+        """???"""
 
         if self is other:
             return True
@@ -247,34 +248,29 @@ class JClass(JObjectBase, JAnnotatedElement):
 
         return True  # and self.getName() == other.getName()
 
-    def __ne__(self, other):
-        eq = self.__eq__(other)
-        return NotImplemented if eq is NotImplemented else not eq
-
-    def asObject(self, own: bool = True) -> 'JObject':
+    def asObject(self, own: bool = True) -> JObject:
 
         with self.jvm as (jvm, jenv):
             return self.jvm.JObject(jenv, self._jobj, own=own)
 
-    def asSubclass(self, jcls: 'JClass') -> 'JClass':
-        """Casts this Class object to represent a subclass of the class
-        represented by the specified class object.
-        """
+    def asSubclass(self, jcls: JClass) -> JClass:
+        """Casts this Class object to represent a subclass of the class \
+        represented by the specified class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jcls.handle
+            jargs[0].l = jcls.handle  # noqa: E741
             jccls = jenv.CallObjectMethod(self._jobj, jvm.Class.asSubclass, jargs)
             return self.jvm.JClass(jenv, jccls)
 
     @cached
-    def getClassLoader(self) -> Optional['JClassLoader']:
+    def getClassLoader(self) -> JClassLoader | None:
         """Returns the class loader for the class."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcld = jenv.CallObjectMethod(self._jobj, jvm.Class.getClassLoader)
             return self.jvm.JClassLoader(jenv, jcld) if jcld else None
 
     @cached
-    def getPackage(self) -> Optional['JPackage']:
+    def getPackage(self) -> JPackage | None:
         """Gets the package for this class."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jpkg = jenv.CallObjectMethod(self._jobj, jvm.Class.getPackage)
@@ -282,8 +278,9 @@ class JClass(JObjectBase, JAnnotatedElement):
 
     @cached
     def getModifiers(self) -> int:
-        """Returns the Java language modifiers for this class or interface,
+        """Returns the Java language modifiers for this class or interface, \
         encoded in an integer.
+
         The JModifier class should be used to decode the modifiers in the integer.
         """
         with self.jvm as (jvm, jenv):
@@ -292,8 +289,9 @@ class JClass(JObjectBase, JAnnotatedElement):
 
     @cached
     def getModifiersSet(self) -> FrozenSet[int]:
-        """Returns the Java language modifiers for this class or interface,
+        """Returns the Java language modifiers for this class or interface, \
         as a set of integers.
+
         The JModifier class should be used to decode the modifiers in the integer.
         """
         with self.jvm as (jvm, jenv):
@@ -313,9 +311,8 @@ class JClass(JObjectBase, JAnnotatedElement):
 
     @cached
     def getName(self) -> str:
-        """Returns the name of the entity (class, interface, array class,
-        primitive type, or void) represented by this Class object, as a string.
-        """
+        """Returns the name of the entity (class, interface, array class, \
+        primitive type, or void) represented by this Class object, as a string."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jname = jenv.CallObjectMethod(self._jobj, jvm.Class.getName)
             return JString(jenv, jname, own=False).str
@@ -329,9 +326,8 @@ class JClass(JObjectBase, JAnnotatedElement):
 
     @cached
     def getCanonicalName(self) -> str:
-        """Returns the canonical name of the underlying class as defined by the
-        Java Language Specification.
-        """
+        """Returns the canonical name of the underlying class as defined by the \
+        Java Language Specification."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jname = jenv.CallObjectMethod(self._jobj, jvm.Class.getCanonicalName)
             return JString(jenv, jname, own=False).str if jname else ""
@@ -344,17 +340,15 @@ class JClass(JObjectBase, JAnnotatedElement):
 
     @cached
     def isEnum(self) -> bool:
-        """Returns true if and only if this class was declared as an enum
-        in the source code.
-        """
+        """Returns true if and only if this class was declared as an enum \
+        in the source code."""
         with self.jvm as (jvm, jenv):
             return jenv.CallBooleanMethod(self._jobj, jvm.Class.isEnum)
 
     @cached
     def isPrimitive(self) -> bool:
-        """Returns true if and only if this class was declared as an enum
-        in the source code.
-        """
+        """Returns true if and only if this class was declared as an enum \
+        in the source code."""
         with self.jvm as (jvm, jenv):
             return jenv.CallBooleanMethod(self._jobj, jvm.Class.isPrimitive)
 
@@ -389,21 +383,20 @@ class JClass(JObjectBase, JAnnotatedElement):
             return jenv.CallBooleanMethod(self._jobj, jvm.Class.isArray)
 
     @cached
-    def getComponentType(self) -> Optional['JClass']:
+    def getComponentType(self) -> JClass | None:
         """Returns the Class representing the component type of an array."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.CallObjectMethod(self._jobj, jvm.Class.getComponentType)
             return self.jvm.JClass(jenv, jcls) if jcls else None
 
-    def isAssignableFrom(self, jcls: 'JClass') -> bool:
+    def isAssignableFrom(self, jcls: JClass) -> bool:
 
         with self.jvm as (jvm, jenv):
             return jenv.IsAssignableFrom(jcls.handle, self._jobj)
 
     def isInstance(self, obj: JObjectBase) -> bool:
-        """Determines if the specified Object is assignment-compatible with
-        the object represented by this Class.
-        """
+        """Determines if the specified Object is assignment-compatible with \
+        the object represented by this Class."""
         with self.jvm as (jvm, jenv):
             return jenv.IsInstanceOf(obj.handle, self._jobj)
 
@@ -416,19 +409,17 @@ class JClass(JObjectBase, JAnnotatedElement):
     def isException(self) -> bool: return self.isThrowable()
 
     @cached
-    def getSuperclass(self) -> Optional['JClass']:
-        """Returns the Class representing the superclass of the entity
-        (class, interface, primitive type or void) represented by this Class.
-        """
+    def getSuperclass(self) -> JClass | None:
+        """Returns the Class representing the superclass of the entity \
+        (class, interface, primitive type or void) represented by this Class."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.GetSuperclass(self._jobj)
             return self.jvm.JClass(jenv, jcls) if jcls else None
 
     @cached
-    def getInterfaces(self) -> Tuple['JClass', ...]:
-        """Determines the interfaces implemented by the class or interface
-        represented by this object.
-        """
+    def getInterfaces(self) -> Tuple[JClass, ...]:
+        """Determines the interfaces implemented by the class or interface \
+        represented by this object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getInterfaces),
@@ -439,10 +430,9 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getDeclaredClasses(self) -> Tuple['JClass', ...]:
-        """Returns an array of Class objects reflecting all the classes and interfaces
-        declared as members of the class represented by this Class object.
-        """
+    def getDeclaredClasses(self) -> Tuple[JClass, ...]:
+        """Returns an array of Class objects reflecting all the classes and interfaces \
+        declared as members of the class represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getDeclaredClasses),
@@ -453,10 +443,9 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getDeclaredConstructors(self) -> Tuple['JConstructor', ...]:
-        """Returns an array of Constructor objects reflecting all the constructors
-        declared by the class represented by this Class object.
-        """
+    def getDeclaredConstructors(self) -> Tuple[JConstructor, ...]:
+        """Returns an array of Constructor objects reflecting all the constructors \
+        declared by the class represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getDeclaredConstructors),
@@ -467,10 +456,9 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getConstructors(self) -> Tuple['JConstructor', ...]:
-        """Returns an array containing Constructor objects reflecting all the
-        public constructors of the class represented by this Class object.
-        """
+    def getConstructors(self) -> Tuple[JConstructor, ...]:
+        """Returns an array containing Constructor objects reflecting all the \
+        public constructors of the class represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getConstructors),
@@ -480,23 +468,21 @@ class JClass(JObjectBase, JAnnotatedElement):
                 return tuple(self.jvm.JConstructor(jenv, jenv.GetObjectArrayElement(jarr, idx))
                              for idx in range(jlen))
 
-    def getDeclaredField(self, name: str) -> 'JField':
-        """Returns a Field object that reflects the specified declared field of the class
-        or interface represented by this Class object.
-        """
+    def getDeclaredField(self, name: str) -> JField:
+        """Returns a Field object that reflects the specified declared field of the class \
+        or interface represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 2):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jfld = jenv.CallObjectMethod(self._jobj, jvm.Class.getDeclaredField, jargs)
             return self.jvm.JField(jenv, jfld)
 
     @cached
-    def getDeclaredFields(self) -> Tuple['JField', ...]:
-        """Returns an array of Field objects reflecting all the fields declared by
-        the class or interface represented by this Class object.
-        """
+    def getDeclaredFields(self) -> Tuple[JField, ...]:
+        """Returns an array of Field objects reflecting all the fields declared by \
+        the class or interface represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getDeclaredFields),
@@ -506,23 +492,21 @@ class JClass(JObjectBase, JAnnotatedElement):
                 return tuple(self.jvm.JField(jenv, jenv.GetObjectArrayElement(jarr, idx))
                              for idx in range(jlen))
 
-    def getField(self, name: str) -> 'JField':
-        """Returns a Field object that reflects the specified public member field
-        of the class or interface represented by this Class object.
-        """
+    def getField(self, name: str) -> JField:
+        """Returns a Field object that reflects the specified public member field \
+        of the class or interface represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 2):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jfld = jenv.CallObjectMethod(self._jobj, jvm.Class.getField, jargs)
             return self.jvm.JField(jenv, jfld)
 
     @cached
-    def getFields(self) -> Tuple['JField', ...]:
-        """Returns an array containing Field objects reflecting all the accessible
-        public fields of the class or interface represented by this Class object.
-        """
+    def getFields(self) -> Tuple[JField, ...]:
+        """Returns an array containing Field objects reflecting all the accessible \
+        public fields of the class or interface represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getFields),
@@ -533,12 +517,11 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getDeclaredMethods(self) -> Tuple['JMethod', ...]:
-        """Returns an array containing Method objects reflecting all the declared methods
-        of the class or interface represented by this Class object, including public,
-        protected, default (package) access, and private methods, but excluding
-        inherited methods.
-        """
+    def getDeclaredMethods(self) -> Tuple[JMethod, ...]:
+        """Returns an array containing Method objects reflecting all the declared methods \
+        of the class or interface represented by this Class object, including public, \
+        protected, default (package) access, and private methods, but excluding \
+        inherited methods."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getDeclaredMethods),
@@ -549,12 +532,11 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getMethods(self) -> Tuple['JMethod', ...]:
-        """Returns an array containing Method objects reflecting all the public methods
-        of the class or interface represented by this Class object, including those
-        declared by the class or interface and those inherited from superclasses
-        and superinterfaces.
-        """
+    def getMethods(self) -> Tuple[JMethod, ...]:
+        """Returns an array containing Method objects reflecting all the public methods \
+        of the class or interface represented by this Class object, including those \
+        declared by the class or interface and those inherited from superclasses \
+        and superinterfaces."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Class.getMethods),
@@ -565,11 +547,11 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getPropertyDescriptors(self) -> Tuple['JPropertyDescriptor', ...]:
+    def getPropertyDescriptors(self) -> Tuple[JPropertyDescriptor, ...]:
 
         with self.jvm as (jvm, jenv), JFrame(jenv, 2):
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = self._jobj
+            jargs[0].l = self._jobj  # noqa: E741
             jbeanInfo = jenv.CallStaticObjectMethod(jvm.Introspector.Class,
                                                     jvm.Introspector.getBeanInfo, jargs)
             jarr = jni.cast(jenv.CallObjectMethod(jbeanInfo,
@@ -582,33 +564,31 @@ class JClass(JObjectBase, JAnnotatedElement):
                              for idx in range(jlen))
 
     @cached
-    def getEnclosingClass(self) -> Optional['JClass']:
+    def getEnclosingClass(self) -> JClass | None:
         """Returns the immediately enclosing class of the underlying class."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.CallObjectMethod(self._jobj, jvm.Class.getEnclosingClass)
             return self.jvm.JClass(jenv, jcls) if jcls else None
 
     @cached
-    def getEnclosingConstructor(self) -> Optional['JConstructor']:
-        """If this Class object represents a local or anonymous class within a constructor,
-        returns a Constructor object representing the immediately enclosing constructor
-        of the underlying class.
-        """
+    def getEnclosingConstructor(self) -> JConstructor | None:
+        """If this Class object represents a local or anonymous class within a constructor, \
+        returns a Constructor object representing the immediately enclosing constructor \
+        of the underlying class."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jctor = jenv.CallObjectMethod(self._jobj, jvm.Class.getEnclosingConstructor)
             return self.jvm.JConstructor(jenv, jctor) if jctor else None
 
     @cached
-    def getEnclosingMethod(self) -> Optional['JMethod']:
-        """If this Class object represents a local or anonymous class within a method,
-        returns a Method object representing the immediately enclosing method
-        of the underlying class.
-        """
+    def getEnclosingMethod(self) -> JMethod | None:
+        """If this Class object represents a local or anonymous class within a method, \
+        returns a Method object representing the immediately enclosing method \
+        of the underlying class."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jmeth = jenv.CallObjectMethod(self._jobj, jvm.Class.getEnclosingMethod)
             return self.jvm.JMethod(jenv, jmeth) if jmeth else None
 
-    def newInstance(self) -> 'JObject':
+    def newInstance(self) -> JObject:
         """Creates a new instance of the class represented by this Class object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jobj = jenv.CallObjectMethod(self._jobj, jvm.Class.newInstance)
@@ -637,3 +617,12 @@ class JClass(JObjectBase, JAnnotatedElement):
         "float":   "F",
         "double":  "D",
     }
+
+
+from .jpackage        import JPackage             # noqa: E402
+from .jclassloader    import JClassLoader         # noqa: E402
+from .jfield          import JField               # noqa: E402
+from .jconstructor    import JConstructor         # noqa: E402
+from .jmethod         import JMethod              # noqa: E402
+from .jpropdescriptor import JPropertyDescriptor  # noqa: E402
+from .jobject         import JObject              # noqa: E402

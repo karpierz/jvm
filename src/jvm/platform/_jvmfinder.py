@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple, Sequence
+from __future__ import annotations
+
+from typing import Tuple, Sequence
 from pathlib import Path
 import os
 import re
@@ -18,6 +19,8 @@ class JVMFinder:
     # JVM library finder base class
 
     def __init__(self, java_version=None):
+        """Initializer"""
+
         # To specify the required version, set the 'java_version' to the
         # major version required, e.g. 1.3 or "1.3", but not e.g. "1.3.1".
 
@@ -45,7 +48,7 @@ class JVMFinder:
         This method should be overriden for each architecture.
 
         Raises:
-            JVMNotSupportedException: If the jvm is not supported.
+            JVMNotSupportedError: If the jvm is not supported.
         """
 
     def get_jvm_path(self) -> Path:
@@ -64,15 +67,15 @@ class JVMFinder:
                 # If found check the architecture
                 if jvm:
                     self.check(jvm)
-            except (NotImplementedError, JVMNotFoundException, JVMNotSupportedException):
+            except (NotImplementedError, JVMNotFoundError, JVMNotSupportedError):
                 pass
             else:
                 if jvm is not None:
                     return jvm
         else:
-            raise JVMNotFoundException("No JVM shared library file ({}) found. "
-                                       "Try setting up the JAVA_HOME environment "
-                                       "variable properly.".format(self._libfile))
+            raise JVMNotFoundError("No JVM shared library file ({}) found. "
+                                   "Try setting up the JAVA_HOME environment "
+                                   "variable properly.".format(self._libfile))
 
     def find_libjvm(self, java_home: Path) -> Path:
         """
@@ -101,20 +104,20 @@ class JVMFinder:
                     return root/self._libfile
         else:
             if found_non_supported_jvm:
-                raise JVMNotSupportedException("Sorry '{}' is known to be broken. "
-                                               "Please ensure your JAVA_HOME contains "
-                                               "at least another JVM implementation "
-                                               "(eg. server)".format(candidate))
+                raise JVMNotSupportedError("Sorry '{}' is known to be broken. "
+                                           "Please ensure your JAVA_HOME contains "
+                                           "at least another JVM implementation "
+                                           "(eg. server)".format(candidate))
             else:
-                raise JVMNotFoundException("Sorry no JVM could be found. "
-                                           "Please ensure your JAVA_HOME environment "
-                                           "variable is pointing to correct installation.")
+                raise JVMNotFoundError("Sorry no JVM could be found. "
+                                       "Please ensure your JAVA_HOME environment "
+                                       "variable is pointing to correct installation.")
 
     def find_possible_homes(self, parents: Sequence[Path],
                             java_names = ("jre", "jdk", "java")):
         """
-        Generator that looks for the first-level children folders that could be
-        Java installations, according to their name
+        Generator that looks for the first-level children folders that could be \
+        Java installations, according to their name.
 
         Parameters:
             parents: A list of parent directories
@@ -136,11 +139,11 @@ class JVMFinder:
                             yield home
                             break
 
-    def get_java_home(self) -> Optional[Path]:
+    def get_java_home(self) -> Path | None:
         java_home = os.environ.get("JAVA_HOME")
         return Path(java_home) if java_home else None
 
-    def get_jdk_home(self) -> Optional[Path]:
+    def get_jdk_home(self) -> Path | None:
         jdk_home = os.environ.get("JDK_HOME")
         return Path(jdk_home) if jdk_home else None
 
@@ -149,7 +152,7 @@ class JVMFinder:
         match = re.search(r'^\s*java version\s+"(.+)"', cout, re.MULTILINE)
         return float(".".join(match.group(1).split(".")[:2]))
 
-    def get_jre_home(self, java_home: Path) -> Optional[Path]:
+    def get_jre_home(self, java_home: Path) -> Path | None:
         if (java_home/"bin/javac").is_file():
             # this is a JDK
             java_home = java_home/"jre"
@@ -160,7 +163,7 @@ class JVMFinder:
         else:
             return None
 
-    def _get_from_java_home(self) -> Optional[Path]:
+    def _get_from_java_home(self) -> Path | None:
         java_home = self.get_java_home()
 
         if not java_home or not java_home.exists():
@@ -172,7 +175,7 @@ class JVMFinder:
 
         return self.find_libjvm(java_home)
 
-    def _get_from_known_locations(self) -> Optional[Path]:
+    def _get_from_known_locations(self) -> Path | None:
         for home in self.find_possible_homes(self._locations):
             jvm = self.find_libjvm(home)
             if jvm is not None:
@@ -181,8 +184,8 @@ class JVMFinder:
             return None
 
 
-class JVMNotFoundException(RuntimeError):
-    """ """
+class JVMNotFoundError(RuntimeError):
+    """???"""
 
-class JVMNotSupportedException(RuntimeError):
-    """ """
+class JVMNotSupportedError(RuntimeError):
+    """???"""

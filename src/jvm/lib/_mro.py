@@ -16,7 +16,7 @@ def mro(cls):
     # This is just a basic sanity check.
     _check_duplicates(cls.__bases__)
 
-    to_merge = [(bcls.__mro__ if isinstance(bcls, type) else classic_mro(bcls))
+    to_merge = [(bcls.__mro__ if isinstance(bcls, type) else classic_mro(bcls))  # noqa: F821 # !!!
                 for bcls in cls.__bases__]
     to_merge.append(cls.__bases__)
 
@@ -51,7 +51,7 @@ def _merge(result, to_merge):
                 candidate = cseq[rem]
                 for cseq_nxt, rem_nxt in zip(to_merge, remain):
                     if any((cseq_nxt[k] is candidate) for k in range(rem_nxt+1, len(cseq_nxt))):
-                        break # continue outer loop
+                        break  # continue outer loop
                 else:
                     result.append(candidate)
                     for cseq_nxt, rem_nxt, i in zip(to_merge, remain, count()):
@@ -78,6 +78,6 @@ def _check_duplicates(seq):
 def _class_name(cls):
     try:
         name = getattr(cls, "__name__", repr(cls))
-        return name if isisnstance(name, str) and name else None
+        return name if isinstance(name, str) and name else None
     except Exception:
         return None

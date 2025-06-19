@@ -1,7 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
+
+from __future__ import annotations
 
 import unittest
 import sys
@@ -10,6 +11,7 @@ NoneType = type(None)
 import jni
 from jvm.jconstants import EJavaType
 from jvm.jstring    import JString
+from jvm.lib        import platform
 
 
 class JVMTestCase(unittest.TestCase):
@@ -149,7 +151,7 @@ class JVMTestCase(unittest.TestCase):
 
         jclass = cloader.findLoadedClass(jclass_name)
         #self.assertIsNone(jclass)
-        #def loadClass(self, name: str) -> Optional[JClass]:
+        #def loadClass(self, name: str) -> JClass | None:
 
     def test_JPackage(self):
 
@@ -593,7 +595,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsNotNone(jobject)
         self.assertIsInstance(jobject, self.jvm.JObject)
         self.assertEqual(jobject.getClass().getName(), jclass_name)
-        self.assertEqual(jobject.toString(), u"")
+        self.assertEqual(jobject.toString(), "")
 
     def test_JField(self):
 
@@ -627,6 +629,9 @@ class JVMTestCase(unittest.TestCase):
 
         raw_modifiers = field.getModifiers()
         self.assertIsInstance(raw_modifiers, int)
+
+        is_synthetic = field.isSynthetic()
+        self.assertIsInstance(is_synthetic, bool)
 
         name = field.getName()
         self.assertIsInstance(name, str)
@@ -775,7 +780,7 @@ class JVMTestCase(unittest.TestCase):
         #jclass: JClass, val: int)
         #field.setStaticInt(jclass, val)
 
-        #jclass: JClass, val: Union[int, long])
+        #jclass: JClass, val: int | long)
         #field.setStaticLong(jclass, val)
 
         #jclass: JClass, val: float)
@@ -787,7 +792,7 @@ class JVMTestCase(unittest.TestCase):
         #jclass: JClass, val: str)
         #field.setStaticString(jclass, val)
 
-        #jclass: JClass, val: Optional[JObject])
+        #jclass: JClass, val: JObject | None)
         #field.setStaticObject(jclass, val)
 
         #this: JObject, val: bool)
@@ -805,7 +810,7 @@ class JVMTestCase(unittest.TestCase):
         #this: JObject, val: int)
         #field.setInt(this, val)
 
-        #this: JObject, val: Union[int, long])
+        #this: JObject, val: int | long)
         #field.setLong(this, val)
 
         #this: JObject, val: float)
@@ -814,10 +819,10 @@ class JVMTestCase(unittest.TestCase):
         #this: JObject, val: float)
         #field.setDouble(this, val)
 
-        #this: JObject, val: Optional[str])
+        #this: JObject, val: str | None)
         #field.setString(this, val)
 
-        #this: JObject, val: Optional[JObject])
+        #this: JObject, val: JObject | None)
         #field.setObject(this, val)
 
     def test_JArguments(self):
@@ -905,7 +910,7 @@ class JVMTestCase(unittest.TestCase):
                 jargs.setInt(4, val_expected)
 
         for val_expected in (True, False, 0, 1, 23, 34, 2222222222222222, 9223372036854775807):
-            #pos: int, val_expected: Union[int, long]
+            #pos: int, val_expected: int | long
             jargs.setLong(5, val_expected)
             val = jargs.arguments[5].j
             self.assertIsInstance(val, int)
@@ -953,7 +958,7 @@ class JVMTestCase(unittest.TestCase):
                 jargs.setDouble(7, val_expected)
 
         for val_expected in (None, "", "XXX"):
-            #pos: int, val: Optional[str]
+            #pos: int, val: str | None
             jargs.setString(8, val_expected)
             val = jargs.arguments[8].l
             #self.assertIsInstance(val, float)
@@ -969,7 +974,7 @@ class JVMTestCase(unittest.TestCase):
                 jargs.setString(8, val_expected)
 
         for val_expected in (None,):
-            #pos: int, val: Optional[str]
+            #pos: int, val: str | None
             jargs.setObject(9, val_expected)
             val = jargs.arguments[9].l
             #self.assertIsInstance(val, float)
@@ -1003,7 +1008,7 @@ class JVMTestCase(unittest.TestCase):
             self.assertIsInstance(jctor, self.jvm.JConstructor)
         self.assertGreaterEqual(len(constructors), 15)
 
-        ctor_signature = u"([BLjava/lang/String;)V"
+        ctor_signature = "([BLjava/lang/String;)V"
         jctor = self._get_constructor(jclass, ctor_signature)
         # throws UnsupportedEncodingException
 
@@ -1023,6 +1028,9 @@ class JVMTestCase(unittest.TestCase):
 
         raw_modifiers = jctor.getModifiers()
         self.assertIsInstance(raw_modifiers, int)
+
+        is_synthetic = jctor.isSynthetic()
+        self.assertIsInstance(is_synthetic, bool)
 
         name = jctor.getName()
         self.assertIsInstance(name, str)
@@ -1048,7 +1056,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(signature, str)
         self.assertEqual(signature, ctor_signature)
 
-        ctor_signature = u"([CII)V"
+        ctor_signature = "([CII)V"
         jctor = self._get_constructor(jclass, ctor_signature)
 
         # from JMember
@@ -1067,6 +1075,9 @@ class JVMTestCase(unittest.TestCase):
 
         raw_modifiers = jctor.getModifiers()
         self.assertIsInstance(raw_modifiers, int)
+
+        is_synthetic = jctor.isSynthetic()
+        self.assertIsInstance(is_synthetic, bool)
 
         name = jctor.getName()
         self.assertIsInstance(name, str)
@@ -1108,37 +1119,51 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(jobject, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobject)
         self.assertEqual(jobject.getClass().getName(), jclass_name)
-        self.assertEqual(jobject.toString(), u"eArr")
+        self.assertEqual(jobject.toString(), "eArr")
 
     def test_JMethod(self):
 
-        jclass_name = "java.lang.String"
+        jclass_name1 = "java.lang.String"
+        jclass_name2 = "java.math.BigInteger"
 
-        jclass = self.jvm.JClass.forName(jclass_name)
-        self._check_jclass(jclass,
-                           name=jclass_name,
-                           canonical_name=jclass_name,
-                           simple_name=jclass_name.rpartition(".")[-1],
+        jclass1 = self.jvm.JClass.forName(jclass_name1)
+        self._check_jclass(jclass1,
+                           name=jclass_name1,
+                           canonical_name=jclass_name1,
+                           simple_name=jclass_name1.rpartition(".")[-1],
                            is_array=False)
 
-        methods = jclass.getDeclaredMethods()
+        methods = jclass1.getDeclaredMethods()
         self.assertIsInstance(methods, tuple)
         for jmethod in methods:
             self.assertIsInstance(jmethod, self.jvm.JMethod)
         self.assertGreaterEqual(len(methods), 1)
 
-        jmethod_name = u"getBytes"
-        jmethod_signature = u"(Ljava/lang/String;)[B"
-        jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
+        jclass2 = self.jvm.JClass.forName(jclass_name2)
+        self._check_jclass(jclass2,
+                           name=jclass_name2,
+                           canonical_name=jclass_name2,
+                           simple_name=jclass_name2.rpartition(".")[-1],
+                           is_array=False)
+
+        methods = jclass2.getDeclaredMethods()
+        self.assertIsInstance(methods, tuple)
+        for jmethod in methods:
+            self.assertIsInstance(jmethod, self.jvm.JMethod)
+        self.assertGreaterEqual(len(methods), 1)
+
+        jmethod_name = "getBytes"
+        jmethod_signature = "(Ljava/lang/String;)[B"
+        jmethod = self._get_method(jclass1, jmethod_name, jmethod_signature)
         # throws UnsupportedEncodingException
 
         # from JMember
 
         decl_class = jmethod.getDeclaringClass()
         self._check_jclass(decl_class,
-                           name=jclass_name,
-                           canonical_name=jclass_name,
-                           simple_name=jclass_name.rpartition(".")[-1],
+                           name=jclass_name1,
+                           canonical_name=jclass_name1,
+                           simple_name=jclass_name1.rpartition(".")[-1],
                            is_array=False)
 
         modifiers = jmethod.getModifiersSet()
@@ -1148,6 +1173,9 @@ class JVMTestCase(unittest.TestCase):
 
         raw_modifiers = jmethod.getModifiers()
         self.assertIsInstance(raw_modifiers, int)
+
+        is_synthetic = jmethod.isSynthetic()
+        self.assertIsInstance(is_synthetic, bool)
 
         name = jmethod.getName()
         self.assertIsInstance(name, str)
@@ -1176,17 +1204,17 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(signature, str)
         self.assertEqual(signature, jmethod_signature)
 
-        jmethod_name = u"codePointCount"
-        jmethod_signature = u"(II)I"
-        jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
+        jmethod_name = "codePointCount"
+        jmethod_signature = "(II)I"
+        jmethod = self._get_method(jclass1, jmethod_name, jmethod_signature)
 
         # from JMember
 
         decl_class = jmethod.getDeclaringClass()
         self._check_jclass(decl_class,
-                           name=jclass_name,
-                           canonical_name=jclass_name,
-                           simple_name=jclass_name.rpartition(".")[-1],
+                           name=jclass_name1,
+                           canonical_name=jclass_name1,
+                           simple_name=jclass_name1.rpartition(".")[-1],
                            is_array=False)
 
         modifiers = jmethod.getModifiersSet()
@@ -1196,6 +1224,9 @@ class JVMTestCase(unittest.TestCase):
 
         raw_modifiers = jmethod.getModifiers()
         self.assertIsInstance(raw_modifiers, int)
+
+        is_synthetic = jmethod.isSynthetic()
+        self.assertIsInstance(is_synthetic, bool)
 
         name = jmethod.getName()
         self.assertIsInstance(name, str)
@@ -1225,8 +1256,8 @@ class JVMTestCase(unittest.TestCase):
 
         # Methods call
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1235,8 +1266,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticVoid(jclass, jargs)
         #self.assertIsNone(return_value)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1244,8 +1275,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticBoolean(jclass, jargs)
         #self.assertIsInstance(return_value, bool)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1253,8 +1284,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticChar(jclass, jargs)
         #self.assertIsInstance(return_value, str)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1262,8 +1293,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticByte(jclass, jargs)
         #self.assertIsInstance(return_value, int)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1271,8 +1302,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticShort(jclass, jargs)
         #self.assertIsInstance(return_value, int)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1280,8 +1311,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticInt(jclass, jargs)
         #self.assertIsInstance(return_value, int)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1289,8 +1320,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticLong(jclass, jargs)
         #self.assertIsInstance(return_value, int)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1298,8 +1329,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticFloat(jclass, jargs)
         #self.assertIsInstance(return_value, float)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1307,8 +1338,8 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticDouble(jclass, jargs)
         #self.assertIsInstance(return_value, float)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1316,18 +1347,20 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callStaticString(jclass, jargs)
         #self.assertIsInstance(return_value, (str, NoneType))
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
-        jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callStaticObject(jclass, jargs)
-        #self.assertIsInstance(return_value, (self.jvm.JObject, NoneType))
+        jmethod_name = "valueOf"
+        jmethod_signature = "(J)Ljava/math/BigInteger;"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "java.math.BigInteger")
+        jargs = self.jvm.JArguments(1)
+        jargs.setLong(0, 234)
+        return_value = jmethod.callStaticObject(jclass2, jargs)
+        self.assertIsInstance(return_value, (self.jvm.JObject, NoneType))
+        self.assertIsNotNone(return_value)
+        self.assertEqual(return_value.toString(), "234")
 
-        ctor_signature = u"([CII)V"
-        jctor = self._get_constructor(jclass, ctor_signature)
-
+        ctor_signature = "([CII)V"
+        jctor = self._get_constructor(jclass1, ctor_signature)
         jargs = self.jvm.JArguments(3)
         jarray = self.jvm.JArray.newCharArray(8)
         jarray.setChar(0, 'T')
@@ -1341,14 +1374,24 @@ class JVMTestCase(unittest.TestCase):
         jargs.setArray(0, jarray)
         jargs.setInt(1, 2)
         jargs.setInt(2, 4)
-        this = jctor.newInstance(jargs)
-        self.assertIsInstance(this, (self.jvm.JObject, NoneType))
-        self.assertIsNotNone(this)
-        self.assertEqual(this.getClass().getName(), jclass_name)
-        self.assertEqual(this.toString(), u"eArr")
+        this1 = jctor.newInstance(jargs)
+        self.assertIsInstance(this1, (self.jvm.JObject, NoneType))
+        self.assertIsNotNone(this1)
+        self.assertEqual(this1.getClass().getName(), jclass_name1)
+        self.assertEqual(this1.toString(), "eArr")
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
+        ctor_signature = "(Ljava/lang/String;)V"
+        jctor = self._get_constructor(jclass2, ctor_signature)
+        jargs = self.jvm.JArguments(1)
+        jargs.setString(0, "123")
+        this2 = jctor.newInstance(jargs)
+        self.assertIsInstance(this2, (self.jvm.JObject, NoneType))
+        self.assertIsNotNone(this2)
+        self.assertEqual(this2.getClass().getName(), jclass_name2)
+        self.assertEqual(this2.toString(), "123")
+
+        #jmethod_name = "???"
+        #jmethod_signature = "???"
         #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         #return_type = jmethod.getReturnType()
         #self.assertEqual(return_type.getName(), "???")
@@ -1356,99 +1399,120 @@ class JVMTestCase(unittest.TestCase):
         #return_value = jmethod.callInstanceVoid(this, jargs)
         #self.assertIsNone(return_value)
 
-        jmethod_name = u"isEmpty"
-        jmethod_signature = u"()Z"
-        jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
+        jmethod_name = "isEmpty"
+        jmethod_signature = "()Z"
+        jmethod = self._get_method(jclass1, jmethod_name, jmethod_signature)
         return_type = jmethod.getReturnType()
         self.assertEqual(return_type.getName(), "boolean")
         jargs = self.jvm.JArguments(0)
-        return_value = jmethod.callInstanceBoolean(this, jargs)
+        return_value = jmethod.callInstanceBoolean(this1, jargs)
         self.assertIsInstance(return_value, bool)
         self.assertFalse(return_value)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
-        jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceChar(this, jargs)
-        #self.assertIsInstance(return_value, str)
+        jmethod_name = "charAt"
+        jmethod_signature = "(I)C"
+        jmethod = self._get_method(jclass1, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "char")
+        jargs = self.jvm.JArguments(1)
+        jargs.setInt(0, 1)
+        return_value = jmethod.callInstanceChar(this1, jargs)
+        self.assertIsInstance(return_value, str)
+        self.assertEqual(return_value, "A")
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
+        jmethod_name = "byteValueExact"
+        jmethod_signature = "()B"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "byte")
         jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceByte(this, jargs)
-        #self.assertIsInstance(return_value, int)
+        return_value = jmethod.callInstanceByte(this2, jargs)
+        self.assertIsInstance(return_value, int)
+        self.assertEqual(return_value, 123)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
+        jmethod_name = "shortValueExact"
+        jmethod_signature = "()S"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "short")
         jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceShort(this, jargs)
-        #self.assertIsInstance(return_value, int)
+        return_value = jmethod.callInstanceShort(this2, jargs)
+        self.assertIsInstance(return_value, int)
+        self.assertEqual(return_value, 123)
 
-        jmethod_name = u"length"
-        jmethod_signature = u"()I"
-        jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
+        jmethod_name = "intValueExact"
+        jmethod_signature = "()I"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
         return_type = jmethod.getReturnType()
         self.assertEqual(return_type.getName(), "int")
         jargs = self.jvm.JArguments(0)
-        return_value = jmethod.callInstanceInt(this, jargs)
+        return_value = jmethod.callInstanceInt(this2, jargs)
         self.assertIsInstance(return_value, int)
-        self.assertEqual(return_value, 4)
+        self.assertEqual(return_value, 123)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
+        jmethod_name = "longValueExact"
+        jmethod_signature = "()J"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "long")
         jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceLong(this, jargs)
-        #self.assertIsInstance(return_value, int)
+        return_value = jmethod.callInstanceLong(this2, jargs)
+        self.assertIsInstance(return_value, int)
+        self.assertEqual(return_value, 123)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
+        jmethod_name = "floatValue"
+        jmethod_signature = "()F"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "float")
         jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceFloat(this, jargs)
-        #self.assertIsInstance(return_value, float)
+        return_value = jmethod.callInstanceFloat(this2, jargs)
+        self.assertIsInstance(return_value, float)
+        self.assertEqual(return_value, 123.0)
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
+        jmethod_name = "doubleValue"
+        jmethod_signature = "()D"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "double")
         jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceDouble(this, jargs)
-        #self.assertIsInstance(return_value, float)
+        return_value = jmethod.callInstanceDouble(this2, jargs)
+        self.assertIsInstance(return_value, float)
+        self.assertEqual(return_value, 123.0)
 
-        jmethod_name = u"toUpperCase"
-        jmethod_signature = u"()Ljava/lang/String;"
-        jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
+        jmethod_name = "toUpperCase"
+        jmethod_signature = "()Ljava/lang/String;"
+        jmethod = self._get_method(jclass1, jmethod_name, jmethod_signature)
         return_type = jmethod.getReturnType()
         self.assertEqual(return_type.getName(), "java.lang.String")
         jargs = self.jvm.JArguments(0)
-        return_value = jmethod.callInstanceString(this, jargs)
+        return_value = jmethod.callInstanceString(this1, jargs)
         self.assertIsInstance(return_value, (str, NoneType))
         self.assertIsNotNone(return_value)
-        self.assertEqual(return_value, u"EARR")
+        self.assertEqual(return_value, "EARR")
 
-        #jmethod_name = u"???"
-        #jmethod_signature = u"???"
-        #jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
-        #return_type = jmethod.getReturnType()
-        #self.assertEqual(return_type.getName(), "???")
+        jmethod_name = "negate"
+        jmethod_signature = "()Ljava/math/BigInteger;"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "java.math.BigInteger")
         jargs = self.jvm.JArguments(0)
-        #return_value = jmethod.callInstanceObject(this, jargs)
-        #self.assertIsInstance(return_value, (self.jvm.JObject, NoneType))
+        return_value = jmethod.callInstanceObject(this2, jargs)
+        self.assertIsInstance(return_value, (self.jvm.JObject, NoneType))
+        self.assertIsNotNone(return_value)
+        self.assertEqual(return_value.toString(), "-123")
+
+        jmethod_name = "pow"
+        jmethod_signature = "(I)Ljava/math/BigInteger;"
+        jmethod = self._get_method(jclass2, jmethod_name, jmethod_signature)
+        return_type = jmethod.getReturnType()
+        self.assertEqual(return_type.getName(), "java.math.BigInteger")
+        jargs = self.jvm.JArguments(1)
+        jargs.setInt(0, 2)
+        return_value = jmethod.callInstanceObject(this2, jargs)
+        self.assertIsInstance(return_value, (self.jvm.JObject, NoneType))
+        self.assertIsNotNone(return_value)
+        self.assertEqual(return_value.toString(), str(123**2))
 
     def test_JPropertyDescriptor(self):
 
@@ -1479,6 +1543,9 @@ class JVMTestCase(unittest.TestCase):
         hash_value = prop.hashCode()
         self.assertIsInstance(hash_value, int)
 
+        str_value = prop.toString()
+        self.assertIsInstance(str_value, str)
+
         name = prop.getName()
         self.assertIsInstance(name, str)
         self.assertEqual(name, prop_name)
@@ -1507,6 +1574,9 @@ class JVMTestCase(unittest.TestCase):
         hash_value = prop.hashCode()
         self.assertIsInstance(hash_value, int)
 
+        str_value = prop.toString()
+        self.assertIsInstance(str_value, str)
+
         name = prop.getName()
         self.assertIsInstance(name, str)
         self.assertEqual(name, prop_name)
@@ -1529,16 +1599,17 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsNotNone(write_method)
         self.assertEqual(write_method.getName(), "set" + prop_name[0].upper() + prop_name[1:])
 
+    @unittest.skipIf(platform.is_pypy, "jvm: crash on PyPy!!!")
     def test_JObject(self):
 
         # from JObjectBase
 
-        from jvm.jvm import JVMException
-        with self.assertRaises(JVMException):
+        from jvm.jvm import JVMError
+        with self.assertRaises(JVMError):
             jobj = self.jvm.JObject(None, 0, own=False)
-        del JVMException
+        del JVMError
 
-        jobj = self.jvm.JObject.newString(u"ABCDEF")
+        jobj = self.jvm.JObject.newString("ABCDEF")
         self.assertIsInstance(jobj, self.jvm.JObject)
 
         handle = jobj.handle
@@ -1581,7 +1652,7 @@ class JVMTestCase(unittest.TestCase):
         is_equals = jobj.equals(jobj2)
         self.assertIsInstance(is_equals, bool)
         self.assertTrue(is_equals)
-        jobj2 = self.jvm.JObject.newString(u"ABCDEF")
+        jobj2 = self.jvm.JObject.newString("ABCDEF")
         is_equals = jobj.equals(jobj2)
         self.assertIsInstance(is_equals, bool)
         self.assertTrue(is_equals)
@@ -1601,7 +1672,7 @@ class JVMTestCase(unittest.TestCase):
 
         # from JObject
 
-        #jobj: Optional['JObjectBase'], ->Optional['JObject']
+        #jobj: JObjectBase | None, -> JObject | None
         #= self.jvm.JObject.fromObject(cls, jobj):
         #
         #    with cls.jvm as (jvm, jenv):
@@ -1616,7 +1687,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsNotNone(jobj)
 
         #val: str
-        jobj = self.jvm.JObject.newCharacter(u"A")
+        jobj = self.jvm.JObject.newCharacter("A")
         self.assertIsInstance(jobj, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobj)
 
@@ -1635,7 +1706,7 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(jobj, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobj)
 
-        #val: Union[int, long]
+        #val: int | long
         jobj = self.jvm.JObject.newLong(12345)
         self.assertIsInstance(jobj, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobj)
@@ -1657,11 +1728,11 @@ class JVMTestCase(unittest.TestCase):
         jobj = self.jvm.JObject.newString("STRING")
         self.assertIsInstance(jobj, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobj)
-        jobj = self.jvm.JObject.newString(u"STRING")
+        jobj = self.jvm.JObject.newString("STRING")
         self.assertIsInstance(jobj, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobj)
 
-        #val: Union[bytes, bytearray, memoryview, memview]
+        #val: bytes | bytearray | memoryview | memview
         jobj = self.jvm.JObject.newDirectByteBuffer(b"abcdefgh")
         self.assertIsInstance(jobj, (self.jvm.JObject, NoneType))
         self.assertIsNotNone(jobj)
@@ -1684,7 +1755,7 @@ class JVMTestCase(unittest.TestCase):
         jclass = jobj.asClass()
         self.assertIsInstance(jclass, self.jvm.JClass)
 
-        #javaType: Optional[EJavaType], own: bool
+        #javaType: EJavaType | None, own: bool
         jarr = jobj.asArray(javaType=None, own=True)
         self.assertIsInstance(jarr, self.jvm.JArray)
         jarr = jobj.asArray(javaType=None, own=False)
@@ -1698,11 +1769,11 @@ class JVMTestCase(unittest.TestCase):
         value = jobj.booleanValue()
         self.assertIsInstance(value, bool)
 
-        jobj = self.jvm.JObject.newCharacter(u"A")
+        jobj = self.jvm.JObject.newCharacter("A")
         value = jobj.charValue()
         self.assertIsInstance(value, str)
         self.assertEqual(len(value), 1)
-        self.assertEqual(value, u"A")
+        self.assertEqual(value, "A")
 
         jobj = self.jvm.JObject.newByte(66)
         value = jobj.byteValue()
@@ -1734,11 +1805,11 @@ class JVMTestCase(unittest.TestCase):
         self.assertIsInstance(value, float)
         self.assertAlmostEqual(value, 12345.67, 7)
 
-        jobj = self.jvm.JObject.newString(u"STRING")
+        jobj = self.jvm.JObject.newString("STRING")
         value = jobj.stringValue()
         self.assertIsInstance(value, str)
-        self.assertEqual(value, u"STRING")
-        # return jstr if jstr is not None else u"null" #!!! v1.x
+        self.assertEqual(value, "STRING")
+        # return jstr if jstr is not None else "null" #!!! v1.x
 
         values = self.jvm.JObject.minmaxByteValue()
         self.assertIsInstance(values, tuple)
@@ -1787,10 +1858,10 @@ class JVMTestCase(unittest.TestCase):
 
     def test_JAnnotation(self):
 
-        from jvm.jvm import JVMException
-        with self.assertRaises(JVMException):
+        from jvm.jvm import JVMError
+        with self.assertRaises(JVMError):
             jobj = self.jvm.JAnnotation(None, 0, own=False)
-        del JVMException
+        del JVMError
 
         jclass_name = "java.security.Signer"
 
@@ -1837,7 +1908,7 @@ class JVMTestCase(unittest.TestCase):
             #is_equals = jobj.equals(jobj2)
             #self.assertIsInstance(is_equals, bool)
             #self.assertTrue(is_equals)
-            jobj2 = self.jvm.JObject.newString(u"ABCDEF")
+            jobj2 = self.jvm.JObject.newString("ABCDEF")
             is_equals = jannotation.equals(jobj2)
             self.assertIsInstance(is_equals, bool)
             self.assertFalse(is_equals)
@@ -1880,7 +1951,7 @@ class JVMTestCase(unittest.TestCase):
         cloader = thread.getContextClassLoader()
         self.assertIsInstance(cloader, (self.jvm.JClassLoader, NoneType))
 
-        #jcloader: Optional[JClassLoader]
+        #jcloader: JClassLoader | None
         # thread.setContextClassLoader(jcloader)
 
         is_daemon = thread.isDaemon()
@@ -1919,8 +1990,8 @@ class JVMTestCase(unittest.TestCase):
         py_object2 = object()
         py_object3 = object()
 
-        jmethod_name = u"testReferenceQueue"
-        jmethod_signature = u"([I)V"
+        jmethod_name = "testReferenceQueue"
+        jmethod_signature = "([I)V"
         jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         return_type = jmethod.getReturnType()
         self.assertEqual(return_type.getName(), "void")
@@ -1937,6 +2008,7 @@ class JVMTestCase(unittest.TestCase):
     def test_JException(self):
         pass  # TODO
 
+    @unittest.skipIf(platform.is_pypy, "jvm: crash on PyPy!!!")
     def test_JString(self):
 
         jclass_name = "org.jt.jvm.test.StringTest"
@@ -1948,41 +2020,41 @@ class JVMTestCase(unittest.TestCase):
                            simple_name=jclass_name.rpartition(".")[-1],
                            is_array=False)
 
-        jfield_name = u"fieldStaticString"
+        jfield_name = "fieldStaticString"
         jfield = jclass.getDeclaredField(jfield_name)
         field_type = jfield.getType()
         self.assertEqual(field_type.getName(), "java.lang.String")
 
-        jmethod_name = u"methodStaticString"
-        jmethod_signature = u"()Ljava/lang/String;"
+        jmethod_name = "methodStaticString"
+        jmethod_signature = "()Ljava/lang/String;"
         jmethod = self._get_method(jclass, jmethod_name, jmethod_signature)
         return_type = jmethod.getReturnType()
         self.assertEqual(return_type.getName(), "java.lang.String")
         jargs = self.jvm.JArguments(0)
         return_value = jmethod.callStaticString(jclass, jargs)
         self.assertIsInstance(return_value, str)
-        self.assertEqual(return_value, u"hello \U0001F30E!")
+        self.assertEqual(return_value, "hello \U0001F30E!")
 
         #Test = jclass # autoclass('org.jnius.BasicsTest')
         #test = Test()
-        #self.assertEquals(Test.fieldStaticString,    u"hello \U0001F30E!")
-        #self.assertEquals(test.fieldString,          u"hello \U0001F30E!")
-        #self.assertEquals(Test.methodStaticString(), u"hello \U0001F30E!")
-        #self.assertEquals(test.methodString(),       u"hello \U0001F30E!")
+        #self.assertEquals(Test.fieldStaticString,    "hello \U0001F30E!")
+        #self.assertEquals(test.fieldString,          "hello \U0001F30E!")
+        #self.assertEquals(Test.methodStaticString(), "hello \U0001F30E!")
+        #self.assertEquals(test.methodString(),       "hello \U0001F30E!")
 
         # Unicode charset:
         #
-        # u"\u0000" - u"\uD7FF"
-        # u"\uE000" - u"\uFFFF"
-        # u"\U00010000" - u"\U0010FFFF"
+        # "\u0000" - "\uD7FF"
+        # "\uE000" - "\uFFFF"
+        # "\U00010000" - "\U0010FFFF"
 
-        s = u""
+        s = ""
         for x in range(0x0000, 0xD7FF + 1):
             s += chr(x)
         for x in range(0xE000, 0xFFFF + 1):
             s += chr(x)
 
-        s = u""
+        s = ""
         for x in range(0x00010000, min(0x0010FFFF, sys.maxunicode) + 1):
             s += chr(x)
 
@@ -1992,8 +2064,7 @@ class JVMTestCase(unittest.TestCase):
     def test_PythonInterpreter(self):
 
         jclass = self.jvm.JClass.forName("org.python.util.PythonInterpreter")
-        jctor  = self._get_constructor(jclass, u"()V")
-
+        jctor  = self._get_constructor(jclass, "()V")
         jargs = self.jvm.JArguments(0)
         python = jctor.newInstance(jargs)
         #!!!print("@@@", dir(python))

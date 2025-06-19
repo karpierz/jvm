@@ -5,8 +5,8 @@ __all__ = ('to_int', 'to_float')
 
 
 def to_int(val) -> int:
-    return int(val if hasattr(val, "__int__") or
-                      hasattr(val, "__trunc__") else None)
+    return int(val if hasattr(val, "__int__")
+                   or hasattr(val, "__trunc__") else None)
 
 
 def to_float(val) -> float:

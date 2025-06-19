@@ -1,9 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional
+from __future__ import annotations
 
 import jni
 from .lib import public
@@ -28,20 +27,23 @@ class JFrame(obj):
 
     __slots__ = ('__jenv', '__size')
 
-    def __init__(self, jenv: jni.JNIEnv, size: int=0):
+    def __init__(self, jenv: jni.JNIEnv, size: int = 0):
+        """Initializer"""
         self.__jenv = jenv
         self.__size = max(size, JLOCAL_REFS) if size else 0
 
     def __enter__(self):
+        """Enter context"""
         if self.__size: self.__jenv.PushLocalFrame(self.__size)
         return self
 
-    def reset(self, size: Optional[int] = None):
-        if self.__size: self.__jenv.PopLocalFrame(jni.NULL)
-        if size is not None: self.__size = size
-        if self.__size: self.__jenv.PushLocalFrame(self.__size)
-
     def __exit__(self, *exc_info):
+        """Exit context"""
         del exc_info
         if not self.__jenv: return
         if self.__size: self.__jenv.PopLocalFrame(jni.NULL)
+
+    def reset(self, size: int | None = None):
+        if self.__size: self.__jenv.PopLocalFrame(jni.NULL)
+        if size is not None: self.__size = size
+        if self.__size: self.__jenv.PushLocalFrame(self.__size)

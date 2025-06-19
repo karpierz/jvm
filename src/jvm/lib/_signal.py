@@ -7,6 +7,7 @@ __all__ = ('Signal',)
 class Signal:
 
     def __init__(self, *types):
+        """Initializer"""
         self._listeners = []
 
     def connect(self, listener):
@@ -20,5 +21,6 @@ class Signal:
             listener(*args, **kwargs)
 
     def __iadd__(self, listener):
+        """???"""
         self.connect(listener)
         return self

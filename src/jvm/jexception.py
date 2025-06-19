@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 
 import jni
 from .lib import public
@@ -25,6 +26,7 @@ class JException(JObjectBase):
     # self.__jinfo: jni.jstring
 
     def __init__(self, thr: jni.Throwable):
+        """Initializer"""
         self._jobj   = jni.obj(jni.jthrowable)
         self.__jinfo = jni.obj(jni.jstring)
         _, jenv = self.jvm
@@ -39,6 +41,7 @@ class JException(JObjectBase):
         #     self.jvm.handleException(exc)
 
     def __del__(self):
+        """Finalizer"""
         try: jvm, jenv = self.jvm
         except Exception: return  # pragma: no cover
         if jvm.jnijvm:
@@ -50,7 +53,7 @@ class JException(JObjectBase):
         PyExc = cls.jvm.ExceptionsMap.get(EStatusCode.ERR, RuntimeError)
         raise PyExc("An error occured while handling a Java Exception")
 
-    def asObject(self) -> Optional['JObject']:
+    def asObject(self) -> JObject | None:
 
         with self.jvm as (jvm, jenv):
             try:
@@ -59,7 +62,7 @@ class JException(JObjectBase):
                 JException.__handle_unexpected(exc)
 
     @cached
-    def getClass(self) -> Optional['JClass']:
+    def getClass(self) -> JClass | None:
         """Returns the runtime class of this Object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             try:
@@ -71,8 +74,9 @@ class JException(JObjectBase):
                 JException.__handle_unexpected(exc)
 
     @cached
-    def hashCode(self) -> Optional[int]:
+    def hashCode(self) -> int | None:
         """Returns a hash code value for the object.
+
         See Object.hashCode() for a complete description.
         """
         with self.jvm as (jvm, jenv):
@@ -83,7 +87,7 @@ class JException(JObjectBase):
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
 
-    def toString(self) -> Optional[str]:
+    def toString(self) -> str | None:
         """Returns a string representation of the object."""
         with self.jvm as (jvm, jenv):
             try:
@@ -95,7 +99,7 @@ class JException(JObjectBase):
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
 
-    def getMessage(self) -> Optional[str]:
+    def getMessage(self) -> str | None:
         """Returns the detail message string of this throwable."""
         with self.jvm as (jvm, jenv):
             try:
@@ -107,7 +111,7 @@ class JException(JObjectBase):
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
 
-    def getLocalizedMessage(self) -> Optional[str]:
+    def getLocalizedMessage(self) -> str | None:
         """Creates a localized description of this throwable."""
         with self.jvm as (jvm, jenv):
             try:
@@ -119,10 +123,9 @@ class JException(JObjectBase):
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
 
-    def getCause(self) -> Optional['JException']:
-        """Returns the cause of this throwable or null if the cause is nonexistent
-        or unknown.
-        """
+    def getCause(self) -> JException | None:
+        """Returns the cause of this throwable or null if the cause is nonexistent \
+        or unknown."""
         with self.jvm as (jvm, jenv):
             try:
                 if jvm is None or jenv is None or not self._jobj:
@@ -133,10 +136,9 @@ class JException(JObjectBase):
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
 
-    def getStackTrace(self) -> Optional[Tuple['JObject', ...]]:
-        """Provides programmatic access to the stack trace information printed by
-        printStackTrace().
-        """
+    def getStackTrace(self) -> Tuple[JObject, ...] | None:
+        """Provides programmatic access to the stack trace information printed by \
+        printStackTrace()."""
         with self.jvm as (jvm, jenv):
             try:
                 if jvm is None or jenv is None or not self._jobj:
@@ -152,10 +154,9 @@ class JException(JObjectBase):
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
 
-    def getStackTraceString(self) -> Optional[str]:
-        """Returns this throwable and its backtrace information as string printed by
-        printStackTrace().
-        """
+    def getStackTraceString(self) -> str | None:
+        """Returns this throwable and its backtrace information as string printed by \
+        printStackTrace()."""
         with self.jvm as (jvm, jenv):
             try:
                 if jvm is None or jenv is None or not self._jobj:
@@ -164,11 +165,11 @@ class JException(JObjectBase):
                     stringWriter = jenv.NewObject(jvm.StringWriter.Class,
                                                   jvm.StringWriter.Constructor)
                     jargs = jni.new_array(jni.jvalue, 1)
-                    jargs[0].l = stringWriter
+                    jargs[0].l = stringWriter  # noqa: E741
                     printWriter = jenv.NewObject(jvm.PrintWriter.Class,
                                                  jvm.PrintWriter.Constructor, jargs)
                     jargs = jni.new_array(jni.jvalue, 1)
-                    jargs[0].l = printWriter
+                    jargs[0].l = printWriter  # noqa: E741
                     jenv.CallVoidMethod(self._jobj,
                                         jvm.Throwable.printStackTrace, jargs)
                     jenv.CallVoidMethod(printWriter, jvm.PrintWriter.flush)
@@ -192,8 +193,10 @@ class JException(JObjectBase):
 
     @classmethod
     def printDescribe(cls):
-        """Prints an exception and a backtrace of the stack to a system error-reporting
-        channel, such as stderr. This is a convenience routine provided for debugging.
+        """Prints an exception and a backtrace of the stack to a system error-reporting \
+        channel, such as stderr.
+
+        This is a convenience routine provided for debugging.
         This will only have an effect if the jvm flag 'describe_exceptions' is set.
         """
         with cls.jvm as (jvm, jenv):
@@ -202,3 +205,7 @@ class JException(JObjectBase):
                     jenv.ExceptionDescribe()
             except jni.Throwable as exc:
                 JException.__handle_unexpected(exc)
+
+
+from .jclass  import JClass   # noqa: E402
+from .jobject import JObject  # noqa: E402

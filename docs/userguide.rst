@@ -363,7 +363,7 @@ This method tries to automatically obtain the path to a Java runtime
 installation. This path is needed as argument for startJVM method and should
 be used in favour of hardcoded paths to make your scripts more portable.
 There are several methods under the hood to search for a JVM. If none
-of them succeeds, the method will raise a JVMNotFoundException.
+of them succeeds, the method will raise a JVMNotFoundError.
 
 Arguments
 :::::::::
@@ -377,7 +377,7 @@ valid path to a Java virtual machine library (jvm.dll, jvm.so, jvm.dylib)
 
 Exceptions
 ::::::::::
-JVMNotFoundException, if none of the provided methods returned a valid JVM path.
+JVMNotFoundError, if none of the provided methods returned a valid JVM path.
 
 startJVM method
 ~~~~~~~~~~~~~~~

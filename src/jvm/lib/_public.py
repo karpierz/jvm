@@ -16,7 +16,7 @@ def public(thing=None, **kwargs):
              sys.modules[thing.__module__].__dict__)  # The decorator syntax.
     dunder_all = mdict.setdefault("__all__", [])
     if not isinstance(dunder_all, list):
-        raise ValueError(f"__all__ must be a list not: {type(dunder_all)}")
+        raise TypeError(f"__all__ must be a list not: {type(dunder_all)}")
     if thing is None:
         # The function call form.
         retval = []
@@ -41,7 +41,7 @@ def private(thing):
     mdict = sys.modules[thing.__module__].__dict__
     dunder_all = mdict.setdefault("__all__", [])
     if not isinstance(dunder_all, list):
-        raise ValueError(f"__all__ must be a list not: {type(dunder_all)}")
+        raise TypeError(f"__all__ must be a list not: {type(dunder_all)}")
     if thing.__name__ in dunder_all:
         dunder_all.remove(thing.__name__)
     return thing

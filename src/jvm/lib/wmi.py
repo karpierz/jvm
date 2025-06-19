@@ -1,6 +1,5 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
 __all__ = ('WmiObject', 'WmiClient')
@@ -9,6 +8,7 @@ __all__ = ('WmiObject', 'WmiClient')
 class WmiObject:
 
     def __init__(self, com_object):
+        """Initializer"""
         super().__init__()
         self._properties = None
         self._values     = {}
@@ -32,6 +32,7 @@ class WmiObject:
 class WmiClient:
 
     def __init__(self, namespace=r"root\cimv2"):
+        """Initializer"""
         super().__init__()
         from comtypes import CoInitializeEx
         # CoInitialize is per-thread, but comtypes only calls it once on module load.
@@ -55,24 +56,22 @@ class WmiClient:
 
     def execute_query(self, query):
         from _ctypes import COMError
-        from sys     import version_info
         results = self._com_client.ExecQuery(query)
         count = 0
         try:
             count = results.Count
         except COMError:
             pass
-        for idx in (range(count) if version_info[0] >= 3 else xrange(count)):
+        for idx in range(count):
             yield results.ItemIndex(idx)
 
     def execute_event_query(self, query):
         from _ctypes import COMError
-        from sys     import version_info
         results = self._com_client.ExecNotificationQuery(query)
         count = 0
         try:
             count = results.Count
         except COMError:
             pass
-        for idx in (range(count) if version_info[0] >= 3 else xrange(count)):
+        for idx in range(count):
             yield results.ItemIndex(idx)

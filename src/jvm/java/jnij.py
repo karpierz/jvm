@@ -1,6 +1,5 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
 import jni
@@ -131,7 +130,7 @@ class java_nio(jnij):
             jcls = jenv.FindClass(b"java/nio/DoubleBuffer")
             self.DoubleBufferClass  = jni.cast(jenv.NewGlobalRef(jcls), jni.jclass)
             self.DoubleBuffer_order = jenv.GetMethodID(jcls, b"order", b"()Ljava/nio/ByteOrder;")
-            jcls = jenv.FindClass(b"java/nio/ByteOrder");
+            jcls = jenv.FindClass(b"java/nio/ByteOrder")
             self.ByteOrderClass = jni.cast(jenv.NewGlobalRef(jcls), jni.jclass)
             self.ByteOrder_nativeOrder = jenv.GetStaticMethodID(jcls, b"nativeOrder", b"()Ljava/nio/ByteOrder;")
 

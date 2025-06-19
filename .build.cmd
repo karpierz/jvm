@@ -1,10 +1,11 @@
 @echo off
-setlocal enableDelayedExpansion
-set JAVA_HOME=C:\Program Files\Zulu\zulu-11
+setlocal
+set JAVA_HOME=C:\Program Files\Zulu\zulu-17
 set javac="%JAVA_HOME%\bin\javac" -encoding UTF-8 -g:none ^
           -deprecation -Xlint:unchecked --release 8
 
-set py=C:\Windows\py.exe -3.12 -B
+set py=C:\Windows\py.exe -3.13 -B
+
 set vcdir=%ProgramFiles%\Microsoft Visual Studio\2022
 set vc32="%vcdir%\Community\VC\Auxiliary\Build\vcvars32.bat"
 set vc64="%vcdir%\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -15,6 +16,8 @@ if exist %vc32% goto :start
 echo VC compiler (2022) should be installed!
 goto :exit
 :start
+
+echo Compile java C extensions ...
 pushd "%~dp0"
 rmdir /Q/S %TEMP%\jvm 2> nul
 setlocal
@@ -40,6 +43,8 @@ cl /TC /O2 /Ob2 /LD ^
    /link /IMPLIB:%BUILD_DIR%\PythonInterpreter.lib /INCREMENTAL:NO
 endlocal
 popd
+
+echo Compile java classes ...
 pushd "%~dp0"\src\jvm\java
 %py% org\python\Version.py
 %javac% ^
@@ -108,5 +113,6 @@ dir /S/B/O:N ^
 del /F/Q build.fil
 popd
 
+echo Done
 :exit
 endlocal

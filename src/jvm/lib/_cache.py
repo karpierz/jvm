@@ -25,17 +25,15 @@ def cached(method):
 
 
 def cached_property(fget=None, fset=None, fdel=None, doc=None):
-    """cached_property(fget=None, fset=None, fdel=None, doc=None)
+    """Decorator to simple cache property attribute.
 
-    Property attribute.
-
-      fget
-        function to be used for cached getting an attribute value
-      fset
-        function to be used for setting an attribute value
-      fdel
-        function to be used for del'ing an attribute
-      doc
-        docstring
+    fget
+      function to be used for cached getting an attribute value
+    fset
+      function to be used for setting an attribute value
+    fdel
+      function to be used for del'ing an attribute
+    doc
+      docstring
     """
     return property(None if fget is None else cached(fget), fset, fdel, doc)

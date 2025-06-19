@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 
 import jni
 from .lib import public
@@ -11,7 +12,6 @@ from .lib import public
 from .jframe       import JFrame
 from .jstring      import JString
 from .jobjectbase  import JObjectBase
-from .jclassloader import JClassLoader
 
 
 @public
@@ -21,7 +21,7 @@ class JThread(JObjectBase):
     __slots__ = ()
 
     @classmethod
-    def currentThread(cls) -> 'JThread':
+    def currentThread(cls) -> JThread:
         """Returns a reference to the currently executing thread object."""
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jthread = jenv.CallStaticObjectMethod(jvm.Thread.Class,
@@ -39,17 +39,17 @@ class JThread(JObjectBase):
             jname = jenv.CallObjectMethod(self._jobj, jvm.Thread.getName)
             return JString(jenv, jname, own=False).str
 
-    def getContextClassLoader(self) -> Optional[JClassLoader]:
+    def getContextClassLoader(self) -> JClassLoader | None:
         """Returns the context ClassLoader for this thread."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcld = jenv.CallObjectMethod(self._jobj, jvm.Thread.getContextClassLoader)
             return self.jvm.JClassLoader(jenv, jcld) if jcld else None
 
-    def setContextClassLoader(self, jcloader: Optional[JClassLoader]):
+    def setContextClassLoader(self, jcloader: JClassLoader | None):
         """Sets the context ClassLoader for this thread."""
         with self.jvm as (jvm, jenv):
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jcloader.handle if jcloader is not None else jni.NULL
+            jargs[0].l = jcloader.handle if jcloader is not None else jni.NULL  # noqa: E741
             jenv.CallVoidMethod(self._jobj, jvm.Thread.setContextClassLoader, jargs)
 
     def isDaemon(self) -> bool:
@@ -68,9 +68,8 @@ class JThread(JObjectBase):
             return jenv.CallBooleanMethod(self._jobj, jvm.Thread.isInterrupted)
 
     def start(self):
-        """Causes this thread to begin execution; the Java Virtual Machine calls
-        the run method of this thread.
-        """
+        """Causes this thread to begin execution; the Java Virtual Machine calls \
+        the run method of this thread."""
         with self.jvm as (jvm, jenv):
             jenv.CallVoidMethod(self._jobj, jvm.Thread.start)
 
@@ -84,10 +83,9 @@ class JThread(JObjectBase):
         with self.jvm as (jvm, jenv):
             jenv.CallVoidMethod(self._jobj, jvm.Thread.interrupt)
 
-    def getStackTrace(self) -> Tuple['JObject', ...]:
-        """Returns an array of stack trace elements representing the stack dump
-        of this thread.
-        """
+    def getStackTrace(self) -> Tuple[JObject, ...]:
+        """Returns an array of stack trace elements representing the stack dump \
+        of this thread."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jarr = jni.cast(jenv.CallObjectMethod(self._jobj,
                                                   jvm.Thread.getStackTrace),
@@ -97,3 +95,7 @@ class JThread(JObjectBase):
                 return tuple(self.jvm.JObject(jenv,
                                               jenv.GetObjectArrayElement(jarr, idx))
                              for idx in range(jlen))
+
+
+from .jobject      import JObject       # noqa: E402
+from .jclassloader import JClassLoader  # noqa: E402

@@ -1,6 +1,5 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
 __all__ = ('prompt',)
@@ -49,14 +48,13 @@ if readline is not None:
         import rlcompleter
         readline.set_completer(rlcompleter.Completer(locals()).complete)
         readline.parse_and_bind("tab: complete")
-    except:
+    except BaseException:
         pass
     try:
-       #history_file = os.path.join(os.path.expanduser("~"), ".jep")
-        history_file = os.path.join(os.path.expanduser("~"), ".jtypes")
+        history_file = os.path.join(os.path.expanduser("~"), ".jtypes")  # , ".jep")
         if not os.path.exists(history_file):
             open(history_file, "w").close()
-            #readline.write_history_file(history_file)
+            # readline.write_history_file(history_file)
         else:
             readline.read_history_file(history_file)
     except IOError:
@@ -67,11 +65,11 @@ del os
 
 def prompt(python=None):
 
-    #import code
-    #con = code.InteractiveConsole([locals[, filename]])
+    # import code
+    # con = code.InteractiveConsole([locals[, filename]])
 
     import sys
-    import traceback
+    # import traceback
 
     PS1 = getattr(sys, "ps1", ">>> ")
     PS2 = getattr(sys, "ps2", "... ")
@@ -82,7 +80,7 @@ def prompt(python=None):
         while True:
             try:
                 line = input(PS1 if ran else PS2)
-            except:
+            except BaseException:
                 break
             ran = True
             try:
@@ -94,9 +92,9 @@ def prompt(python=None):
                     else:
                         exec(line, None)
                         ran = True
-            #except SystemExit:
-            #    # if a user uses exit(), don't print the error
-            #    pass
+            # except SystemExit:
+            #     # if a user uses exit(), don't print the error
+            #     pass
             except Exception as err:
                 printed_err = False
                 try:
@@ -108,7 +106,7 @@ def prompt(python=None):
                 finally:
                     if not printed_err:
                         print(f"{err}")
-                #traceback.print_exc()
+                # traceback.print_exc()
     finally:
         if history_file is not None:
             try:

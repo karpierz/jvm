@@ -1,19 +1,15 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional
+from __future__ import annotations
 
-import jni
 from .lib import public
 from .lib import cached
 
 from .jframe      import JFrame
-from .jobjectbase import JObjectBase
-from .jclass      import JClass
 from .jstring     import JString
-from .jmethod     import JMethod
+from .jobjectbase import JObjectBase
 
 
 @public
@@ -23,8 +19,9 @@ class JPropertyDescriptor(JObjectBase):
     __slots__ = ()
 
     @cached
-    def getPropertyType(self) -> Optional[JClass]:
+    def getPropertyType(self) -> JClass | None:
         """Returns the Java type info for the property.
+
         Note that the Class object may describe primitive Java types such as int.
         This type is returned by the read method or is used as the parameter type
         of the write method. Returns null if the type is an indexed property that
@@ -35,14 +32,14 @@ class JPropertyDescriptor(JObjectBase):
             return self.jvm.JClass(jenv, jcls) if jcls else None
 
     @cached
-    def getReadMethod(self) -> Optional[JMethod]:
+    def getReadMethod(self) -> JMethod | None:
         """Gets the method that should be used to read the property value."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jmeth = jenv.CallObjectMethod(self._jobj, jvm.PropertyDescriptor.getReadMethod)
             return self.jvm.JMethod(jenv, jmeth) if jmeth else None
 
     @cached
-    def getWriteMethod(self) -> Optional[JMethod]:
+    def getWriteMethod(self) -> JMethod | None:
         """Gets the method that should be used to write the property value."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jmeth = jenv.CallObjectMethod(self._jobj, jvm.PropertyDescriptor.getWriteMethod)
@@ -51,6 +48,7 @@ class JPropertyDescriptor(JObjectBase):
     @cached
     def hashCode(self) -> int:
         """Returns a hash code value for the object.
+
         See Object.hashCode() for a complete description.
         """
         with self.jvm as (jvm, jenv):
@@ -66,10 +64,15 @@ class JPropertyDescriptor(JObjectBase):
             return JString(jenv, jname, own=False).str
 
     @cached
-    def toString(self) -> Optional[str]:
+    def toString(self) -> str | None:
         """Returns a string representation of the object.
+
         See Object.toString() for a complete description.
         """
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jstr = jenv.CallObjectMethod(self._jobj, jvm.PropertyDescriptor.toString)
             return JString(jenv, jstr, own=False).str if jstr else None
+
+
+from .jclass  import JClass   # noqa: E402
+from .jmethod import JMethod  # noqa: E402

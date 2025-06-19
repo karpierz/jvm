@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 from pathlib import Path
 import os
 import re
@@ -16,11 +17,10 @@ from . import _jvmfinder
 
 @public
 class JVMFinder(_jvmfinder.JVMFinder):
-    """
-    Linux JVM library finder class
-    """
+    """Linux JVM library finder class"""
 
     def __init__(self, java_version=None):
+        """Initializer"""
         super().__init__(java_version)
 
         # Java bin file
@@ -38,12 +38,12 @@ class JVMFinder(_jvmfinder.JVMFinder):
 
         # Search methods
         self._methods = (
-            self._get_from_java_home,       # self._getFromJavaHome,
-            self._get_from_bin,             # self._getFromLibPath,
-            self._get_from_known_locations, # self._getFromKnownLocations,
+            self._get_from_java_home,        # self._getFromJavaHome,
+            self._get_from_bin,              # self._getFromLibPath,
+            self._get_from_known_locations,  # self._getFromKnownLocations,
         )
 
-    def _get_from_bin(self) -> Optional[Path]:
+    def _get_from_bin(self) -> Path | None:
         java_exe = self._java.resolve()
         if java_exe.exists():
             # Get to the home directory
@@ -52,7 +52,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
         else:
             return None
 
-    def _getFromJavaHome(self) -> Optional[Path]:
+    def _getFromJavaHome(self) -> Path | None:
 
         java_home = self.get_java_home()
 
@@ -60,8 +60,8 @@ class JVMFinder(_jvmfinder.JVMFinder):
             # Check JAVA_HOME directory to see if Java version is adequate
             java_exe = java_home/"bin/java"
             if java_exe.is_file():
-                if (not self._java_version or
-                    self.get_java_version(java_exe) == self._java_version):
+                if (not self._java_version
+                    or self.get_java_version(java_exe) == self._java_version):  # noqa: E129
                     jre_home = self.get_jre_home(java_home)
                 else:
                     java_home = None
@@ -72,8 +72,8 @@ class JVMFinder(_jvmfinder.JVMFinder):
             cout = run("locate", "bin/java", text=True, capture_output=True).stdout
             for java_exe in cout.splitlines():
                 if java_exe.endswith("/java"):
-                    if (not self._java_version or
-                        self.get_java_version(java_exe) == self._java_version):
+                    if (not self._java_version
+                        or self.get_java_version(java_exe) == self._java_version):  # noqa: E129
                         java_home = Path(java_exe[:-len("/bin/java")])
                         jre_home  = self.get_jre_home(java_home)
                         if jre_home.is_dir():
@@ -93,7 +93,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
 
         return None
 
-    def _getFromLibPath(self) -> Optional[Path]:
+    def _getFromLibPath(self) -> Path | None:
         # on linux, the JVM has to be in the LD_LIBRARY_PATH anyway,
         # so might as well inspect it
 
@@ -107,7 +107,7 @@ class JVMFinder(_jvmfinder.JVMFinder):
                     pass
         return None
 
-    def _getFromKnownLocations(self) -> Optional[Path]:
+    def _getFromKnownLocations(self) -> Path | None:
 
         KNOWN_LOCATIONS = [
             (r"/opt/sun/",  re.compile(r"j2sdk(.+)/jre/lib/i386/client/")),

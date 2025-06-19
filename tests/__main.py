@@ -1,6 +1,5 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
 import unittest
@@ -110,6 +109,8 @@ def main(argv=sys.argv[1:]):
 
     with multiprocessing.Pool(len(jvm_paths)) as pool:
         result = pool.map(test, jvm_paths)
+
+    test(dir_prefix/"Zulu/zulu-17-jre/bin/server/jvm.dll")
 
     return 0 if not any(result) else 1
 

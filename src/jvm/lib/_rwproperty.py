@@ -43,7 +43,7 @@ class get(_property):
         return property(func, oldprop.fset, oldprop.fdel)
 
 
-class set(_property):
+class set(_property):  # noqa: A001
 
     @staticmethod
     def create_property(func):

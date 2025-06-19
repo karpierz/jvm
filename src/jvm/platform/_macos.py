@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 from pathlib import Path
 
 from ..lib import public
@@ -14,11 +15,10 @@ from . import _linux
 
 @public
 class JVMFinder(_linux.JVMFinder):
-    """
-    Mac OS X JVM library finder class
-    """
+    """Mac OS X JVM library finder class"""
 
     def __init__(self, java_version=None):
+        """Initializer"""
         super().__init__(java_version)
 
         # Library file name
@@ -38,11 +38,11 @@ class JVMFinder(_linux.JVMFinder):
         #     self.defaultPath,
         # )
 
-    def _pre_vm7_path(self) -> Optional[Path]:
+    def _pre_vm7_path(self) -> Path | None:
         # Returns the previous (older then Java7) constant JVM library path
         return Path("/System/Library/Frameworks/JavaVM.framework/JavaVM")
 
-    def _javahome_binary(self) -> Optional[Path]:
+    def _javahome_binary(self) -> Path | None:
         # For osx > 10.5 we have the nice util /usr/libexec/java_home available.
         # Invoke it and return its output.
         # It seems this tool has been removed in osx 10.9.
@@ -54,24 +54,27 @@ class JVMFinder(_linux.JVMFinder):
             return None
         return subprocess.check_output(["/usr/libexec/java_home"]).strip()
 
-    def defaultPath(self) -> Optional[Path]:
+    def defaultPath(self) -> Path | None:
         # This script attempts to find an existing installation of Java that
         # meets a minimum version requirement on a Mac OS X machine.
 
+        sys_lib = Path("/System/Library")
+
         # on darwin, the JVM is always in the same location it seems ...
-        return Path("/System/Library/Frameworks/JavaVM.framework/JavaVM")
+        return sys_lib/"Frameworks/JavaVM.framework/JavaVM"
 
         java_home = self.get_java_home()
 
         if java_home is not None:
             # Check JAVA_HOME directory to see if Java version is adequate
-            java_exe = java_home/"bin/java"
+            # java_exe = java_home/"bin/java"
             # [...]
+            pass
 
         if java_home is None:
             # If the existing JAVA_HOME directory is inadequate, use '/usr/libexec/java_home'
             # to search for other possible java candidates and check their versions.
-            if Path("/usr/libexec/java_home").isfile(): # -x
+            if Path("/usr/libexec/java_home").isfile():  # -x
                 # Apple JDKs
                 java_home = run("/usr/libexec/java_home",
                                 "" if not self._java_version else f"-v {self._java_version}",
@@ -80,8 +83,8 @@ class JVMFinder(_linux.JVMFinder):
             else:
                 # Look for the Apple JDKs first to preserve the existing behaviour,
                 # and then look for the new JDKs provided by Oracle.
-                framework_jdk = Path("/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK")
-                system_jdk    = Path("/System/Library/Java/JavaVirtualMachines/CurrentJDK")
+                framework_jdk = sys_lib/"Frameworks/JavaVM.framework/Versions/CurrentJDK"
+                system_jdk    = sys_lib/"Java/JavaVirtualMachines/CurrentJDK"
                 location_jdk  = self._locations[0]/"CurrentJDK"
                 if framework_jdk.is_link():
                     # Apple JDKs

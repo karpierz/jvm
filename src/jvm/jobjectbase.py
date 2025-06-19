@@ -1,9 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional
+from __future__ import annotations
 
 import jni
 from .lib import public
@@ -23,15 +22,17 @@ class JObjectBase(obj):
     # self._jobj: jni.jobject
 
     def __init__(self, jenv: jni.JNIEnv, jobj: jni.jobject, own: bool = True):
+        """Initializer"""
         self._jobj = jni.NULL
         self._own  = own
         if not jobj:
             from .jconstants import EStatusCode
-            from .jvm        import JVMException
-            raise JVMException(EStatusCode.UNKNOWN, "Allocating null Object")
+            from .jvm        import JVMError
+            raise JVMError(EStatusCode.UNKNOWN, "Allocating null Object")
         self._jobj = jni.cast(jenv.NewGlobalRef(jobj) if own else jobj, jni.jobject)
 
     def __del__(self):
+        """Finalizer"""
         if not self._own or not self.jvm: return
         try: jvm, jenv = self.jvm
         except Exception: return  # pragma: no cover
@@ -45,6 +46,7 @@ class JObjectBase(obj):
         return int(self.hashCode())
 
     def __eq__(self, other):
+        """???"""
 
         if self is other:
             return True
@@ -64,16 +66,12 @@ class JObjectBase(obj):
         with self.jvm as (jvm, jenv):
             return jenv.IsSameObject(self_handle, other_handle)
 
-    def __ne__(self, other):
-        eq = self.__eq__(other)
-        return NotImplemented if eq is NotImplemented else not eq
-
     def __str__(self):
         """Returns a string representation of the object."""
         return self.toString()
 
     @cached
-    def getClass(self) -> 'JClass':
+    def getClass(self) -> JClass:  # noqa: F821 # !!!
         """Returns the runtime class of this Object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jcls = jenv.GetObjectClass(self._jobj)
@@ -86,7 +84,7 @@ class JObjectBase(obj):
             return int(jenv.CallIntMethod(self._jobj, jvm.Object.hashCode))
 
     @cached
-    def toString(self) -> Optional[str]:
+    def toString(self) -> str | None:
         """Returns a string representation of the object."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jstr = jenv.CallObjectMethod(self._jobj, jvm.Object.toString)
@@ -108,6 +106,9 @@ class JObjectBase(obj):
 
         with self.jvm as (jvm, jenv):
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = other_handle
-            return (jenv.IsSameObject(self_handle, other_handle) or
-                    jenv.CallBooleanMethod(self_handle, jvm.Object.equals, jargs))
+            jargs[0].l = other_handle  # noqa: E741
+            return (jenv.IsSameObject(self_handle, other_handle)
+                    or jenv.CallBooleanMethod(self_handle, jvm.Object.equals, jargs))
+
+
+# from .jclass import JClass  # noqa: E402

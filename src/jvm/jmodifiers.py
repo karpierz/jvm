@@ -1,7 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
+
+from __future__ import annotations
 
 import jni
 from .lib import public
@@ -15,6 +16,7 @@ class JModifiers(obj):
                  'modif')
 
     def __init__(self, jvm, jenv: jni.JNIEnv, modif: int):
+        """Initializer"""
         Modif = jvm.Modifier
         jcls = Modif.Class
         jmod = jni.new_array(jni.jvalue, 1)

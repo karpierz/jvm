@@ -1,7 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
+
+from __future__ import annotations
 
 import jni
 from .lib import public
@@ -14,82 +15,81 @@ from .jobjectbase import JObjectBase
 class JModifier(JObjectBase):
 
     @classproperty
-    def PUBLIC(cls) -> int:
+    def PUBLIC(cls) -> int:  # noqa: N805
         """The int value representing the public modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.PUBLIC
 
     @classproperty
-    def PROTECTED(cls) -> int:
+    def PROTECTED(cls) -> int:  # noqa: N805
         """The int value representing the protected modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.PROTECTED
 
     @classproperty
-    def PRIVATE(cls) -> int:
+    def PRIVATE(cls) -> int:  # noqa: N805
         """The int value representing the private modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.PRIVATE
 
     @classproperty
-    def FINAL(cls) -> int:
+    def FINAL(cls) -> int:  # noqa: N805
         """The int value representing the final modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.FINAL
 
     @classproperty
-    def STATIC(cls) -> int:
+    def STATIC(cls) -> int:  # noqa: N805
         """The int value representing the static modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.STATIC
 
     @classproperty
-    def ABSTRACT(cls) -> int:
+    def ABSTRACT(cls) -> int:  # noqa: N805
         """The int value representing the abstract modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.ABSTRACT
 
     @classproperty
-    def INTERFACE(cls) -> int:
+    def INTERFACE(cls) -> int:  # noqa: N805
         """The int value representing the interface modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.INTERFACE
 
     @classproperty
-    def NATIVE(cls) -> int:
+    def NATIVE(cls) -> int:  # noqa: N805
         """The int value representing the native modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.NATIVE
 
     @classproperty
-    def STRICT(cls) -> int:
+    def STRICT(cls) -> int:  # noqa: N805
         """The int value representing the strictfp modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.STRICT
 
     @classproperty
-    def SYNCHRONIZED(cls) -> int:
+    def SYNCHRONIZED(cls) -> int:  # noqa: N805
         """The int value representing the synchronized modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.SYNCHRONIZED
 
     @classproperty
-    def TRANSIENT(cls) -> int:
+    def TRANSIENT(cls) -> int:  # noqa: N805
         """The int value representing the transient modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.TRANSIENT
 
     @classproperty
-    def VOLATILE(cls) -> int:
+    def VOLATILE(cls) -> int:  # noqa: N805
         """The int value representing the volatile modifier."""
         with cls.jvm as (jvm, jenv):
             return jvm.Modifier.VOLATILE
 
     @classmethod
     def isPublic(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the public modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the public modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -98,9 +98,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isProtected(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the protected modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the protected modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -109,9 +108,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isPrivate(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the private modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the private modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -120,9 +118,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isFinal(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the final modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the final modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -131,9 +128,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isStatic(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the static modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the static modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -142,9 +138,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isAbstract(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the abstract modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the abstract modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -153,9 +148,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isInterface(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the interface modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the interface modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -164,9 +158,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isNative(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the native modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the native modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -175,9 +168,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isStrict(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the strictfp modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the strictfp modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -186,9 +178,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isSynchronized(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the synchronized modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the synchronized modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -197,9 +188,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isTransient(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the transient modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the transient modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif
@@ -208,9 +198,8 @@ class JModifier(JObjectBase):
 
     @classmethod
     def isVolatile(cls, modif: int) -> bool:
-        """Return True if the integer argument includes the volatile modifier,
-        False otherwise.
-        """
+        """Return True if the integer argument includes the volatile modifier, \
+        False otherwise."""
         with cls.jvm as (jvm, jenv):
             jmod = jni.new_array(jni.jvalue, 1)
             jmod[0].i = modif

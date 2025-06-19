@@ -27,6 +27,7 @@ urls = {
     21: "https://docs.oracle.com/en/java/javase/21/docs/api/allclasses-index.html",
     22: "https://docs.oracle.com/en/java/javase/22/docs/api/allclasses-index.html",
     23: "https://docs.oracle.com/en/java/javase/23/docs/api/allclasses-index.html",
+    24: "https://docs.oracle.com/en/java/javase/24/docs/api/allclasses-index.html",
 }
 
 here = Path(__file__).resolve().parent

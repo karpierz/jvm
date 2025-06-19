@@ -5,23 +5,21 @@
 
 from __future__ import absolute_import
 
-__all__ = ('memoryview','buffer','Py_buffer','Buffer','isbuffer')
+__all__ = ('memoryview', 'buffer', 'Py_buffer', 'Buffer', 'isbuffer')
 
+from typing import List
 import sys
 import platform
-PY3 = sys.version_info[0] >= 3
-long    = int
-unicode = str
-import gc
 import struct
 import binascii
 from ctypes import (c_bool, c_char, c_byte, c_ubyte, c_short, c_ushort, c_int, c_uint, c_long,
                     c_ulong, c_longlong, c_ulonglong, c_ssize_t, c_size_t, c_float, c_double,
-                    c_char_p, c_void_p, POINTER, pointer, byref, sizeof, addressof, resize,
+                    c_char_p, c_void_p, POINTER, pointer, byref, sizeof, resize,  # addressof,
                     cast, memset, memmove, py_object, create_string_buffer, Structure)
 from memorybuffer import Py_buffer, Buffer, isbuffer
 
 is_cpython = (platform.python_implementation().lower() == "cpython")
+is_pypy    = (platform.python_implementation().lower() == "pypy")
 
 CHAR_BIT   = 8
 UCHAR_MAX  = c_ubyte(-1).value
@@ -42,12 +40,6 @@ LLONG_MAX  = ULLONG_MAX // 2
 
 if is_cpython:
     from ctypes import pythonapi
-    Py_IncRef = pythonapi.Py_IncRef
-    Py_IncRef.argtypes = [py_object]
-    Py_IncRef.restype  = None
-    Py_DecRef = pythonapi.Py_DecRef
-    Py_DecRef.argtypes = [py_object]
-    Py_DecRef.restype  = None
     PyObject_GetBuffer = pythonapi.PyObject_GetBuffer
     PyObject_GetBuffer.argtypes = [py_object, POINTER(Py_buffer), c_int]
     PyObject_GetBuffer.restype  = c_int
@@ -90,42 +82,109 @@ if is_cpython:
     Py_FatalError = pythonapi.Py_FatalError
     Py_FatalError.argtypes = [c_char_p]
     Py_FatalError.restype  = None
+elif is_pypy:
+    import os
+    from cffi import FFI
+    ffi = FFI()
+    ffi.cdef("struct _typeobject;")
+    ffi.cdef("typedef struct _typeobject PyTypeObject;")
+    ffi.cdef("typedef long long Py_ssize_t;")
+    ffi.cdef("typedef Py_ssize_t Signed;")
+    ffi.cdef("""
+    typedef struct _object {
+        Py_ssize_t ob_refcnt;
+        Py_ssize_t ob_pypy_link;
+        struct _typeobject *ob_type;
+    } PyObject;
+    """)
+    ffi.cdef("""
+    /* Py3k buffer interface, adapted for PyPy */
+    /* Changing this constant changes the ABI */
+    #define PyBUF_MAX_NDIM 64
+    typedef struct bufferinfo {
+        void *buf;
+        PyObject *obj;        /* owned reference */
+        Py_ssize_t len;
+        Py_ssize_t itemsize;  /* This is Py_ssize_t so it can be
+                                 pointed to by strides in simple case.*/
+        int readonly;
+        int ndim;
+        char *format;
+        Py_ssize_t *shape;
+        Py_ssize_t *strides;
+        Py_ssize_t *suboffsets; /* alway NULL for app-level objects*/
+        void *internal; /* always NULL for app-level objects */
+        /* PyPy extensions */
+        int flags;
+        Py_ssize_t _strides[PyBUF_MAX_NDIM];
+        Py_ssize_t _shape[PyBUF_MAX_NDIM];
+        /* static store for shape and strides of
+           mono-dimensional buffers. */
+        /* Py_ssize_t smalltable[2]; */
+    } Py_buffer;
+    """)
+    ffi.cdef("int PyPyObject_GetBuffer(PyObject *obj, Py_buffer *view, int flags);")
+    ffi.cdef("void PyPyBuffer_Release(Py_buffer *view);")
+    ffi.cdef("int PyPyBuffer_IsContiguous(struct bufferinfo *arg0, char arg1);")
+    ffi.cdef("int PyPyBuffer_FillInfo(struct bufferinfo *arg0, struct _object *arg1, "
+             "                        void *arg2, Signed arg3, int arg4, int arg5);")
+    ffi.cdef("struct _object * PyPyNumber_Index(struct _object *arg0);")
+    ffi.cdef("Signed PyPyNumber_AsSsize_t(struct _object *arg0, struct _object *arg1);")
+    ffi.cdef("int PyPyLong_AsLong(struct _object *arg0);")
+    ffi.cdef("unsigned int PyPyLong_AsUnsignedLong(struct _object *arg0);")
+    ffi.cdef("Signed PyPyLong_AsLongLong(struct _object *arg0);")
+    ffi.cdef("size_t PyPyLong_AsUnsignedLongLong(struct _object *arg0);")
+    ffi.cdef("Signed PyPyLong_AsSsize_t(struct _object *arg0);")
+    ffi.cdef("size_t PyPyLong_AsSize_t(struct _object *arg0);")
+    ffi.cdef("double PyPyFloat_AsDouble(struct _object *arg0);")
+    ffi.cdef("void _PyPy_FatalErrorFunc(const char * func, const char *msg);")
+    ffi.cdef("void PyPy_FatalError(const char *msg);")
+    pypyapi = ffi.dlopen(os.path.join(os.path.dirname(sys.executable),
+                         f"libpypy{sys.version_info[0]}.{sys.version_info[1]}-c.dll"))
+    PyObject_GetBuffer = pypyapi.PyPyObject_GetBuffer
+    PyBuffer_Release = pypyapi.PyPyBuffer_Release
+    PyBuffer_IsContiguous = pypyapi.PyPyBuffer_IsContiguous
+    PyBuffer_FillInfo = pypyapi.PyPyBuffer_FillInfo
+    PyNumber_Index = pypyapi.PyPyNumber_Index
+    PyNumber_AsSsize_t = pypyapi.PyPyNumber_AsSsize_t
+    PyLong_AsLong = pypyapi.PyPyLong_AsLong
+    PyLong_AsUnsignedLong = pypyapi.PyPyLong_AsUnsignedLong
+    PyLong_AsLongLong = pypyapi.PyPyLong_AsLongLong
+    PyLong_AsUnsignedLongLong = pypyapi.PyPyLong_AsUnsignedLongLong
+    PyLong_AsSsize_t = pypyapi.PyPyLong_AsSsize_t
+    PyLong_AsSize_t = pypyapi.PyPyLong_AsSize_t
+    PyFloat_AsDouble = pypyapi.PyPyFloat_AsDouble
+    _Py_FatalErrorFunc = pypyapi._PyPy_FatalErrorFunc
+    # Py_FatalError = lambda message: _Py_FatalErrorFunc(0, message)
+    Py_FatalError = pypyapi.PyPy_FatalError
 else:
-    def Py_IncRef(*args, **kwargs): return None
-    def Py_DecRef(*args, **kwargs): return None
-    #def PyObject_GetBuffer(*args, **kwargs): return None
-    #def PyBuffer_Release(*args, **kwargs): return None
-    #def PyBuffer_IsContiguous(*args, **kwargs): return None
-    #def PyBuffer_FillInfo(*args, **kwargs): return None
-    #def PyNumber_Index(*args, **kwargs): return None
-    #def PyNumber_AsSsize_t(*args, **kwargs): return None
-    #def PyLong_AsLong(*args, **kwargs): return None
-    #def PyLong_AsUnsignedLong(*args, **kwargs): return None
-    #def PyLong_AsLongLong(*args, **kwargs): return None
-    #def PyLong_AsUnsignedLongLong(*args, **kwargs): return None
-    #def PyLong_AsSsize_t(*args, **kwargs): return None
-    #def PyLong_AsSize_t(*args, **kwargs): return None
-    #def PyFloat_AsDouble(*args, **kwargs): return None
-    #def Py_FatalError(*args, **kwargs): return None
+    raise NotImplementedError("memoryview is not implemented for "
+                              f"'{platform.python_implementation()}'")
+
 
 def ct_ptr_add(ptr, offset):
     vptr = cast(ptr, c_void_p)
     vptr.value += offset
     return cast(vptr, type(ptr))
 
+
 def ct_copy(dst, src):
     pointer(dst)[0] = src
+
 
 def ct_clone(src):
     dst = type(src)()
     pointer(dst)[0] = src
     return dst
 
+
 def is_multislice(idx):
     return isinstance(idx, tuple) and idx and all(isinstance(item, slice) for item in idx)
 
+
 def is_multiindex(idx):
     return isinstance(idx, tuple) and all(hasattr(item, "__index__") for item in idx)
+
 
 # ManagedBuffer Object:
 # ---------------------
@@ -165,18 +224,19 @@ def is_multiindex(idx):
 
 _Py_MANAGED_BUFFER_RELEASED = 0x0001  # access to exporter blocked
 
+
 class managedbuffer(Py_buffer):
 
-    __slots__ = ('_flags','_exports')
+    __slots__ = ('_flags', '_exports')
 
     def __new__(cls, *args, **kwargs):
-
         self = super(managedbuffer, cls).__new__(cls, *args, **kwargs)
         self._flags   = _Py_MANAGED_BUFFER_RELEASED  # state flags
         self._exports = 0  # number of direct memoryview exports
         return self
 
     def __init__(self, obj=None, flags=Py_buffer.PyBUF_FULL_RO):
+        """Initializer"""
 
         # (self, object, flags=PyBUF_RECORDS_RO | PyBUF_C_CONTIGUOUS): # memorybuffers
 
@@ -190,39 +250,41 @@ class managedbuffer(Py_buffer):
         except Exception as exc:
             self.obj = py_object()
             raise exc
-        if result != 0: #!!! a nie TypeError ???
+        if result != 0:  # !!! a nie TypeError ???
             self.obj = py_object()
-            raise ValueError("Unable to retrieve Buffer from {}".format(obj))
-        if not self.buf: #!!! a nie TypeError ???
+            raise ValueError(f"Unable to retrieve Buffer from {obj}")
+        if not self.buf:  # !!! a nie TypeError ???
             self.obj = py_object()
-            raise ValueError("Null pointer result from {}".format(obj))
+            raise ValueError(f"Null pointer result from {obj}")
 
         self._flags &= ~_Py_MANAGED_BUFFER_RELEASED
 
     def __del__(self, PyBuffer_Release=PyBuffer_Release):
+        """Finalizer"""
 
         # NOTE: at this point self._exports can still be > 0 if this function
         # is called from Py_buffer.__clear() to break up a reference cycle.
 
-        #!!!assert self._exports == 0, self._exports
+        # !!!assert self._exports == 0, self._exports
 
         if self._flags & _Py_MANAGED_BUFFER_RELEASED:
             return
 
         self._flags |= _Py_MANAGED_BUFFER_RELEASED
 
-        #if not self.buf: # tego nie bylo w memoryview !!!
-        #    return
+        # if not self.buf: # tego nie bylo w memoryview !!!
+        #     return
 
         PyBuffer_Release(self)
-        #!!!self.buf = None # NULL
+        # !!!self.buf = None # NULL
         memset(byref(self), 0, sizeof(Py_buffer))
+
 
 buffer = managedbuffer  # alias
 
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 #                              MemoryView Object                             #
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 
 # memoryview state flags
 _Py_MEMORYVIEW_RELEASED   = 0x001  # access to master buffer blocked
@@ -233,21 +295,23 @@ _Py_MEMORYVIEW_PIL        = 0x010  # PIL-style layout
 _Py_MEMORYVIEW_STRICT_PY3 = 0x020  # strict Python3 mode
 
 
-class memoryview(Buffer, Structure):
+class memoryview(Buffer, Structure):  # noqa: A001
+    """memoryview(object)
 
-    """memoryview(object)\n\n""" \
-    """Create a new memoryview object which references the given object."""
+    Create a new memoryview object which references the given object.
+    """
 
-    _fields_  = (("_mbuf",     py_object),      # POINTER(managedbuffer)) # managed buffer
-                 ("_hash",     c_ssize_t),      # Py_hash_t,hash value for read-only views
-                 ("_flags",    c_int),          # state flags
-                 ("_exports",  c_ssize_t),      # number of buffer re-exports
-                 ("_view",     Py_buffer),      # private copy of the exporter's view
-                 ("_ob_array", c_ssize_t * 0))  # shape, strides, suboffsets
+    _fields_ = (
+        ("_mbuf",     py_object),      # POINTER(managedbuffer)) # managed buffer
+        ("_hash",     c_ssize_t),      # Py_hash_t,hash value for read-only views
+        ("_flags",    c_int),          # state flags
+        ("_exports",  c_ssize_t),      # number of buffer re-exports
+        ("_view",     Py_buffer),      # private copy of the exporter's view
+        ("_ob_array", c_ssize_t * 0),  # shape, strides, suboffsets
+    )
 
-#!!!def __new__(cls, object, strict_py3=False):
-    def __new__(cls, object, strict_py3=True):
-
+# !!!def __new__(cls, object, strict_py3=False):
+    def __new__(cls, object, strict_py3=True):  # noqa: A002
         # Create a memoryview from an object that implements the buffer protocol.
         # If the object is a memoryview, the new memoryview must be registered
         # with the same managed buffer. Otherwise, a new managed buffer is created.
@@ -264,10 +328,10 @@ class memoryview(Buffer, Structure):
 
         else:
             raise TypeError("memoryview: a bytes-like object is required, "
-                            "not '{:.200}'".format(object.__class__.__name__))
+                            f"not '{object.__class__.__name__:.200}'")
 
-    def __init__(self, object, strict_py3=False):
-
+    def __init__(self, object, strict_py3=False):  # noqa: A002
+        """Initializer"""
         super(memoryview, self).__init__()
 
     @classmethod
@@ -283,11 +347,11 @@ class memoryview(Buffer, Structure):
 
         if src.ndim > Py_buffer.PyBUF_MAX_NDIM:
             raise ValueError("memoryview: number of dimensions "
-                             "must not exceed {}".format(Py_buffer.PyBUF_MAX_NDIM))
+                             f"must not exceed {Py_buffer.PyBUF_MAX_NDIM}")
 
         self = memoryview._new_incomplete_view(src, mbuf, src.ndim)
         Py_buff.init_shape_strides(self._view, src)
-        Py_buff.init_suboffsets   (self._view, src)
+        Py_buff.init_suboffsets(self._view, src)
         self._init_flags(strict_py3=strict_py3)
 
         return self
@@ -324,7 +388,7 @@ class memoryview(Buffer, Structure):
         return self
 
     def __del__(self):
-
+        """Finalizer"""
         assert self._exports == 0
 
         self.release()
@@ -332,9 +396,7 @@ class memoryview(Buffer, Structure):
 
     @property
     def obj(self):
-
         """The underlying object of the memoryview."""
-
         self._check_released()
         view = self._view
         try:
@@ -344,103 +406,80 @@ class memoryview(Buffer, Structure):
 
     @property
     def nbytes(self):
-
-        """The amount of space in bytes that the array would use in\n""" \
-        """a contiguous representation."""
-
+        """The amount of space in bytes that the array would use in \
+        a contiguous representation."""
         self._check_released()
-        return long(self._view.len)
+        return int(self._view.len)
 
     @property
     def readonly(self):
-
         """A bool indicating whether the memory is read only."""
-
         self._check_released()
         return bool(self._view.readonly)
 
     @property
     def itemsize(self):
-
         """The size in bytes of each element of the memoryview."""
-
         self._check_released()
-        return long(self._view.itemsize)
+        return int(self._view.itemsize)
 
     @property
-    def format(self):
-
-        """A string containing the format (in struct module style)\n""" \
-        """for each element in the view."""
-
+    def format(self):  # noqa: A003
+        """A string containing the format - in struct module style - \
+        for each element in the view."""
         self._check_released()
         return self._view.format.decode("utf-8")
 
     @property
     def ndim(self):
-
-        """An integer indicating how many dimensions of a multi-dimensional\n""" \
-        """array the memory represents."""
-
+        """An integer indicating how many dimensions of a multi-dimensional \
+        array the memory represents."""
         self._check_released()
-        return long(self._view.ndim)
+        return int(self._view.ndim)
 
     @property
     def shape(self):
-
-        """A tuple of ndim integers giving the shape of the memory\n""" \
-        """as an N-dimensional array."""
-
+        """A tuple of ndim integers giving the shape of the memory \
+        as an N-dimensional array."""
         self._check_released()
         vals = self._view.shape
-        return tuple(map(long, vals[:self._view.ndim])) if vals else ()
+        return tuple(map(int, vals[:self._view.ndim])) if vals else ()
 
     @property
     def strides(self):
-
-        """A tuple of ndim integers giving the size in bytes to access\n""" \
-        """each element for each dimension of the array."""
-
+        """A tuple of ndim integers giving the size in bytes to access \
+        each element for each dimension of the array."""
         self._check_released()
         vals = self._view.strides
-        return tuple(map(long, vals[:self._view.ndim])) if vals else ()
+        return tuple(map(int, vals[:self._view.ndim])) if vals else ()
 
     @property
     def suboffsets(self):
-
         """A tuple of integers used internally for PIL-style arrays."""
-
         self._check_released()
         vals = self._view.suboffsets
-        return tuple(map(long, vals[:self._view.ndim])) if vals else ()
+        return tuple(map(int, vals[:self._view.ndim])) if vals else ()
 
     @property
     def c_contiguous(self):
-
         """A bool indicating whether the memory is C contiguous."""
-
         self._check_released()
         return bool(self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C))
 
     @property
     def f_contiguous(self):
-
         """A bool indicating whether the memory is Fortran contiguous."""
-
         self._check_released()
         return bool(self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_FORTRAN))
 
     @property
     def contiguous(self):
-
         """A bool indicating whether the memory is contiguous."""
-
         self._check_released()
-        return bool(self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C | _Py_MEMORYVIEW_FORTRAN))
+        return bool(self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C
+                                                         | _Py_MEMORYVIEW_FORTRAN))
 
-    def release(self):
-
-        """M.release() -> None\n\n""" \
+    def release(self) -> None:
         """Release the underlying buffer exposed by the memoryview object."""
 
         # Inform the managed buffer that this particular memoryview will not access
@@ -454,8 +493,8 @@ class memoryview(Buffer, Structure):
             return
 
         if self._exports > 0:
-            raise BufferError("memoryview has {} exported buffer{}".format(self._exports,
-                              "s" if self._exports > 1 else ""))
+            raise BufferError(f"memoryview has {self._exports} exported "
+                              f"buffer{'s' if self._exports > 1 else ''}")
 
         if self._exports < 0:
             Py_FatalError("release(): negative export count")
@@ -469,9 +508,7 @@ class memoryview(Buffer, Structure):
             self._mbuf.__del__()
             self._mbuf = None
 
-    def tobytes(self):
-
-        """M.tobytes() -> bytes\n\n""" \
+    def tobytes(self) -> bytes:
         """Return the data in the buffer as a byte string."""
 
         self._check_released()
@@ -484,9 +521,7 @@ class memoryview(Buffer, Structure):
             Py_buff.buffer_to_contiguous(view, 'C', buf)
             return buf.raw
 
-    def tolist(self):
-
-        """M.tolist() -> list\n\n""" \
+    def tolist(self) -> List:
         """Return the data in the buffer as a list of elements."""
 
         # Return a list representation of the memoryview.
@@ -534,9 +569,7 @@ class memoryview(Buffer, Structure):
 
         return lst
 
-    def cast(self, format, shape=None):
-
-        """M.cast(format[, shape]) -> memoryview\n\n""" \
+    def cast(self, format, shape=None) -> memoryview:  # noqa: A002
         """Cast a memoryview to a new format or shape."""
 
         # Cast a copy of 'self' to a different view. The input view must
@@ -553,7 +586,7 @@ class memoryview(Buffer, Structure):
         self._check_released()
         view = self._view
 
-        if not isinstance(format, (str, unicode)):
+        if not isinstance(format, str):
             raise TypeError("memoryview: format argument must be a string")
 
         if not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C)):
@@ -569,12 +602,12 @@ class memoryview(Buffer, Structure):
         if is_shape:
 
             if not isinstance(shape, (list, tuple)):
-                raise TypeError("{} must be a list or a tuple".format(shape))
+                raise TypeError(f"{shape} must be a list or a tuple")
 
             ndim = len(shape)
             if ndim > Py_buffer.PyBUF_MAX_NDIM:
                 raise ValueError("memoryview: number of dimensions "
-                                 "must not exceed {}".format(Py_buffer.PyBUF_MAX_NDIM))
+                                 f"must not exceed {Py_buffer.PyBUF_MAX_NDIM}")
 
             if view.ndim != 1 and ndim != 1:
                 raise TypeError("memoryview: cast must be 1D -> ND or ND -> 1D")
@@ -586,7 +619,7 @@ class memoryview(Buffer, Structure):
 
         return mv
 
-    def _cast_to_1D(self, format):
+    def _cast_to_1D(self, format):  # noqa: A002
 
         # Cast a memoryview's data type to 'format'. The input array must be
         # C-contiguous. At least one of input-format, output-format must have
@@ -596,14 +629,14 @@ class memoryview(Buffer, Structure):
         view = self._view
 
         assert view.ndim        >= 1
-        #assert Py_SIZE(self)   == 3 * view.ndim
-        #assert view.shape      == addressof(self._ob_array)
-        #assert view.strides    == addressof(self._ob_array) + 1 * view.ndim
-        #assert view.suboffsets == addressof(self._ob_array) + 2 * view.ndim
+        # assert Py_SIZE(self)   == 3 * view.ndim
+        # assert view.shape      == addressof(self._ob_array)
+        # assert view.strides    == addressof(self._ob_array) + 1 * view.ndim
+        # assert view.suboffsets == addressof(self._ob_array) + 2 * view.ndim
 
-        format = format.encode("ascii")
+        bformat = format.encode("ascii")
 
-        dest_fmtchar, itemsize = get_native_fmtchar(format)
+        dest_fmtchar, itemsize = get_native_fmtchar(bformat)
         if dest_fmtchar is None:
             raise ValueError("memoryview: destination format must be a native single "
                              "character format prefixed with an optional '@'")
@@ -615,7 +648,7 @@ class memoryview(Buffer, Structure):
         if (view.len % itemsize) != 0:
             raise TypeError("memoryview: length is not a multiple of itemsize")
 
-        view.format = get_native_fmtstr(format)
+        view.format = get_native_fmtstr(bformat)
         if view.format is None:
             # NOT_REACHED: get_native_fmtchar() already validates the format.
             raise RuntimeError("memoryview: internal error")
@@ -636,33 +669,34 @@ class memoryview(Buffer, Structure):
 
         view = self._view
 
-        assert view.ndim        == 1               # ndim from _cast_to_1D()
-        #assert Py_SIZE(self)   == 3 * (ndim or 1) # ndim of result array
-        #assert view.shape      == addressof(self._ob_array)
-        #assert view.strides    == addressof(self._ob_array) + (ndim or 1)
-        assert not view.suboffsets # NULL
+        assert view.ndim == 1  # ndim from _cast_to_1D()
+        # assert Py_SIZE(self)   == 3 * (ndim or 1) # ndim of result array
+        # assert view.shape      == addressof(self._ob_array)
+        # assert view.strides    == addressof(self._ob_array) + (ndim or 1)
+        assert not view.suboffsets  # NULL
 
         view.ndim = ndim
         if view.ndim == 0:
-            len = view.itemsize
+            length = view.itemsize
             view.shape   = None
             view.strides = None
         else:
-            len = Py_buff.copy_shape(view, shape)
+            length = Py_buff.copy_shape(view, shape)
             Py_buff.init_strides_from_shape(view)
 
-        if len != view.len:
+        if length != view.len:
             raise TypeError("memoryview: product(shape) * itemsize != buffer size")
 
         self._init_flags(strict_py3=bool(self._flags | _Py_MEMORYVIEW_STRICT_PY3))
 
     def __len__(self):
-
+        """Length of"""
         self._check_released()
         view = self._view
         return 1 if view.ndim == 0 else view.shape[0]
 
     def __getitem__(self, idx):
+        """???"""
 
         # mv[obj] returns an object holding the data for one element if obj
         # fully indexes the memoryview or another memoryview object if it
@@ -689,7 +723,7 @@ class memoryview(Buffer, Structure):
             else:
                 raise TypeError("invalid indexing of 0-dim memory")
 
-        else: # view.ndim != 0
+        else:  # view.ndim != 0
 
             if hasattr(idx, "__index__"):
 
@@ -732,9 +766,10 @@ class memoryview(Buffer, Structure):
                 raise NotImplementedError("multi-dimensional slicing is not implemented")
 
             else:
-                raise TypeError("memoryview: invalid slice key");
+                raise TypeError("memoryview: invalid slice key")
 
     def __setitem__(self, idx, value):
+        """???"""
 
         self._check_released()
         view = self._view
@@ -757,7 +792,7 @@ class memoryview(Buffer, Structure):
             else:
                 raise TypeError("invalid indexing of 0-dim memory")
 
-        else: # view.ndim != 0
+        else:  # view.ndim != 0
 
             if hasattr(idx, "__index__"):
 
@@ -787,7 +822,8 @@ class memoryview(Buffer, Structure):
                     sliced_view.strides = ct_ptr_add(sliced_view.shape, 1 * sizeof(c_ssize_t))
                     sliced_view.strides[0] = view.strides[0]
                     if view.suboffsets:
-                        sliced_view.suboffsets = ct_ptr_add(sliced_view.strides, 1 * sizeof(c_ssize_t))
+                        sliced_view.suboffsets = ct_ptr_add(sliced_view.strides,
+                                                            1 * sizeof(c_ssize_t))
                         sliced_view.suboffsets[0] = view.suboffsets[0]
                     Py_buff.init_slice(sliced_view, idx, 0)
                     Py_buff.init_len(sliced_view)
@@ -814,13 +850,14 @@ class memoryview(Buffer, Structure):
                 raise TypeError("memoryview: invalid slice key")
 
     def __delitem__(self, idx):
-
+        """???"""
         self._check_released()
         raise TypeError("cannot modify read-only memory"
                         if self._view.readonly else
                         "cannot delete memory")
 
     def __hash__(self):
+        """Hash value"""
 
         if self._hash != -1:
             return self._hash
@@ -855,7 +892,8 @@ class memoryview(Buffer, Structure):
         self._hash = hash(buf)
         return self._hash
 
-    def __eq__ (self, other):
+    def __eq__(self, other):
+        """???"""
 
         if self._base_inaccessible():
             return self is other
@@ -903,9 +941,9 @@ class memoryview(Buffer, Structure):
                     other_unpack = struct_get_unpacker(other_view.format, other_view.itemsize)
                     # Translate a StructError to "not equal". Preserve other exceptions.
                     # XXX Cannot get at StructError directly?
-                except (ImportError, MemoryError):
+                except (ImportError, MemoryError) as exc:
                     raise exc
-                except Exception as exc:
+                except Exception:
                     # StructError: invalid or unknown format -> not equal
                     return False
             else:
@@ -929,7 +967,7 @@ class memoryview(Buffer, Structure):
             return NotImplemented
         elif eq < 0:
             # exception
-            return 0 # NULL;
+            return 0  # NULL
         else:
             return bool(eq)
 
@@ -980,15 +1018,7 @@ class memoryview(Buffer, Structure):
 
         return True
 
-    def __ne__(self, other):
-
-        eq = self.__eq__(other)
-        return NotImplemented if eq is NotImplemented else not eq
-
-    def hex(self):
-
-        """hex($self, /)\n""" \
-        """--\n\n""" \
+    def hex(self):  # noqa: A003
         """Return the data in the buffer as a string of hexadecimal numbers."""
 
         self._check_released()
@@ -1001,24 +1031,23 @@ class memoryview(Buffer, Structure):
         return binascii.hexlify(buf).decode("ascii")
 
     def __enter__(self):
-
+        """Enter context"""
         self._check_released()
         return self
 
     def __exit__(self, *exc_info):
-
+        """Exit context"""
         del exc_info
         return self.release()
 
     def __repr__(self):
+        """Return printable representation."""
+        return ("<released " if self._flags & _Py_MEMORYVIEW_RELEASED else "<") \
+               + f"memory at 0x{id(self):08X}>"
 
-        return ("<released memory at 0x{:08X}>"
-                if self._flags & _Py_MEMORYVIEW_RELEASED else
-                "<memory at 0x{:08X}>").format(id(self))
-
-    #----------------------------------------------------------------------------#
+    # -------------------------------------------------------------------------- #
     #                          extension for ctypes                              #
-    #----------------------------------------------------------------------------#
+    # -------------------------------------------------------------------------- #
 
     @property
     def as_ctypes(self):
@@ -1039,11 +1068,12 @@ class memoryview(Buffer, Structure):
             buffer._obj = view.obj
         return buffer
 
-    #----------------------------------------------------------------------------#
+    # -------------------------------------------------------------------------- #
     #                          getbuffer/releasebuffer                           #
-    #----------------------------------------------------------------------------#
+    # -------------------------------------------------------------------------- #
 
     def __getbuffer__(self, view, flags):
+        """???"""
 
         # Py_buffer view, int flags -> int
 
@@ -1051,7 +1081,7 @@ class memoryview(Buffer, Structure):
 
         # start with complete information
         ct_copy(view, self._view)
-        view.obj = py_object() # NULL
+        view.obj = py_object()  # NULL
 
         if (flags & Py_buffer.PyBUF_WRITABLE) == Py_buffer.PyBUF_WRITABLE and self._view.readonly:
             raise BufferError("memoryview: underlying buffer is not writable")
@@ -1064,20 +1094,21 @@ class memoryview(Buffer, Structure):
             # from here on!
             view.format = None
 
-        if ((flags & Py_buffer.PyBUF_C_CONTIGUOUS) == Py_buffer.PyBUF_C_CONTIGUOUS and
-            not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C))):
+        if ((flags & Py_buffer.PyBUF_C_CONTIGUOUS) == Py_buffer.PyBUF_C_CONTIGUOUS
+           and not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C))):
             raise BufferError("memoryview: underlying buffer is not C-contiguous")
 
-        if ((flags & Py_buffer.PyBUF_F_CONTIGUOUS) == Py_buffer.PyBUF_F_CONTIGUOUS and
-            not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_FORTRAN))):
+        if ((flags & Py_buffer.PyBUF_F_CONTIGUOUS) == Py_buffer.PyBUF_F_CONTIGUOUS
+           and not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_FORTRAN))):
             raise BufferError("memoryview: underlying buffer is not Fortran contiguous")
 
-        if ((flags & Py_buffer.PyBUF_ANY_CONTIGUOUS) == Py_buffer.PyBUF_ANY_CONTIGUOUS and
-            not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C | _Py_MEMORYVIEW_FORTRAN))):
+        if ((flags & Py_buffer.PyBUF_ANY_CONTIGUOUS) == Py_buffer.PyBUF_ANY_CONTIGUOUS
+           and not (self._flags & (_Py_MEMORYVIEW_SCALAR | _Py_MEMORYVIEW_C
+                                                         | _Py_MEMORYVIEW_FORTRAN))):
             raise BufferError("memoryview: underlying buffer is not contiguous")
 
-        if ((flags & Py_buffer.PyBUF_INDIRECT) != Py_buffer.PyBUF_INDIRECT and
-            (self._flags & _Py_MEMORYVIEW_PIL)):
+        if ((flags & Py_buffer.PyBUF_INDIRECT) != Py_buffer.PyBUF_INDIRECT
+           and (self._flags & _Py_MEMORYVIEW_PIL)):
             raise BufferError("memoryview: underlying buffer requires suboffsets")
 
         if (flags & Py_buffer.PyBUF_STRIDES) != Py_buffer.PyBUF_STRIDES:
@@ -1103,6 +1134,7 @@ class memoryview(Buffer, Structure):
         self._exports += 1
 
     def __releasebuffer__(self, view):
+        """???"""
 
         # Py_buffer view
 
@@ -1110,20 +1142,17 @@ class memoryview(Buffer, Structure):
 
         # PyBuffer_Release() decrements view.obj after this function returns.
 
-    #------------------------------------------------------------------------#
+    # ---------------------------------------------------------------------- #
 
     def _check_released(self):
-
         if self._base_inaccessible():
             raise ValueError("operation forbidden on released memoryview object")
 
     def _base_inaccessible(self):
-
         # In the process of breaking reference cycles managedbuffer.__del__()
         # can be called before self.release().
-
-        return ((self._flags       & _Py_MEMORYVIEW_RELEASED) or
-                (self._mbuf._flags & _Py_MANAGED_BUFFER_RELEASED))
+        return ((self._flags & _Py_MEMORYVIEW_RELEASED)
+                or (self._mbuf._flags & _Py_MANAGED_BUFFER_RELEASED))
 
     def _init_flags(self, strict_py3=False):
 
@@ -1151,18 +1180,19 @@ class memoryview(Buffer, Structure):
 
         self._flags = flags
 
-#PyTypeObject PyMemoryView_Type =
+
+# PyTypeObject PyMemoryView_Type =
 #
 #    PyVarObject_HEAD_INIT(&PyType_Type,  0)
 #    offsetof(memoryview, _ob_array),     # tp_basicsize
 #    sizeof(c_ssize_t),                   # tp_itemsize
 
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 #                                Constructors                                #
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 
-#def PyMemoryView_FromMemory(char* mem, c_ssize_t size, int flags):
-def  PyMemoryView_FromMemory(mem, size, flags):
+# def PyMemoryView_FromMemory(char* mem, c_ssize_t size, int flags):
+def PyMemoryView_FromMemory(mem, size, flags):
 
     # Expose a raw memory area as a view of contiguous bytes. flags can be
     # PyBUF_READ or PyBUF_WRITE. view.format is set to "B" (unsigned bytes).
@@ -1178,8 +1208,9 @@ def  PyMemoryView_FromMemory(mem, size, flags):
 
     return memoryview._new_view(mbuf, mbuf)
 
-#def PyMemoryView_FromBuffer(Py_buffer* info):
-def  PyMemoryView_FromBuffer(info):
+
+# def PyMemoryView_FromBuffer(Py_buffer* info):
+def PyMemoryView_FromBuffer(info):
 
     # Create a memoryview from a given buffer. For simple byte views,
     # PyMemoryView_FromMemory() should be used instead.
@@ -1193,13 +1224,14 @@ def  PyMemoryView_FromBuffer(info):
     mbuf = managedbuffer()
     # info.obj is either NULL or a borrowed reference.
     # This reference should not be decremented in PyBuffer_Release().
-    memmove(byref(mbuf), byref(info), sizeof(Py_buffer)) # copy
-    mbuf.obj = py_object() # NULL
+    memmove(byref(mbuf), byref(info), sizeof(Py_buffer))  # copy
+    mbuf.obj = py_object()  # NULL
 
     return memoryview._new_view(mbuf, mbuf)
 
-#def __memory_from_contiguous_copy(Py_buffer* src, char order):
-def  __memory_from_contiguous_copy(src, order):
+
+# def __memory_from_contiguous_copy(Py_buffer* src, char order):
+def __memory_from_contiguous_copy(src, order):
 
     # Return a memoryview that is based on a contiguous copy of src.
     # Assumptions: src has PyBUF_FULL_RO information, src.ndim > 0.
@@ -1215,14 +1247,14 @@ def  __memory_from_contiguous_copy(src, order):
     assert src.ndim > 0
     assert src.shape
 
-    bytes = b"\0" * src.len
-    mbuf = managedbuffer(bytes)
-    del bytes
+    buffer = b"\0" * src.len
+    mbuf = managedbuffer(buffer)
+    del buffer
 
     # Copy the format string from a base object that might vanish.
     if src.format is not None:
-        cp = PyMem_Malloc(strlen(src.format) + 1) # char*
-        mbuf.format = strcpy(cp, src.format)
+        cp = PyMem_Malloc(strlen(src.format) + 1)  # char*  # noqa: F821 # !!!
+        mbuf.format = strcpy(cp, src.format)  # noqa: F821 # !!!
 
     mv = memoryview._new_incomplete_view(mbuf, mbuf, src.ndim)
     del mbuf
@@ -1239,8 +1271,9 @@ def  __memory_from_contiguous_copy(src, order):
 
     return mv
 
-#def PyMemoryView_GetContiguous(PyObject *obj, int buffertype, char order):
-def  PyMemoryView_GetContiguous(obj, buffertype, order):
+
+# def PyMemoryView_GetContiguous(PyObject *obj, int buffertype, char order):
+def PyMemoryView_GetContiguous(obj, buffertype, order):
 
     # Return a new memoryview object based on a contiguous exporter with
     # buffertype={PyBUF_READ, PyBUF_WRITE} and order={'C', 'F'ortran, or 'A'ny}.
@@ -1275,14 +1308,15 @@ def  PyMemoryView_GetContiguous(obj, buffertype, order):
 
     return __memory_from_contiguous_copy(view, order)
 
+
 class buffer_full:
+    """???"""
+    # Py_buffer view;
+    # c_ssize_t array[1];
 
-    """ """
-   # Py_buffer view;
-   # c_ssize_t array[1];
 
-#int PyBuffer_ToContiguous(void *buf, Py_buffer* src, c_ssize_t len, char order):
-def  PyBuffer_ToContiguous(buf, src, len, order):
+# int PyBuffer_ToContiguous(void *buf, Py_buffer* src, c_ssize_t len, char order):
+def PyBuffer_ToContiguous(buf, src, len, order):  # noqa: A002
 
     assert order in (b'C', b'F', b'A')
 
@@ -1297,8 +1331,8 @@ def  PyBuffer_ToContiguous(buf, src, len, order):
     else:
 
         # Py_buff.buffer_to_contiguous() assumes PyBUF_FULL
-        #buffer_full *fb = NULL;
-        fb = PyMem_Malloc(sizeof *fb + 3 * src.ndim * (sizeof *fb.array))
+        # buffer_full *fb = NULL;
+        fb = PyMem_Malloc(sizeof(*fb) + 3 * src.ndim * sizeof(*fb.array))  # noqa: F821 # !!!
         fb._view.ndim       = src.ndim
         fb._view.shape      = fb.array
         fb._view.strides    = fb.array + 1 * src.ndim
@@ -1306,13 +1340,13 @@ def  PyBuffer_ToContiguous(buf, src, len, order):
 
         Py_buff.init_shared_values(fb._view, src)
         Py_buff.init_shape_strides(fb._view, src)
-        Py_buff.init_suboffsets   (fb._view, src)
+        Py_buff.init_suboffsets(fb._view, src)
 
         return Py_buff.buffer_to_contiguous(fb._view, order, buf)
 
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 #            Optimized pack/unpack for all native format specifiers          #
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 
 # Timings with the ndarray from _testbuffer.c indicate that using the
 # struct module is around 15x slower than the two functions below.
@@ -1326,48 +1360,46 @@ def unpack_single(ptr, fmt, strict_py3=False):
     # This function is very sensitive to small changes.
     # With this layout gcc automatically generates a fast jump table.
 
-    global _unpack_single_funcs
-    global _unpack_single_funcs_PY3
-    unpack_funcs = _unpack_single_funcs_PY3 if strict_py3 else _unpack_single_funcs
+    unpack_funcs = _unpack_single_funcs_py3 if strict_py3 else _unpack_single_funcs
     try:
         func = unpack_funcs[fmt[:1]]
     except KeyError:
-        raise NotImplementedError("memoryview: format {} not supported".format(fmt)) from None
+        raise NotImplementedError(f"memoryview: format {fmt} not supported") from None
     return func(ptr)
 
-_unpack_single_funcs_PY3 = {
 
+_unpack_single_funcs_py3 = {
     # boolean
-    #ifdef HAVE_C99_BOOL
+    # ifdef HAVE_C99_BOOL
     b'?': lambda ptr: bool(cast(ptr, POINTER(c_bool))[0]),
-    #else
-    #b'?':lambda ptr: bool(cast(ptr, POINTER(c_byte))[0]),
-    #endif
+    # else
+    # b'?':lambda ptr: bool(cast(ptr, POINTER(c_byte))[0]),
+    # endif
 
     # signed integers
-    b'b': lambda ptr: cast(ptr, POINTER(c_byte ))[0],
+    b'b': lambda ptr: cast(ptr, POINTER(c_byte))[0],
     b'h': lambda ptr: cast(ptr, POINTER(c_short))[0],
-    b'i': lambda ptr: cast(ptr, POINTER(c_int  ))[0],
-    b'l': lambda ptr: cast(ptr, POINTER(c_long ))[0],
+    b'i': lambda ptr: cast(ptr, POINTER(c_int))[0],
+    b'l': lambda ptr: cast(ptr, POINTER(c_long))[0],
 
     # unsigned integers
-    b'B': lambda ptr: cast(ptr, POINTER(c_ubyte ))[0],
+    b'B': lambda ptr: cast(ptr, POINTER(c_ubyte))[0],
     b'H': lambda ptr: cast(ptr, POINTER(c_ushort))[0],
-    b'I': lambda ptr: cast(ptr, POINTER(c_uint  ))[0],
-    b'L': lambda ptr: cast(ptr, POINTER(c_ulong ))[0],
+    b'I': lambda ptr: cast(ptr, POINTER(c_uint))[0],
+    b'L': lambda ptr: cast(ptr, POINTER(c_ulong))[0],
 
     # native 64-bit
-    #ifdef HAVE_LONG_LONG
-    b'q': lambda ptr: cast(ptr, POINTER(c_longlong ))[0],
+    # ifdef HAVE_LONG_LONG
+    b'q': lambda ptr: cast(ptr, POINTER(c_longlong))[0],
     b'Q': lambda ptr: cast(ptr, POINTER(c_ulonglong))[0],
-    #endif
+    # endif
 
     # ssize_t and size_t
     b'n': lambda ptr: cast(ptr, POINTER(c_ssize_t))[0],
-    b'N': lambda ptr: cast(ptr, POINTER(c_size_t ))[0],
+    b'N': lambda ptr: cast(ptr, POINTER(c_size_t))[0],
 
     # floats
-    b'f': lambda ptr: cast(ptr, POINTER(c_float ))[0],
+    b'f': lambda ptr: cast(ptr, POINTER(c_float))[0],
     b'd': lambda ptr: cast(ptr, POINTER(c_double))[0],
 
     # bytes object
@@ -1375,9 +1407,11 @@ _unpack_single_funcs_PY3 = {
 
     # pointer
     b'P': lambda ptr: cast(ptr, POINTER(c_void_p))[0],
-    }
+}
 
-_unpack_single_funcs = _unpack_single_funcs_PY3
+
+_unpack_single_funcs = _unpack_single_funcs_py3
+
 
 def pack_single(ptr, value, fmt):
 
@@ -1386,21 +1420,22 @@ def pack_single(ptr, value, fmt):
     # Pack a single item.
     # 'fmt' can be any native format character in struct module syntax.
 
-    global _pack_single_funcs
     try:
         func = _pack_single_funcs[fmt[:1]]
     except KeyError:
-        raise NotImplementedError("memoryview: format {} not supported".format(fmt)) from None
+        raise NotImplementedError(f"memoryview: format {fmt} not supported") from None
     func(ptr, value, fmt)
+
 
 def _pack_single_z(ptr, value, fmt):
     value = not not value
     # preserve original error
-    #ifdef HAVE_C99_BOOL
+    # ifdef HAVE_C99_BOOL
     cast(ptr,  POINTER(c_bool))[0] = value
-    #else
-    #cast(ptr, POINTER(c_byte))[0] = value
-    #endif
+    # else
+    # cast(ptr, POINTER(c_byte))[0] = value
+    # endif
+
 
 def _pack_single_b(ptr, value, fmt):
     try:
@@ -1412,6 +1447,7 @@ def _pack_single_b(ptr, value, fmt):
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_byte))[0] = value
 
+
 def _pack_single_h(ptr, value, fmt):
     try:
         value = PyNumber_Index(value)
@@ -1421,6 +1457,7 @@ def _pack_single_h(ptr, value, fmt):
     if not (SHRT_MIN <= value <= SHRT_MAX):
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_short))[0] = value
+
 
 def _pack_single_i(ptr, value, fmt):
     try:
@@ -1432,6 +1469,7 @@ def _pack_single_i(ptr, value, fmt):
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_int))[0] = value
 
+
 def _pack_single_l(ptr, value, fmt):
     try:
         value = PyNumber_Index(value)
@@ -1439,6 +1477,7 @@ def _pack_single_l(ptr, value, fmt):
     except Exception as exc:
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_long))[0] = value
+
 
 def _pack_single_B(ptr, value, fmt):
     try:
@@ -1450,6 +1489,7 @@ def _pack_single_B(ptr, value, fmt):
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_ubyte))[0] = value
 
+
 def _pack_single_H(ptr, value, fmt):
     try:
         value = PyNumber_Index(value)
@@ -1459,6 +1499,7 @@ def _pack_single_H(ptr, value, fmt):
     if value > USHRT_MAX:
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_ushort))[0] = value
+
 
 def _pack_single_I(ptr, value, fmt):
     try:
@@ -1470,6 +1511,7 @@ def _pack_single_I(ptr, value, fmt):
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_uint))[0] = value
 
+
 def _pack_single_L(ptr, value, fmt):
     try:
         value = PyNumber_Index(value)
@@ -1477,6 +1519,7 @@ def _pack_single_L(ptr, value, fmt):
     except Exception as exc:
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_ulong))[0] = value
+
 
 def _pack_single_q(ptr, value, fmt):
     try:
@@ -1486,6 +1529,7 @@ def _pack_single_q(ptr, value, fmt):
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_longlong))[0] = value
 
+
 def _pack_single_Q(ptr, value, fmt):
     try:
         value = PyNumber_Index(value)
@@ -1493,6 +1537,7 @@ def _pack_single_Q(ptr, value, fmt):
     except Exception as exc:
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_ulonglong))[0] = value
+
 
 def _pack_single_n(ptr, value, fmt):
     try:
@@ -1502,6 +1547,7 @@ def _pack_single_n(ptr, value, fmt):
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_ssize_t))[0] = value
 
+
 def _pack_single_N(ptr, value, fmt):
     try:
         value = PyNumber_Index(value)
@@ -1509,6 +1555,7 @@ def _pack_single_N(ptr, value, fmt):
     except Exception as exc:
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_size_t))[0] = value
+
 
 def _pack_single_f(ptr, value, fmt):
     try:
@@ -1518,12 +1565,14 @@ def _pack_single_f(ptr, value, fmt):
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_float))[0] = value
 
+
 def _pack_single_d(ptr, value, fmt):
     try:
         value = PyFloat_AsDouble(value)
     except Exception as exc:
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_double))[0] = value
+
 
 def _pack_single_c(ptr, value, fmt):
     if not isinstance(value, bytes):
@@ -1532,12 +1581,14 @@ def _pack_single_c(ptr, value, fmt):
         raise _pack_value_error(fmt)
     cast(ptr, POINTER(c_char))[0] = value[0]
 
+
 def _pack_single_P(ptr, value, fmt):
     try:
         value = c_void_p(value)
     except Exception as exc:
         raise _fix_pack_error(exc, fmt)
     cast(ptr, POINTER(c_void_p))[0] = value
+
 
 def _fix_pack_error(exc, fmt):
 
@@ -1557,16 +1608,16 @@ def _fix_pack_error(exc, fmt):
     else:
         return exc
 
-def _pack_type_error(fmt):
 
-    return TypeError("memoryview: invalid type for format '{}'".format(fmt))
+def _pack_type_error(fmt):
+    return TypeError(f"memoryview: invalid type for format '{fmt}'")
+
 
 def _pack_value_error(fmt):
+    return ValueError(f"memoryview: invalid value for format '{fmt}'")
 
-    return ValueError("memoryview: invalid value for format '{}'".format(fmt))
 
 _pack_single_funcs = {
-
     # boolean
     b'?': _pack_single_z,
 
@@ -1583,10 +1634,10 @@ _pack_single_funcs = {
     b'L': _pack_single_L,
 
     # native 64-bit
-    #ifdef HAVE_LONG_LONG
+    # ifdef HAVE_LONG_LONG
     b'q': _pack_single_q,
     b'Q': _pack_single_Q,
-    #endif
+    # endif
 
     # ssize_t and size_t
     b'n': _pack_single_n,
@@ -1601,11 +1652,11 @@ _pack_single_funcs = {
 
     # pointer
     b'P': _pack_single_P,
-    }
+}
 
-#--------------------------------------------------------------#
+# ------------------------------------------------------------ #
 #                 unpack using the struct module               #
-#--------------------------------------------------------------#
+# ------------------------------------------------------------ #
 
 class unpacker(object):
 
@@ -1617,15 +1668,16 @@ class unpacker(object):
     def __new__(cls):
 
         self = super(unpacker, cls).__new__(cls)
-        self.unpack_from = NULL  # PyObject* unpack_from; # Struct.unpack_from(format)
-        self.mview       = NULL  # PyObject* mview;       # cached memoryview
-        self.item        = NULL  # char*     item;        # buffer for mview
-        self.itemsize    = 0     # c_ssize_t itemsize;    # len(item)
+        self.unpack_from = 0  # NULL # PyObject* unpack_from; # Struct.unpack_from(format)
+        self.mview       = 0  # NULL # PyObject* mview;       # cached memoryview
+        self.item        = 0  # NULL # char*     item;        # buffer for mview
+        self.itemsize    = 0         # c_ssize_t itemsize;    # len(item)
         return self
 
     def __del__(self):
 
-        PyMem_Free(self.item)
+        PyMem_Free(self.item)  # noqa: F821 # !!!
+
 
 def struct_get_unpacker(fmt, itemsize):
 
@@ -1633,20 +1685,20 @@ def struct_get_unpacker(fmt, itemsize):
 
     # Return a new unpacker for the given format.
 
-    format = PyBytes_FromString(fmt)
-    structobj = struct.Struct(format)
+    bformat = PyBytes_FromString(fmt)  # noqa: F821 # !!!
+    structobj = struct.Struct(bformat)
 
     unp = unpacker()
     unp.unpack_from = structobj.unpack_from
-    unp.item        = PyMem_Malloc(itemsize)
+    unp.item        = PyMem_Malloc(itemsize)  # noqa: F821 # !!!
     unp.itemsize    = itemsize
     unp.mview       = PyMemoryView_FromMemory(unp.item, itemsize, Py_buffer.PyBUF_WRITE)
 
     return unp
 
-#--------------------------------------------------------------#
+# ------------------------------------------------------------ #
 #                        Comparisons                           #
-#--------------------------------------------------------------#
+# ------------------------------------------------------------ #
 
 def unpack_cmp(ptr_p, ptr_q, fmtchar, unpack_p, unpack_q):
 
@@ -1660,10 +1712,8 @@ def unpack_cmp(ptr_p, ptr_q, fmtchar, unpack_p, unpack_q):
 
     if fmtchar == b'_':
         # use the struct module
-        global _unpack_cmp_struct
         return _unpack_cmp_struct(ptr_p, ptr_q, unpack_p, unpack_q)
     else:
-        global _unpack_cmp_funcs
         try:
             func = _unpack_cmp_funcs[fmtchar]
         except KeyError:
@@ -1672,48 +1722,67 @@ def unpack_cmp(ptr_p, ptr_q, fmtchar, unpack_p, unpack_q):
         else:
             return func(ptr_p, ptr_q)
 
-_unpack_cmp_funcs = {
 
+_unpack_cmp_funcs = {
     # boolean
-    #ifdef HAVE_C99_BOOL
-    b'?': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_bool))[0] == cast(ptr_q, POINTER(c_bool))[0],
-    #else
-    #b'?':lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_byte))[0] == cast(ptr_q, POINTER(c_byte))[0],
-    #endif
+    # ifdef HAVE_C99_BOOL
+    b'?': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_bool))[0] == cast(ptr_q, POINTER(c_bool))[0],
+    # else
+    # b'?':lambda ptr_p, ptr_q: cast(ptr_p,
+    #                                POINTER(c_byte))[0] == cast(ptr_q, POINTER(c_byte))[0],
+    # endif
 
     # signed integers
-    b'b': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_byte ))[0] == cast(ptr_q, POINTER(c_byte ))[0],
-    b'h': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_short))[0] == cast(ptr_q, POINTER(c_short))[0],
-    b'i': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_int  ))[0] == cast(ptr_q, POINTER(c_int  ))[0],
-    b'l': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_long ))[0] == cast(ptr_q, POINTER(c_long ))[0],
+    b'b': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_byte))[0] == cast(ptr_q, POINTER(c_byte))[0],
+    b'h': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_short))[0] == cast(ptr_q, POINTER(c_short))[0],
+    b'i': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_int))[0] == cast(ptr_q, POINTER(c_int))[0],
+    b'l': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_long))[0] == cast(ptr_q, POINTER(c_long))[0],
 
     # unsigned integers
-    b'B': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_ubyte ))[0] == cast(ptr_q, POINTER(c_ubyte ))[0],
-    b'H': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_ushort))[0] == cast(ptr_q, POINTER(c_ushort))[0],
-    b'I': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_uint  ))[0] == cast(ptr_q, POINTER(c_uint  ))[0],
-    b'L': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_ulong ))[0] == cast(ptr_q, POINTER(c_ulong ))[0],
+    b'B': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_ubyte))[0] == cast(ptr_q, POINTER(c_ubyte))[0],
+    b'H': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_ushort))[0] == cast(ptr_q, POINTER(c_ushort))[0],
+    b'I': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_uint))[0] == cast(ptr_q, POINTER(c_uint))[0],
+    b'L': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_ulong))[0] == cast(ptr_q, POINTER(c_ulong))[0],
 
     # native 64-bit
-    #ifdef HAVE_LONG_LONG
-    b'q': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_longlong ))[0] == cast(ptr_q, POINTER(c_longlong ))[0],
-    b'Q': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_ulonglong))[0] == cast(ptr_q, POINTER(c_ulonglong))[0],
-    #endif
+    # ifdef HAVE_LONG_LONG
+    b'q': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_longlong))[0] == cast(ptr_q, POINTER(c_longlong))[0],
+    b'Q': lambda ptr_p, ptr_q: cast(ptr_p,
+                                  POINTER(c_ulonglong))[0] == cast(ptr_q, POINTER(c_ulonglong))[0],
+    # endif
 
     # ssize_t and size_t
-    b'n': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_ssize_t))[0] == cast(ptr_q, POINTER(c_ssize_t))[0],
-    b'N': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_size_t ))[0] == cast(ptr_q, POINTER(c_size_t ))[0],
+    b'n': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_ssize_t))[0] == cast(ptr_q, POINTER(c_ssize_t))[0],
+    b'N': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_size_t))[0] == cast(ptr_q, POINTER(c_size_t))[0],
 
     # floats
     # XXX DBL_EPSILON?
-    b'f': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_float ))[0] == cast(ptr_q, POINTER(c_float ))[0],
-    b'd': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_double))[0] == cast(ptr_q, POINTER(c_double))[0],
+    b'f': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_float))[0] == cast(ptr_q, POINTER(c_float))[0],
+    b'd': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_double))[0] == cast(ptr_q, POINTER(c_double))[0],
 
-    # bytes object #!!! sprawdzic czy dobrze !!!
-    b'c': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_char))[0] == cast(ptr_q, POINTER(c_char))[0],
+    # bytes object  # !!! sprawdzic czy dobrze !!!
+    b'c': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_char))[0] == cast(ptr_q, POINTER(c_char))[0],
 
-    # pointer #!!! sprawdzic czy dobrze !!!
-    b'P': lambda ptr_p, ptr_q: cast(ptr_p, POINTER(c_void_p))[0] == cast(ptr_q, POINTER(c_void_p))[0],
-    }
+    # pointer  # !!! sprawdzic czy dobrze !!!
+    b'P': lambda ptr_p, ptr_q: cast(ptr_p,
+                                    POINTER(c_void_p))[0] == cast(ptr_q, POINTER(c_void_p))[0],
+}
+
 
 def _unpack_cmp_struct(ptr_p, ptr_q, unpack_p, unpack_q):
 
@@ -1725,15 +1794,16 @@ def _unpack_cmp_struct(ptr_p, ptr_q, unpack_p, unpack_q):
 
     return struct_unpack_single(ptr_p, unpack_p) == struct_unpack_single(ptr_q, unpack_q)
 
+
 def struct_unpack_single(ptr, unpack):
 
     memmove(unpack.item, ptr, unpack.itemsize)
     v = unpack.unpack_from(unpack.mview)
     return v[0] if len(v) == 1 else v
 
-#--------------------------------------------------------------#
+# ------------------------------------------------------------ #
 #                   Casting format and shape                   #
-#--------------------------------------------------------------#
+# ------------------------------------------------------------ #
 
 def get_native_fmtchar(fmt):
 
@@ -1746,9 +1816,9 @@ def get_native_fmtchar(fmt):
 
     fch = fmt[at:at+1]
 
-    global _native_fmt_sizes
     size = _native_fmt_sizes.get(fch, -1)
     return (fch, size) if size > 0 else (None, -1)
+
 
 def get_native_fmtstr(fmt):
 
@@ -1764,13 +1834,13 @@ def get_native_fmtstr(fmt):
 
     fch = fmt[at:at+1]
 
-    global _native_fmt_chars
     return ((b"@" + fch) if at else fch) if fch in _native_fmt_chars else None
+
 
 def is_byte_format(fch):
 
-    global _native_byte_fmt_chars
     return fch in _native_byte_fmt_chars
+
 
 _native_fmt_sizes = {
     b'c': sizeof(c_char),
@@ -1782,37 +1852,37 @@ _native_fmt_sizes = {
     b'I': sizeof(c_uint),
     b'l': sizeof(c_long),
     b'L': sizeof(c_ulong),
-    #ifdef HAVE_LONG_LONG
+    # ifdef HAVE_LONG_LONG
     b'q': sizeof(c_longlong),
     b'Q': sizeof(c_ulonglong),
-    #endif
+    # endif
     b'n': sizeof(c_ssize_t),
-    b'N': sizeof(c_size_t),  #!!! bylo (blednie?): c_ssize_t !!!
+    b'N': sizeof(c_size_t),  # !!! bylo (blednie?): c_ssize_t !!!
     b'f': sizeof(c_float),
     b'd': sizeof(c_double),
-    #ifdef HAVE_C99_BOOL
+    # ifdef HAVE_C99_BOOL
     b'?': sizeof(c_bool),
-    #else
-    #'?':sizeof(c_byte),
-    #endif
+    # else
+    # '?':sizeof(c_byte),
+    # endif
     b'P': sizeof(c_void_p)
-    }
+}
 
 _native_fmt_chars = (
     b'c', b'b', b'B', b'h', b'H', b'i', b'I', b'l', b'L',
-    #ifdef HAVE_LONG_LONG
+    # ifdef HAVE_LONG_LONG
     b'q', b'Q',
-    #endif
+    # endif
     b'n', b'N', b'f', b'd', b'?', b'P'
-    )
+)
 
 _native_byte_fmt_chars = (
     b'c', b'b', b'B'
-    )
+)
 
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 #                         Copy memoryview buffers                            #
-#----------------------------------------------------------------------------#
+# -------------------------------------------------------------------------- #
 
 # The functions in this section take a source and a destination buffer
 # with the same logical structure: format, itemsize, ndim and shape
@@ -1902,14 +1972,14 @@ class Py_buff:
 
         # view=Py_buffer
 
-        # len = product(shape) * itemsize
+        # length = product(shape) * itemsize
 
-        len = 1
+        length = 1
         for i in range(view.ndim):
-            len *= view.shape[i]
-        len *= view.itemsize
+            length *= view.shape[i]
+        length *= view.itemsize
 
-        view.len = len
+        view.len = length
 
     @staticmethod
     def init_strides_from_shape(view, order='C'):
@@ -1919,9 +1989,9 @@ class Py_buff:
         # Initialize strides for a contiguous array.
 
         assert view.ndim > 0
-        assert order in ('C','F','A')
+        assert order in ('C', 'F', 'A')
 
-        if order in ('C','A'):
+        if order in ('C', 'A'):
             # C-contiguous array and All-contiguous array
             view.strides[view.ndim - 1] = view.itemsize
             for i in range(view.ndim - 2, -1, -1):
@@ -1939,10 +2009,10 @@ class Py_buff:
 
         assert dest.ndim > 0 and src.ndim > 0
 
-        return (not Py_buff.__have_suboffsets_in_last_dim(dest) and
-                not Py_buff.__have_suboffsets_in_last_dim(src)  and
-                dest.strides[dest.ndim - 1] == dest.itemsize and
-                src.strides[src.ndim   - 1] == src.itemsize)
+        return (not Py_buff.__have_suboffsets_in_last_dim(dest)
+                and not Py_buff.__have_suboffsets_in_last_dim(src)
+                and dest.strides[dest.ndim - 1] == dest.itemsize
+                and src.strides[src.ndim   - 1] == src.itemsize)
 
     @staticmethod
     def __have_suboffsets_in_last_dim(view):
@@ -1953,7 +2023,7 @@ class Py_buff:
         # forbidden in the PEP.
         # Assumptions: ndim >= 1.
 
-        return view.suboffsets and view.suboffsets[dest.ndim - 1] >= 0
+        return view.suboffsets and view.suboffsets[dest.ndim - 1] >= 0  # noqa: F821 # !!!
 
     @staticmethod
     def __equiv_structure(dest, src):
@@ -1962,8 +2032,7 @@ class Py_buff:
 
         # Check that the logical structure of the destination and source buffers is identical.
 
-        return (Py_buff.equiv_format(dest, src) and
-                Py_buff.equiv_shape (dest, src))
+        return Py_buff.equiv_format(dest, src) and Py_buff.equiv_shape(dest, src)
 
     @staticmethod
     def equiv_format(dest, src):
@@ -1983,7 +2052,7 @@ class Py_buff:
             return False
 
         dfmt = dest.format[1:] if dest.format[:1] == b'@' else dest.format
-        sfmt = src.format[1:]  if src.format[:1]  == b'@' else src.format
+        sfmt = src.format[1:]  if src.format[:1] == b'@'  else src.format
 
         if dfmt != sfmt:
             return False
@@ -2006,7 +2075,7 @@ class Py_buff:
             if dest.shape[i] != src.shape[i]:
                 return False
             if dest.shape[i] == 0:
-                break;
+                break
 
         return True
 
@@ -2096,12 +2165,12 @@ class Py_buff:
 
         # The memoryview must have space for 3 * len(shape) elements.
 
-        len = view.itemsize
+        length = view.itemsize
 
         for i in range(view.ndim):
             item = shape[i]
 
-            if not isinstance(item, (int, long)):
+            if not isinstance(item, int):
                 raise TypeError("memoryview.cast(): elements of shape must be integers")
 
             item = PyLong_AsSsize_t(item)
@@ -2109,13 +2178,13 @@ class Py_buff:
             if item <= 0:
                 # In general elements of shape may be 0, but not for casting.
                 raise ValueError("memoryview.cast(): elements of shape must be integers > 0")
-            if item > sys.maxsize // len:
+            if item > sys.maxsize // length:
                 raise ValueError("memoryview.cast(): product(shape) > SSIZE_MAX")
 
             view.shape[i] = item
-            len *= item
+            length *= item
 
-        return len
+        return length
 
     @staticmethod
     def buffer_to_contiguous(view, order, mem):
@@ -2149,7 +2218,7 @@ class Py_buff:
 
         fmt = view.format[1:] if view.format[:1] == b'@' else view.format[:]
         if len(fmt) != 1:
-            raise NotImplementedError("memoryview: unsupported format {}".format(view.format))
+            raise NotImplementedError(f"memoryview: unsupported format {view.format}")
         return fmt
 
     # Indexing and slicing
@@ -2171,8 +2240,8 @@ class Py_buff:
         # Get the pointer to the item at tuple.
 
         if len(key) > view.ndim:
-            raise TypeError("cannot index {}-dimension view with "
-                            "{}-element tuple".format(view.ndim, len(key)))
+            raise TypeError(f"cannot index {view.ndim}-dimension view with "
+                            f"{len(key)}-element tuple")
 
         ptr = view.buf
         for dim, item in enumerate(key):
@@ -2192,7 +2261,7 @@ class Py_buff:
         nitems = view.shape[dim]  # items in the given dimension
         if index < 0: index += nitems
         if not (0 <= index < nitems):
-            raise IndexError("index out of bounds on dimension {}".format(dim + 1))
+            raise IndexError(f"index out of bounds on dimension {dim + 1}")
 
         return Py_buff.adjust_ptr(ptr + view.strides[dim] * index, view.suboffsets, dim)
 
@@ -2205,15 +2274,15 @@ class Py_buff:
 
 
 """
-#ifndef Py_LIMITED_API
+# ifndef Py_LIMITED_API
 // Get a pointer to the memoryview's private copy of the exporter's buffer.
 #define PyMemoryView_GET_BUFFER(op) (&((memoryview *)(op))->view)
-#endif
+# endif
 
 PyAPI_FUNC(PyObject *) PyMemoryView_FromMemory(char* mem, c_ssize_t size, int flags);
-#ifndef Py_LIMITED_API
+# ifndef Py_LIMITED_API
 PyAPI_FUNC(PyObject *) PyMemoryView_FromBuffer(Py_buffer *info);
-#endif
+# endif
 PyAPI_FUNC(PyObject *) PyMemoryView_GetContiguous(PyObject *base, int buffertype, char order);
 
 """

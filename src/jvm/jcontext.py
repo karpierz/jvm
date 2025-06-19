@@ -1,9 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional
+from __future__ import annotations
 
 import jni
 from .lib import public
@@ -15,12 +14,13 @@ class JContext(obj):
 
     __slots__ = ('jvm', 'jenv')
 
-    def __init__(self, jenv: Optional[jni.JNIEnv] = None):
+    def __init__(self, jenv: jni.JNIEnv | None = None):
+        """Initializer"""
         if jenv is None:
             from .jconstants import EStatusCode
-            from .jvm        import JVMException
-            raise JVMException(EStatusCode.EDETACHED,
-                               "Unable to use JVM: thread detached from the VM")
+            from .jvm        import JVMError
+            raise JVMError(EStatusCode.EDETACHED,
+                           "Unable to use JVM: thread detached from the VM")
         pjvm = jni.obj(jni.POINTER(jni.JavaVM))
         jenv.GetJavaVM(pjvm)
         from .jvm import _JVM
@@ -30,4 +30,5 @@ class JContext(obj):
         self.jenv = jenv  # jni.JNIEnv
 
     def __iter__(self):
+        """Iterator"""
         return iter((self.jvm, self.jenv))

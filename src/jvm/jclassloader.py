@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 
 import jni
 from .lib import public
@@ -11,8 +12,6 @@ from .lib import public
 from .jframe      import JFrame
 from .jstring     import JString
 from .jobjectbase import JObjectBase
-from .jpackage    import JPackage
-from .jclass      import JClass
 from ._util       import str2jchars
 
 
@@ -23,8 +22,9 @@ class JClassLoader(JObjectBase):
     __slots__ = ()
 
     @classmethod
-    def getSystemClassLoader(cls) -> Optional['JClassLoader']:
+    def getSystemClassLoader(cls) -> JClassLoader | None:
         """Returns the system class loader for delegation.
+
         This is the default delegation parent for new ClassLoader instances,
         and is typically the class loader used to start the application.
         This method is first invoked early in the runtime's startup sequence,
@@ -40,6 +40,7 @@ class JClassLoader(JObjectBase):
 
     def loadClass(self, name: str) -> JClass:
         """Loads the class with the specified binary name.
+
         This method searches for classes in the same manner as the loadClass(String, boolean)
         method. It is invoked by the Java virtual machine to resolve class references.
         Invoking this method is equivalent to invoking loadClass(name, false).
@@ -48,19 +49,18 @@ class JClassLoader(JObjectBase):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jcls = jenv.CallObjectMethod(self._jobj, jvm.ClassLoader.loadClass, jargs)
             return self.jvm.JClass(jenv, jcls)
 
-    def getPackage(self, name: str) -> Optional[JPackage]:
-        """Returns a Package that has been defined by this class loader or any of
-        its ancestors.
-        """
+    def getPackage(self, name: str) -> JPackage | None:
+        """Returns a Package that has been defined by this class loader or any of \
+        its ancestors."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 2):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jpkg = jenv.CallObjectMethod(self._jobj, jvm.ClassLoader.getPackage, jargs)
             return self.jvm.JPackage(jenv, jpkg) if jpkg else None
 
@@ -81,7 +81,7 @@ class JClassLoader(JObjectBase):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jcls = jenv.CallObjectMethod(self._jobj, jvm.ClassLoader.findClass, jargs)
             return self.jvm.JClass(jenv, jcls)
 
@@ -91,28 +91,31 @@ class JClassLoader(JObjectBase):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jcls = jenv.CallObjectMethod(self._jobj, jvm.ClassLoader.findSystemClass, jargs)
             return self.jvm.JClass(jenv, jcls)
 
-    def findLoadedClass(self, name: str) -> Optional[JClass]:
-        """Returns the class with the given binary name if this loader has been recorded
-        by the Java virtual machine as an initiating loader of a class with that binary name.
-        """
+    def findLoadedClass(self, name: str) -> JClass | None:
+        """Returns the class with the given binary name if this loader has been recorded by the \
+        Java virtual machine as an initiating loader of a class with that binary name."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 2):
             jchars, size, jbuf = str2jchars(name)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jcls = jenv.CallObjectMethod(self._jobj, jvm.ClassLoader.findLoadedClass, jargs)
             return self.jvm.JClass(jenv, jcls) if jcls else None
 
-    def findLibrary(self, libname: str) -> Optional[str]:
+    def findLibrary(self, libname: str) -> str | None:
         """Returns the absolute path name of a native library."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 2):
             jchars, size, jbuf = str2jchars(libname)
             jname = jenv.NewString(jchars, size)
             jargs = jni.new_array(jni.jvalue, 1)
-            jargs[0].l = jname
+            jargs[0].l = jname  # noqa: E741
             jpath = jenv.CallObjectMethod(self._jobj, jvm.ClassLoader.findLibrary, jargs)
             return JString(jenv, jpath, own=False).str if jpath else None
+
+
+from .jpackage import JPackage  # noqa: E402
+from .jclass   import JClass    # noqa: E402

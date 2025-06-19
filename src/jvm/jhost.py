@@ -1,7 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
+
+from __future__ import annotations
 
 import ctypes as ct
 import traceback
@@ -31,32 +32,40 @@ else:
 
 @public
 class JHost(JHostABC):
+    """???"""
 
     __slots__ = ()
 
     class ThreadState(JHostABC.ThreadState):
+        """???"""
 
         __slots__ = ('_state',)
 
         def __init__(self):
+            """Initializer"""
             self._state = None
 
         def __enter__(self):
+            """Enter context"""
             self._state = None  # PyEval_SaveThread()
 
         def __exit__(self, *exc_info):
+            """Exit context"""
             del exc_info
             # PyEval_RestoreThread(self._state)
 
     class CallbackState(JHostABC.CallbackState):
+        """???"""
 
         __slots__ = ('ctx', '_state')
 
         def __init__(self, ctx=None):
+            """Initializer"""
             self.ctx    = ctx
             self._state = None
 
         def __enter__(self):
+            """Enter context"""
             try:
                 self._state = None  # PyGILState_Ensure()
                 # make sure the thread-local is initialized
@@ -74,6 +83,7 @@ class JHost(JHostABC):
                 raise exc
 
         def __exit__(self, *exc_info):
+            """Exit context"""
             del exc_info
             # PyGILState_Release(self._state)
 

@@ -1,9 +1,7 @@
 # Copyright (c) 2012 Adam Karpierz
 # SPDX-License-Identifier: Zlib
 
-__all__ = ('byte', 'long', 'obj')
-
-from builtins import int as long
+__all__ = ('byte', 'obj')
 
 byte = lambda val: val  # ord in Py2
 
@@ -13,7 +11,7 @@ class obj:
     __slots__ = ('__cache__',)
 
     def __init__(self, *args, **kwargs):
-        pass
+        """Initializer"""
 
 
 def meta_dict(cls):

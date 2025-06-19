@@ -1,6 +1,21 @@
 Changelog
 =========
 
+0.6.0b6 (2025-06-17)
+--------------------
+- Add support for Python 3.14
+- Add support for PyPy 3.11
+- Drop support for Python 3.9 (due to compatibility issues).
+- Drop support for PyPy 3.9
+- | Drop support for Oracle Java 1.8 (jdk, jre) due to licensing issues
+  | and the end of support from Oracle.
+- Update readthedocs's python to version 3.13
+- Update tox's base_python to version 3.13
+- Added utilities: dll_path(), python_dll_path()
+- pvm.h has been moved to jni (v.1.2.0b1) as pvm.c.
+- Tox configuration is now in native (toml) format.
+- Setup (dependencies) update.
+
 0.6.0b5 (2024-11-08)
 --------------------
 - Add support for Python 3.10, 3.11, 3.12 and 3.13

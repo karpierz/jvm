@@ -41,10 +41,10 @@ Installation
 
 Prerequisites:
 
-+ Python 3.9 or higher
++ Python 3.10 or higher
 
   * https://www.python.org/
-  * Java 11 is a primary test environment.
+  * Java 17 is a primary test environment.
 
 + pip and setuptools
 
@@ -103,7 +103,7 @@ Authors
 
 .. |package| replace:: jvm
 .. |package_bold| replace:: **jvm**
-.. |copyright| replace:: Copyright (c) 2004-2024 Adam Karpierz
+.. |copyright| replace:: Copyright (c) 2004-2025 Adam Karpierz
 .. |respository| replace:: https://github.com/karpierz/jvm.git
 .. _Development page: https://github.com/karpierz/jvm
 .. _PyPI record: https://pypi.org/project/jvm/

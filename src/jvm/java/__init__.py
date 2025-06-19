@@ -1,16 +1,17 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Sequence, Callable
+from __future__ import annotations
+
+from typing import Sequence, Callable
 import inspect
 
 import jni
 
 
 def registerClass(jenv: jni.JNIEnv, class_name: str, class_code,
-                  native_methods: Optional[Sequence[Callable]] = None, class_loader=None):
+                  native_methods: Sequence[Callable] | None = None, class_loader=None):
 
     if inspect.ismodule(class_code) or inspect.isclass(class_code):
         if native_methods is None:

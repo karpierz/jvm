@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Union, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 
 import jni
 from .lib import public
@@ -12,7 +13,6 @@ from .lib import memoryview as memview
 from .jconstants  import EJavaType
 from .jframe      import JFrame
 from .jobjectbase import JObjectBase
-from .jclass      import JClass
 from ._util       import str2jchars
 
 
@@ -23,13 +23,13 @@ class JObject(JObjectBase):
     __slots__ = ()
 
     @classmethod
-    def fromObject(cls, jobj: Optional['JObjectBase']) -> Optional['JObject']:
+    def fromObject(cls, jobj: JObjectBase | None) -> JObject | None:
 
         with cls.jvm as (jvm, jenv):
             return cls.jvm.JObject(jenv, jobj.handle) if jobj is not None else None
 
     @classmethod
-    def newBoolean(cls, val: bool) -> Optional['JObject']:
+    def newBoolean(cls, val: bool) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -39,7 +39,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newCharacter(cls, val: str) -> Optional['JObject']:
+    def newCharacter(cls, val: str) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -49,7 +49,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newByte(cls, val: int) -> Optional['JObject']:
+    def newByte(cls, val: int) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -59,7 +59,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newShort(cls, val: int) -> Optional['JObject']:
+    def newShort(cls, val: int) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -69,7 +69,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newInteger(cls, val: int) -> Optional['JObject']:
+    def newInteger(cls, val: int) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -79,7 +79,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newLong(cls, val: int) -> Optional['JObject']:
+    def newLong(cls, val: int) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -89,7 +89,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newFloat(cls, val: float) -> Optional['JObject']:
+    def newFloat(cls, val: float) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -99,7 +99,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newDouble(cls, val: float) -> Optional['JObject']:
+    def newDouble(cls, val: float) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jval = jni.new_array(jni.jvalue, 1)
@@ -109,7 +109,7 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jobj) if jobj else None
 
     @classmethod
-    def newString(cls, val: str) -> Optional['JObject']:
+    def newString(cls, val: str) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             jchars, size, jbuf = str2jchars(val)
@@ -117,8 +117,8 @@ class JObject(JObjectBase):
             return cls.jvm.JObject(jenv, jstr) if jstr else None
 
     @classmethod
-    def newDirectByteBuffer(cls, val: Union[bytes, bytearray,
-                                            memoryview, memview]) -> Optional['JObject']:
+    def newDirectByteBuffer(cls, val: bytes | bytearray | memoryview
+                                      | memview) -> JObject | None:
 
         with cls.jvm as (jvm, jenv), JFrame(jenv, 1):
             if isinstance(val, memview):
@@ -133,7 +133,7 @@ class JObject(JObjectBase):
         with self.jvm as (jvm, jenv):
             return self.jvm.JClass(jenv, self._jobj, own=own)
 
-    def asArray(self, javaType: Optional[EJavaType] = None, own: bool = True) -> 'JArray':
+    def asArray(self, javaType: EJavaType | None = None, own: bool = True) -> JArray:
 
         with self.jvm as (jvm, jenv):
             return self.jvm.JArray(jenv, self._jobj, own=own)
@@ -243,3 +243,7 @@ class JObject(JObjectBase):
 
         with cls.jvm as (jvm, jenv):
             return jvm.Double.MIN_VALUE, jvm.Double.MAX_VALUE
+
+
+from .jclass import JClass  # noqa: E402
+from .jarray import JArray  # noqa: E402

@@ -1,30 +1,31 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional
-import builtins
+from __future__ import annotations
+
+# import builtins
 import ctypes as __ct
 
-import jni
+# import jni
 
-from ....lib.compat import *
-from ....lib import cached
-from ....lib import classproperty
+# from ....lib.compat import *
+# from ....lib import cached
+# from ....lib import classproperty
 from ....lib import platform
 
-from ....jhost   import JHost
-from ....jstring import JString
-from ....jobject import JObject
-from ....jclass  import JClass
-from ....java    import throwJavaException
+# from ....jhost   import JHost
+# from ....jstring import JString
+# from ....jobject import JObject
+# from ....jclass  import JClass
+# from ....java    import throwJavaException
 
 
 def proto(restype, func, *argtypes):
     func.restype  = restype
     func.argtypes = argtypes
     return func
+
 
 if platform.is_cpython:
     Py_NoSiteFlag            = __ct.c_int.in_dll(__ct.pythonapi, "Py_NoSiteFlag")

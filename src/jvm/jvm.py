@@ -1,16 +1,16 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 from pathlib import Path
 import os
 
 import jni
 from .lib import public
 from .lib import obj
-from .lib import const
 from .lib import weakconst
 from .lib import adict
 
@@ -25,7 +25,7 @@ class JVM(obj):
 
     JNI_VERSION = jni.JNI_VERSION_1_6
 
-    def createdJVMs(self) -> Tuple['_JVM', ...]:
+    def createdJVMs(self) -> Tuple[_JVM, ...]:
         njvm = jni.new(jni.jsize)
         err = self._jvm.JNI.GetCreatedJavaVMs(None, 0, njvm)
         if err != jni.JNI_OK:
@@ -42,7 +42,8 @@ class JVM(obj):
             jvms.append(jvm)
         return tuple(jvms)
 
-    def __init__(self, dll_path: Optional[object] = None):
+    def __init__(self, dll_path: object | None = None):
+        """Initializer"""
 
         def class_copy(cls, **dict):
             dict.update(__module__="jvm", __doc__=cls.__doc__, __slots__=())
@@ -91,20 +92,21 @@ class JVM(obj):
             # TODO: add the non-string parameters, for possible callbacks
 
             if if_load and not isinstance(dll_path, (str, os.PathLike)):
-                raise JVMException(EStatusCode.EINVAL,
-                                   "First parameter must be a string or os.PathLike type")
+                raise JVMError(EStatusCode.EINVAL,
+                               "First parameter must be a string or os.PathLike type")
             self._jvm = _JVM()
             self._jvm.data.describe_exceptions = False
             try:
                 self._jvm.JNI = jni.load(dll_path) if if_load else None
             except Exception as exc:
-                raise JVMException(EStatusCode.UNKNOWN,
-                                   f"Unable to load DLL [{dll_path}], error = {exc}") from None
+                raise JVMError(EStatusCode.UNKNOWN,
+                               f"Unable to load DLL [{dll_path}], error = {exc}") from None
             self._jvm._create()
         except Exception as exc:
             self.handleException(exc)
 
     def __del__(self):
+        """Finalizer"""
         if not self._jvm: return
         try: self._jvm.jnijvm.DestroyJavaVM()
         except Exception: pass
@@ -114,9 +116,10 @@ class JVM(obj):
         self._jvm.JNI = None
 
     def __enter__(self):
+        """Enter context"""
         if self._jvm is None:
-            raise JVMException(EStatusCode.EDETACHED,
-                               "Unable to use JVM: thread detached from the VM")
+            raise JVMError(EStatusCode.EDETACHED,
+                           "Unable to use JVM: thread detached from the VM")
         if self._jvm.jnijvm:
             penv = jni.obj(jni.POINTER(jni.JNIEnv))
             self._jvm.jnijvm.AttachCurrentThread(penv)
@@ -125,20 +128,22 @@ class JVM(obj):
             return self._jvm, None
 
     def __exit__(self, exc_type, exc, exc_tb):
+        """Exit context"""
         del exc_type, exc_tb
         if exc: self.handleException(exc)
         return True
 
     def __iter__(self):
+        """Iterator"""
         return iter(self.__enter__())
 
-    def start(self, *jvmoptions, **jvmargs): # -> Tuple['_JVM', jni.JNIEnv]:
+    def start(self, *jvmoptions, **jvmargs) -> Tuple[_JVM, jni.JNIEnv]:
         jvmoptions = tuple(["-Djava.class.path=" + os.pathsep.join(
                                [item.partition("=")[2] for item in jvmoptions
-                                if item.lstrip().startswith("-Djava.class.path=")] +
-                               [str(path) for path in INTERNAL_CLASSPATHS])] +
-                           [item for item in jvmoptions
-                            if not item.lstrip().startswith("-Djava.class.path=")])
+                                if item.lstrip().startswith("-Djava.class.path=")]
+                               + [str(path) for path in INTERNAL_CLASSPATHS])]
+                           + [item for item in jvmoptions
+                              if not item.lstrip().startswith("-Djava.class.path=")])
         ignoreUnrecognized = jvmargs.get("ignoreUnrecognized", True)
         try:
             pjvm = jni.obj(jni.POINTER(jni.JavaVM))
@@ -175,12 +180,12 @@ class JVM(obj):
             finally:
                 self._jvm.jnijvm = None
 
-    def attach(self, pjvm: Optional[object] = None): # -> Tuple['_JVM', jni.JNIEnv]:
+    def attach(self, pjvm: object | None = None) -> Tuple[_JVM, jni.JNIEnv]:
         if_bind = pjvm is not None
         try:
             if if_bind and not pjvm:
-                raise JVMException(EStatusCode.EINVAL,
-                                   "First parameter must be a JNI jvm handle")
+                raise JVMError(EStatusCode.EINVAL,
+                               "First parameter must be a JNI jvm handle")
             penv = jni.obj(jni.POINTER(jni.JNIEnv))
             if if_bind:
                 self._jvm.jnijvm = jni.cast(pjvm, jni.POINTER(jni.JavaVM))[0]
@@ -215,7 +220,7 @@ class JVM(obj):
         # Check if the JVM environment has been initialized
         return self._jvm is not None and self._jvm.jnijvm is not None
 
-    def attachThread(self, daemon: bool=False):
+    def attachThread(self, daemon: bool = False):
         try:
             penv = jni.obj(jni.POINTER(jni.JNIEnv))
             if not daemon:
@@ -263,7 +268,7 @@ class JVM(obj):
             PyExc = self.ExceptionsMap.get(exc.getError(),
                                            self.ExceptionsMap.get(EStatusCode.ERR, RuntimeError))
             raise PyExc(exc.getMessage()) from None
-        except JVMException as exc:
+        except JVMError as exc:
             PyExc = self.ExceptionsMap.get(exc.args[0],
                                            self.ExceptionsMap.get(EStatusCode.ERR, RuntimeError))
             raise PyExc(exc.args[1]) from None
@@ -273,9 +278,10 @@ class JVM(obj):
 
 
 @public
-class JVMException(Exception):
+class JVMError(Exception):
 
     def __init__(self, *args, **kwargs):
+        """Initializer"""
         super().__init__(*args, **kwargs)
 
 
@@ -296,9 +302,9 @@ class _JVM(obj):
 
     def __init__(self):
         super().__init__()
-        self.JNI    = None  # jni.JNI
-        self.jnijvm = None  # jni.JavaVM
-        self.data   = adict()
+        self.JNI:    jni.JNI    = None
+        self.jnijvm: jni.JavaVM = None
+        self.data = adict()
 
     def _create(self):
 

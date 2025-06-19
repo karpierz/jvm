@@ -1,9 +1,10 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Tuple
 
 import jni
 from .lib import public
@@ -12,10 +13,7 @@ from .lib import cached
 from .jframe     import JFrame
 from .jmember    import JMember
 from .jannotated import JAnnotatedElement
-from .jclass     import JClass
-from .jarguments import JArguments
 from .jstring    import JString
-from .jobject    import JObject
 
 
 @public
@@ -25,7 +23,7 @@ class JMethod(JMember, JAnnotatedElement):
     __slots__ = ()
 
     @cached
-    def _jmid(self, jenv: jni.JNIEnv):
+    def _jmid(self, jenv: jni.JNIEnv) -> jni.jmethodID:
         return jenv.FromReflectedMethod(self._jobj)
 
     @cached
@@ -61,17 +59,16 @@ class JMethod(JMember, JAnnotatedElement):
 
     @cached
     def isVarArgs(self) -> bool:
-        """Returns True if this method was declared to take a variable number
-        of arguments; returns False otherwise.
-        """
+        """Returns True if this method was declared to take a variable number \
+        of arguments; returns False otherwise."""
         with self.jvm as (jvm, jenv):
             return jenv.CallBooleanMethod(self._jobj, jvm.Method.isVarArgs)
 
     @cached
     def getSignature(self) -> str:
         """Returns the method signature."""
-        return ("(" + "".join(jcls.getSignature() for jcls in self.getParameterTypes()) + ")" +
-                self.getReturnType().getSignature())
+        return ("(" + "".join(jcls.getSignature() for jcls in self.getParameterTypes()) + ")"
+                + self.getReturnType().getSignature())
 
     def callStaticVoid(self, jcls: JClass, jargs: JArguments) -> None:
         """???."""
@@ -119,13 +116,13 @@ class JMethod(JMember, JAnnotatedElement):
         with self.jvm as (jvm, jenv):
             return jenv.CallStaticDoubleMethod(jcls.handle, self._jmid(jenv), jargs.arguments)
 
-    def callStaticString(self, jcls: JClass, jargs: JArguments) -> Optional[str]:
+    def callStaticString(self, jcls: JClass, jargs: JArguments) -> str | None:
         """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jstr = jenv.CallStaticObjectMethod(jcls.handle, self._jmid(jenv), jargs.arguments)
             return JString(jenv, jstr, own=False).str if jstr else None
 
-    def callStaticObject(self, jcls: JClass, jargs: JArguments) -> Optional[JObject]:
+    def callStaticObject(self, jcls: JClass, jargs: JArguments) -> JObject | None:
         """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jobj = jenv.CallStaticObjectMethod(jcls.handle, self._jmid(jenv), jargs.arguments)
@@ -177,14 +174,19 @@ class JMethod(JMember, JAnnotatedElement):
         with self.jvm as (jvm, jenv):
             return jenv.CallDoubleMethod(this.handle, self._jmid(jenv), jargs.arguments)
 
-    def callInstanceString(self, this: JObject, jargs: JArguments) -> Optional[str]:
+    def callInstanceString(self, this: JObject, jargs: JArguments) -> str | None:
         """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jstr = jenv.CallObjectMethod(this.handle, self._jmid(jenv), jargs.arguments)
             return JString(jenv, jstr, own=False).str if jstr else None
 
-    def callInstanceObject(self, this: JObject, jargs: JArguments) -> Optional[JObject]:
+    def callInstanceObject(self, this: JObject, jargs: JArguments) -> JObject | None:
         """???."""
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             jobj = jenv.CallObjectMethod(this.handle, self._jmid(jenv), jargs.arguments)
             return self.jvm.JObject(jenv, jobj) if jobj else None
+
+
+from .jclass     import JClass      # noqa: E402
+from .jarguments import JArguments  # noqa: E402
+from .jobject    import JObject     # noqa: E402

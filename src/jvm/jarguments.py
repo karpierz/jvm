@@ -1,9 +1,8 @@
 # Copyright (c) 2004 Adam Karpierz
-# Licensed under CC BY-NC-ND 4.0
-# Licensed under proprietary License
+# SPDX-License-Identifier: CC-BY-NC-ND-4.0 OR LicenseRef-Proprietary
 # Please refer to the accompanying LICENSE file.
 
-from typing import Optional
+from __future__ import annotations
 
 import jni
 from .lib import public
@@ -11,9 +10,6 @@ from .lib import obj
 
 from .jconstants import EJavaType
 from .jframe     import JFrame
-from .jclass     import JClass
-from .jobject    import JObject
-from .jarray     import JArray
 from ._util      import str2jchars
 
 
@@ -24,6 +20,7 @@ class JArguments(obj):
     __slots__ = ('__jvalues', '__jtypes', '_own')
 
     def __init__(self, size: int, own: bool = True):
+        """Initializer"""
         self._own = own
         self.__jvalues = (jni.new_array(jni.jvalue, size)
                           if size > 0 else
@@ -31,6 +28,7 @@ class JArguments(obj):
         self.__jtypes  = [EJavaType.VOID] * max(size, 0)
 
     def __del__(self):
+        """Finalizer"""
         if not self._own or not self.jvm: return
         try: jvm, jenv = self.jvm
         except Exception: return  # pragma: no cover
@@ -106,48 +104,53 @@ class JArguments(obj):
         except Exception as exc:
             self.jvm.handleException(exc)
 
-    def setString(self, pos: int, val: Optional[str]):
+    def setString(self, pos: int, val: str | None):
 
         with self.jvm as (jvm, jenv), JFrame(jenv, 1):
             if val is None:
-                self.__jvalues[pos].l = jni.NULL
+                self.__jvalues[pos].l = jni.NULL  # noqa: E741
             else:
                 if not isinstance(val, str):
                     raise TypeError(f"str expected instead of {type(val)}")
                 jchars, size, jbuf = str2jchars(val)
                 jstr = jenv.NewString(jchars, size)
-                self.__jvalues[pos].l = jenv.NewGlobalRef(jstr)
+                self.__jvalues[pos].l = jenv.NewGlobalRef(jstr)  # noqa: E741
             self.__jtypes[pos] = EJavaType.STRING
 
-    def setClass(self, pos: int, val: Optional[JClass]):
+    def setClass(self, pos: int, val: JClass | None):
 
         with self.jvm as (jvm, jenv):
             if val is None:
-                self.__jvalues[pos].l = jni.NULL
+                self.__jvalues[pos].l = jni.NULL  # noqa: E741
             else:
                 if not isinstance(val, self.jvm.JClass):
                     raise TypeError(f"JClass expected instead of {type(val)}")
-                self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)
+                self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)  # noqa: E741
             self.__jtypes[pos]    = EJavaType.CLASS
 
-    def setObject(self, pos: int, val: Optional[JObject]):
+    def setObject(self, pos: int, val: JObject | None):
 
         with self.jvm as (jvm, jenv):
             if val is None:
-                self.__jvalues[pos].l = jni.NULL
+                self.__jvalues[pos].l = jni.NULL  # noqa: E741
             else:
                 if not isinstance(val, self.jvm.JObject):
                     raise TypeError(f"JObject expected instead of {type(val)}")
-                self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)
+                self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)  # noqa: E741
             self.__jtypes[pos]    = EJavaType.OBJECT
 
-    def setArray(self, pos: int, val: Optional[JArray]):
+    def setArray(self, pos: int, val: JArray | None):
 
         with self.jvm as (jvm, jenv):
             if val is None:
-                self.__jvalues[pos].l = jni.NULL
+                self.__jvalues[pos].l = jni.NULL  # noqa: E741
             else:
                 if not isinstance(val, self.jvm.JArray):
                     raise TypeError(f"JArray expected instead of {type(val)}")
-                self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)
+                self.__jvalues[pos].l = jenv.NewGlobalRef(val.handle)  # noqa: E741
             self.__jtypes[pos]    = EJavaType.ARRAY
+
+
+from .jclass  import JClass   # noqa: E402
+from .jobject import JObject  # noqa: E402
+from .jarray  import JArray   # noqa: E402
